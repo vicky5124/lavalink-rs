@@ -55,6 +55,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
+#[only_in("guilds")]
 #[commands(join, leave, play, ping)]
 struct General;
 
@@ -163,15 +164,9 @@ async fn leave(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-async fn play(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
-    let query = match args.single::<String>() {
-        Ok(url) => url,
-        Err(_) => {
-            check_msg(msg.channel_id.say(&ctx.http, "Must provide a valid query.").await);
-
-            return Ok(());
-        },
-    };
+#[min_args(1)]
+async fn play(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
+    let query = args.message().to_string();
 
     let guild_id = match ctx.cache.read().await.guild_channel(msg.channel_id) {
         Some(channel) => channel.read().await.guild_id,
