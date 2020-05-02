@@ -1,6 +1,6 @@
 [package]
 name = "serenity-lavalink"
-version = "0.0.1"
+version = "0.0.2-alpha"
 authors = ["nitsuga5124 <nitsuga5124@gmail.com>"]
 edition = "2018"
 
