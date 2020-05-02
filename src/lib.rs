@@ -83,7 +83,7 @@ pub struct Info {
     pub identifier: String,
     pub author: String,
     pub length: u128,
-    pub position: u64,
+    pub position: u128,
     pub title: String,
     pub uri: String,
 }
@@ -103,6 +103,93 @@ pub struct LavalinkClient {
     pub headers: Option<HeaderMap>,
     pub rest_uri: String,
     pub socket_uri: String,
+}
+
+#[derive(Default, Clone, Copy)]
+pub struct PlayParameters<'a, 'b, 'c> {
+    pub client: Option<&'a LavalinkClient>,
+    pub handler: Option<&'b Handler>,
+    pub track: Option<&'c Track>,
+    pub replace: bool,
+    pub start: u128,
+    pub finish: u128,
+}
+
+impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
+    pub async fn start(self) -> Result<(), String> {
+        let socket = if let Some(x) = &self.client.unwrap().socket { x } else {
+            return Err("There is no initialized websocket.".to_string());
+        };
+        let guild_id = self.handler.unwrap().guild_id.0.to_string();
+
+        let token = if let Some(x) = self.handler.unwrap().token.as_ref() { x } else {
+            return Err("No `token` was found on the handler.".to_string());
+        };
+        let endpoint = if let Some(x) = self.handler.unwrap().endpoint.as_ref() { x } else {
+            return Err("No `endpoint` was found on the handler.".to_string());
+        };
+
+        let event = json!({ "token" : &token, "guild_id" : &guild_id, "endpoint" : &endpoint });
+
+        let session_id = if let Some(x) = self.handler.unwrap().session_id.as_ref() { x } else {
+            return Err("No `session id` was found on the handler.".to_string());
+        };
+
+        let payload = json!({ "op" : "voiceUpdate", "guildId" : &guild_id, "sessionId" : &session_id, "event" : event });
+
+        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
+            return Err("Invalid data was provided to the `voiceUpdate` json.".to_string());
+        };
+
+        {
+            let mut ws = socket.lock().await;
+            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
+                return Err(format!("There was an error sending the `voiceUpdate` payload => {:?}", why));
+            };
+        }
+
+        let payload = if self.finish > 0 {
+            json!({ "op" : "play", "guildId" : &guild_id, "track" : self.track.unwrap().track, "noReplace" : !self.replace, "startTime" : self.start.to_string(), "endTime" : self.finish.to_string()})
+        } else {
+            json!({ "op" : "play", "guildId" : &guild_id, "track" : self.track.unwrap().track, "noReplace" : !self.replace, "startTime" : self.start.to_string()})
+        };
+
+        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
+            return Err("Invalid data was provided to the `play` json.".to_string());
+        };
+
+        {
+            let mut ws = socket.lock().await;
+            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
+                return Err(format!("There was an error sending the `play` payload => {:?}", why));
+            };
+        }
+
+        Ok(())
+    }
+
+    pub fn replace(&mut self, replace: bool) -> &mut Self {
+        self.replace = replace;
+        self
+    }
+
+    pub fn start_msec(&mut self, start: u128) -> &mut Self {
+        self.start = start;
+        self
+    }
+    pub fn start_sec(&mut self, start: u128) -> &mut Self {
+        self.start = start * 1000;
+        self
+    }
+
+    pub fn finish_msec(&mut self, finish: u128) -> &mut Self {
+        self.finish = finish;
+        self
+    }
+    pub fn finish_sec(&mut self, finish: u128) -> &mut Self {
+        self.finish = finish * 1000;
+        self
+    }
 }
 
 impl LavalinkClient {
@@ -176,51 +263,11 @@ impl LavalinkClient {
         Ok(resp)
     }
 
-    pub async fn play<'a, 'b>(&'a self, handler: &'b Handler, track: &Track) -> Result<(), String> {
-        let socket = if let Some(x) = &self.socket { x } else {
-            return Err("There is no initialized websocket.".to_string());
-        };
-        let guild_id = handler.guild_id.0.to_string();
-
-        let token = if let Some(x) = handler.token.as_ref() { x } else {
-            return Err("No `token` was found on the handler.".to_string());
-        };
-        let endpoint = if let Some(x) = handler.endpoint.as_ref() { x } else {
-            return Err("No `endpoint` was found on the handler.".to_string());
-        };
-
-        let event = json!({ "token" : &token, "guild_id" : &guild_id, "endpoint" : &endpoint });
-
-        let session_id = if let Some(x) = handler.session_id.as_ref() { x } else {
-            return Err("No `session id` was found on the handler.".to_string());
-        };
-
-        let payload = json!({ "op" : "voiceUpdate", "guildId" : &guild_id, "sessionId" : &session_id, "event" : event });
-
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `voiceUpdate` json.".to_string());
-        };
-
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `voiceUpdate` payload => {:?}", why));
-            };
-        }
-
-        let payload = json!({ "op" : "play", "guildId" : &guild_id, "track" : track.track });
-
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `play` json.".to_string());
-        };
-
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `play` payload => {:?}", why));
-            };
-        }
-
-        Ok(())
+    pub fn play<'a, 'b, 'c>(&'a self, handler: &'b Handler, track: &'c Track) -> PlayParameters<'a, 'b, 'c> {
+        let mut p = PlayParameters::default();
+        p.client = Some(self);
+        p.handler = Some(handler);
+        p.track = Some(track);
+        p
     }
 }

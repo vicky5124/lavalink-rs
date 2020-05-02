@@ -194,7 +194,7 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             return Ok(());
         }
 
-        if let Err(why) = lava_client.play(&handler, &query_information.tracks[0]).await {
+        if let Err(why) = lava_client.play(&handler, &query_information.tracks[0]).start().await {
             eprintln!("{}", why);
             return Ok(());
         };
