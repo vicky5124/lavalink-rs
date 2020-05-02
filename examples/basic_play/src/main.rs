@@ -75,9 +75,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .configure(|c| c.prefix("~"))
         .group(&GENERAL_GROUP);
 
-    let mut client = Client::new_with_framework(&token, Handler, framework)
+    let mut client = Client::new(&token)
+        .event_handler(Handler)
+        .framework(framework)
         .await
-        .expect("Err creating client");
+        .expect("Error creating client");
 
 
     {
@@ -96,7 +98,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[command]
-async fn join(ctx: &mut Context, msg: &Message) -> CommandResult {
+async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     let guild = match msg.guild(&ctx.cache).await {
         Some(guild) => guild,
         None => {
@@ -117,7 +119,7 @@ async fn join(ctx: &mut Context, msg: &Message) -> CommandResult {
     let connect_to = match channel_id {
         Some(channel) => channel,
         None => {
-            check_msg(msg.reply(&ctx, "Not in a voice channel").await);
+            check_msg(msg.reply(&ctx.http, "Not in a voice channel").await);
 
             return Ok(());
         }
@@ -137,7 +139,7 @@ async fn join(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-async fn leave(ctx: &mut Context, msg: &Message) -> CommandResult {
+async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
     let guild_id = match ctx.cache.read().await.guild_channel(msg.channel_id) {
         Some(channel) => channel.read().await.guild_id,
         None => {
@@ -157,7 +159,7 @@ async fn leave(ctx: &mut Context, msg: &Message) -> CommandResult {
 
         check_msg(msg.channel_id.say(&ctx.http, "Left voice channel").await);
     } else {
-        check_msg(msg.reply(&ctx, "Not in a voice channel").await);
+        check_msg(msg.reply(&ctx.http, "Not in a voice channel").await);
     }
 
     Ok(())
@@ -165,7 +167,7 @@ async fn leave(ctx: &mut Context, msg: &Message) -> CommandResult {
 
 #[command]
 #[min_args(1)]
-async fn play(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
+async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let query = args.message().to_string();
 
     let guild_id = match ctx.cache.read().await.guild_channel(msg.channel_id) {
@@ -206,7 +208,7 @@ async fn play(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
 }
 
 #[command]
-async fn ping(context: &mut Context, msg: &Message) -> CommandResult {
+async fn ping(context: &Context, msg: &Message) -> CommandResult {
     check_msg(msg.channel_id.say(&context.http, "Pong!").await);
 
     Ok(())
