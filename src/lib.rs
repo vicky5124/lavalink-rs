@@ -1,12 +1,20 @@
 use std::{
     sync::Arc,
     fmt::Display,
+    time::Duration,
+    cmp::{
+        min,
+        max,
+    },
 };
 
 use serenity::{
     model::{
         guild::Region,
-        id::UserId,
+        id::{
+            UserId,
+            GuildId,
+        },
     },
     voice::Handler,
     client::bridge::gateway::ShardId,
@@ -173,21 +181,13 @@ impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
         self
     }
 
-    pub fn start_msec(&mut self, start: u128) -> &mut Self {
-        self.start = start;
-        self
-    }
-    pub fn start_sec(&mut self, start: u128) -> &mut Self {
-        self.start = start * 1000;
+    pub fn start_time(&mut self, start: Duration) -> &mut Self {
+        self.start = start.as_millis();
         self
     }
 
-    pub fn finish_msec(&mut self, finish: u128) -> &mut Self {
-        self.finish = finish;
-        self
-    }
-    pub fn finish_sec(&mut self, finish: u128) -> &mut Self {
-        self.finish = finish * 1000;
+    pub fn finish_time(&mut self, finish: Duration) -> &mut Self {
+        self.finish = finish.as_millis();
         self
     }
 }
@@ -263,11 +263,131 @@ impl LavalinkClient {
         Ok(resp)
     }
 
+    pub async fn stop(&self, guild_id: &GuildId) -> Result<(), String> {
+        let socket = if let Some(x) = &self.socket { x } else {
+            return Err("There is no initialized websocket.".to_string());
+        };
+
+        let payload = json!({ "op" : "stop", "guildId" : guild_id.0.to_string()});
+
+        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
+            return Err("Invalid data was provided to the `stop` json.".to_string());
+        };
+
+        {
+            let mut ws = socket.lock().await;
+            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
+                return Err(format!("There was an error sending the `stop` operation => {:?}", why));
+            };
+        }
+
+        Ok(())
+    }
+
+    pub async fn destroy(&self, guild_id: &GuildId) -> Result<(), String> {
+        let socket = if let Some(x) = &self.socket { x } else {
+            return Err("There is no initialized websocket.".to_string());
+        };
+
+        let payload = json!({ "op" : "destroy", "guildId" : guild_id.0.to_string()});
+
+        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
+            return Err("Invalid data was provided to the `destroy` json.".to_string());
+        };
+
+        {
+            let mut ws = socket.lock().await;
+            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
+                return Err(format!("There was an error sending the `destroy` operation => {:?}", why));
+            };
+        }
+
+        Ok(())
+    }
+
     pub fn play<'a, 'b, 'c>(&'a self, handler: &'b Handler, track: &'c Track) -> PlayParameters<'a, 'b, 'c> {
         let mut p = PlayParameters::default();
         p.client = Some(self);
         p.handler = Some(handler);
         p.track = Some(track);
         p
+    }
+
+    pub async fn set_pause(&self, guild_id: &GuildId, pause: bool) -> Result<(), String> {
+        let socket = if let Some(x) = &self.socket { x } else {
+            return Err("There is no initialized websocket.".to_string());
+        };
+
+        let payload = json!({ "op" : "pause", "guildId" : guild_id.0.to_string(), "pause" : pause});
+
+        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
+            return Err("Invalid data was provided to the `pause` json.".to_string());
+        };
+
+        {
+            let mut ws = socket.lock().await;
+            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
+                return Err(format!("There was an error sending the `pause` status => {:?}", why));
+            };
+        }
+
+        Ok(())
+    }
+
+    pub async fn pause(&self, guild_id: &GuildId) -> Result<(), String> {
+        self.set_pause(guild_id, true).await
+    }
+    pub async fn resume(&self, guild_id: &GuildId) -> Result<(), String> {
+        self.set_pause(guild_id, false).await
+    }
+
+    pub async fn set_volume(&self, guild_id: &GuildId, mut volume: u16) -> Result<(), String> {
+        volume = max(min(volume, 1000), 0);
+        let socket = if let Some(x) = &self.socket { x } else {
+            return Err("There is no initialized websocket.".to_string());
+        };
+
+        let payload = json!({ "op" : "volume", "guildId" : guild_id.0.to_string(), "volume" : volume});
+
+        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
+            return Err("Invalid data was provided to the `volume` json.".to_string());
+        };
+
+        {
+            let mut ws = socket.lock().await;
+            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
+                return Err(format!("There was an error sending the `volume` value => {:?}", why));
+            };
+        }
+
+        Ok(())
+    }
+
+    pub async fn jump_to_time(&self, guild_id: &GuildId, time: Duration) -> Result<(), String> {
+        let socket = if let Some(x) = &self.socket { x } else {
+            return Err("There is no initialized websocket.".to_string());
+        };
+
+        let payload = json!({ "op" : "seek", "guildId" : guild_id.0.to_string(), "position" : time.as_millis().to_string()});
+
+        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
+            return Err("Invalid data was provided to the `seek` json.".to_string());
+        };
+
+        {
+            let mut ws = socket.lock().await;
+            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
+                return Err(format!("There was an error sending the `seek` timestamp => {:?}", why));
+            };
+        }
+
+        Ok(())
+    }
+
+    pub async fn scrub(&self, guild_id: &GuildId, time: Duration) -> Result<(), String> {
+        self.jump_to_time(guild_id, time).await
+    }
+    pub async fn seek(&self, guild_id: &GuildId, time: Duration) -> Result<(), String> {
+        self.jump_to_time(guild_id, time).await
     }
 }

@@ -8,16 +8,19 @@ Note: This is not a forl of the [official repository](https://github.com/serenit
 ### TODO
 - [ ] Support multiple connections per region.
 - [ ] Support nodes.
-- [ ] Support pause, resume, current, skip to time.
+- [X] Support pause, resume, skip to time.
+- [X] Support starting at specific times and configurable replace current stream.
 - [ ] Support equalization.
 - [ ] Support identifiers.
 - [ ] Support both rustls and native_tls backends as features.
 - [ ] Support twilight.
 - [ ] Support raw events.
-- [ ] Implement my own event hander and websocket connection to voice channels.
+- [ ] Implement my own event hander
+- [ ] Implement my own websocket connection to voice channels.
 - [ ] Support easy queues natively.
 - [ ] Optimize the codebase.
 - [ ] Improve error handling.
+- [ ] Add tracing and logging.
 
 ### How to use
 ```toml

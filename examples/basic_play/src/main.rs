@@ -156,6 +156,11 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
 
     if has_handler {
         manager.remove(guild_id);
+        {
+            let data = ctx.data.read().await;
+            let lava_client = data.get::<Lavalink>().expect("Expected a lavalink client in TypeMap");
+            lava_client.destroy(&msg.guild_id.unwrap()).await?;
+        }
 
         check_msg(msg.channel_id.say(&ctx.http, "Left voice channel").await);
     } else {
