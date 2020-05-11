@@ -1,7 +1,12 @@
+pub mod nodes;
+
+use nodes::*;
+
 use std::{
     sync::Arc,
     fmt::Display,
     time::Duration,
+    collections::HashMap,
     cmp::{
         min,
         max,
@@ -52,10 +57,9 @@ use async_tungstenite::{
     },
 };
 
-
 pub type WebsocketConnection = Arc<Mutex<WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TokioAdapter<TokioAdapter<TcpStream>>>>>>>>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Tracks {
     #[serde(rename = "playlistInfo")]
     pub playlist_info: PlaylistInfo,
@@ -66,7 +70,7 @@ pub struct Tracks {
     pub tracks: Vec<Track>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct PlaylistInfo {
     #[serde(rename = "selectedTrack")]
     pub selected_track: Option<u64>,
@@ -74,13 +78,13 @@ pub struct PlaylistInfo {
     pub name: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Track {
     pub track: String,
     pub info: Info,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Info {
     #[serde(rename = "isSeekable")]
     pub is_seekable: bool,
@@ -111,6 +115,8 @@ pub struct LavalinkClient {
     pub headers: Option<HeaderMap>,
     pub rest_uri: String,
     pub socket_uri: String,
+    pub nodes: HashMap<GuildId, Node>,
+    pub loops: Vec<GuildId>,
 }
 
 #[derive(Default, Clone, Copy)]
@@ -137,13 +143,22 @@ impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
             return Err("No `endpoint` was found on the handler.".to_string());
         };
 
-        let event = json!({ "token" : &token, "guild_id" : &guild_id, "endpoint" : &endpoint });
+        let event = json!({
+            "token" : &token,
+            "guild_id" : &guild_id,
+            "endpoint" : &endpoint
+        });
 
         let session_id = if let Some(x) = self.handler.unwrap().session_id.as_ref() { x } else {
             return Err("No `session id` was found on the handler.".to_string());
         };
 
-        let payload = json!({ "op" : "voiceUpdate", "guildId" : &guild_id, "sessionId" : &session_id, "event" : event });
+        let payload = json!({
+            "op" : "voiceUpdate",
+            "guildId" : &guild_id,
+            "sessionId" : &session_id,
+            "event" : event
+        });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
             return Err("Invalid data was provided to the `voiceUpdate` json.".to_string());
@@ -157,9 +172,23 @@ impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
         }
 
         let payload = if self.finish > 0 {
-            json!({ "op" : "play", "guildId" : &guild_id, "track" : self.track.unwrap().track, "noReplace" : !self.replace, "startTime" : self.start.to_string(), "endTime" : self.finish.to_string()})
+            json!({
+                "op" : "play",
+                "guildId" : &guild_id,
+                "track" : self.track.unwrap().track,
+                "noReplace" : !self.replace,
+                "startTime" : self.start.to_string(),
+                "endTime" : self.finish.to_string()
+            })
         } else {
-            json!({ "op" : "play", "guildId" : &guild_id, "track" : self.track.unwrap().track, "noReplace" : !self.replace, "startTime" : self.start.to_string()})
+            json!({
+                "op" : "play",
+                "guildId" : &guild_id,
+                "track" : self.track.unwrap().track,
+                "noReplace" : !self.replace,
+                "startTime" : self.start.to_string(),
+                "endTime" : self.finish.to_string()
+            })
         };
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
@@ -268,7 +297,10 @@ impl LavalinkClient {
             return Err("There is no initialized websocket.".to_string());
         };
 
-        let payload = json!({ "op" : "stop", "guildId" : guild_id.0.to_string()});
+        let payload = json!({
+            "op" : "stop",
+            "guildId" : guild_id.0.to_string()
+        });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
             return Err("Invalid data was provided to the `stop` json.".to_string());
@@ -289,7 +321,10 @@ impl LavalinkClient {
             return Err("There is no initialized websocket.".to_string());
         };
 
-        let payload = json!({ "op" : "destroy", "guildId" : guild_id.0.to_string()});
+        let payload = json!({
+            "op" : "destroy",
+            "guildId" : guild_id.0.to_string()
+        });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
             return Err("Invalid data was provided to the `destroy` json.".to_string());
@@ -318,7 +353,10 @@ impl LavalinkClient {
             return Err("There is no initialized websocket.".to_string());
         };
 
-        let payload = json!({ "op" : "pause", "guildId" : guild_id.0.to_string(), "pause" : pause});
+        let payload = json!({"op" : "pause",
+            "guildId" : guild_id.0.to_string(),
+            "pause" : pause
+        });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
             return Err("Invalid data was provided to the `pause` json.".to_string());
@@ -347,7 +385,10 @@ impl LavalinkClient {
             return Err("There is no initialized websocket.".to_string());
         };
 
-        let payload = json!({ "op" : "volume", "guildId" : guild_id.0.to_string(), "volume" : volume});
+        let payload = json!({"op" : "volume",
+            "guildId" : guild_id.0.to_string(),
+            "volume" : volume
+        });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
             return Err("Invalid data was provided to the `volume` json.".to_string());
@@ -368,7 +409,10 @@ impl LavalinkClient {
             return Err("There is no initialized websocket.".to_string());
         };
 
-        let payload = json!({ "op" : "seek", "guildId" : guild_id.0.to_string(), "position" : time.as_millis().to_string()});
+        let payload = json!({"op" : "seek",
+            "guildId" : guild_id.0.to_string(),
+            "position" : time.as_millis().to_string()
+        });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
             return Err("Invalid data was provided to the `seek` json.".to_string());

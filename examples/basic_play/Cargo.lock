@@ -1236,7 +1236,7 @@ dependencies = [
 
 [[package]]
 name = "serenity-lavalink"
-version = "0.0.1"
+version = "0.0.2-alpha"
 dependencies = [
  "async-tungstenite",
  "futures",
