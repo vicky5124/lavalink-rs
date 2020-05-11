@@ -1,5 +1,5 @@
 # Serenity Lavalink
-Note: This is not a forl of the [official repository](https://github.com/serenity-rs/serenity-lavalink) with the same name, this is a completely new wrapper from scratch.
+Note: This is not a fork of the [official repository](https://github.com/serenity-rs/serenity-lavalink) with the same name, this is a completely new wrapper from scratch made to be used with the async version of serenity, as the previous one no longer works.
 
 ### Links you will need
 - [Lavalink repository](https://github.com/Frederikam/Lavalink)
