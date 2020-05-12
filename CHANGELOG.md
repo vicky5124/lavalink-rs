@@ -1,3 +1,7 @@
+# 0.0.3-alpha
+- Added easy queues
+- Added nodes
+
 # 0.0.2-alpha
 - Added start time to play()
 - Added finish time to play()
