@@ -26,7 +26,7 @@ Note: This is not a fork of the [official repository](https://github.com/serenit
 
 ### How to use
 
-1: Install openssl (because native-tls-backend requires openssl in serenity)
+1: Install openssl (because native_tls_backend requires openssl in serenity)
 - if the library is native and the bot is rustls, it works
 - if the library is rustls and the bot is native, it works
 - if the library and the bot are both native, it works
