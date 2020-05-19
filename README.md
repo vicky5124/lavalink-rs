@@ -26,5 +26,5 @@ Note: This is not a fork of the [official repository](https://github.com/serenit
 
 ### How to use
 ```toml
-serenity_lavalink = { git = "https://gitlab.com/nitsuga5124/serenity-lavalink/", branch = "master" }
+serenity-lavalink = { git = "https://gitlab.com/nitsuga5124/serenity-lavalink/", branch = "master" }
 ```
