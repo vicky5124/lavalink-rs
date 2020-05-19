@@ -35,4 +35,5 @@ version = "0.4"
 git = "https://github.com/Lakelezz/serenity/"
 branch = "await"
 default-features = false
-features = ["cache", "gateway", "http", "model", "native_tls_backend", "absolute_ratelimits", "voice"]
+features = ["cache", "gateway", "http", "model", "voice", "native_tls_backend"]
+#features = ["cache", "gateway", "http", "model", "voice", "rustls_backend"]
