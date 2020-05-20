@@ -108,11 +108,9 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
         }
     };
 
-    let guild_id = guild.read().await.id;
+    let guild_id = guild.id;
 
     let channel_id = guild
-        .read()
-        .await
         .voice_states.get(&msg.author.id)
         .and_then(|voice_state| voice_state.channel_id);
 
@@ -140,8 +138,8 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
 
 #[command]
 async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild_id = match ctx.cache.read().await.guild_channel(msg.channel_id) {
-        Some(channel) => channel.read().await.guild_id,
+    let guild_id = match ctx.cache.guild_channel(msg.channel_id).await {
+        Some(channel) => channel.guild_id,
         None => {
             check_msg(msg.channel_id.say(&ctx.http, "DMs not supported").await);
 
@@ -175,8 +173,8 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
 async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let query = args.message().to_string();
 
-    let guild_id = match ctx.cache.read().await.guild_channel(msg.channel_id) {
-        Some(channel) => channel.read().await.guild_id,
+    let guild_id = match ctx.cache.guild_channel(msg.channel_id).await {
+        Some(channel) => channel.guild_id,
         None => {
             check_msg(msg.channel_id.say(&ctx.http, "Error finding channel info").await);
 
