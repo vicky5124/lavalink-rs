@@ -1,6 +1,8 @@
 pub mod nodes;
+pub mod error;
 
 use nodes::*;
+use error::LavalinkError;
 
 use std::{
     sync::Arc,
@@ -130,17 +132,21 @@ pub struct PlayParameters<'a, 'b, 'c> {
 }
 
 impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
-    pub async fn start(self) -> Result<(), String> {
+    pub async fn start(self) -> Result<(), LavalinkError> {
         let socket = if let Some(x) = &self.client.unwrap().socket { x } else {
-            return Err("There is no initialized websocket.".to_string());
+            return Err(LavalinkError::NoWebsocket);
         };
         let guild_id = self.handler.unwrap().guild_id.0.to_string();
 
         let token = if let Some(x) = self.handler.unwrap().token.as_ref() { x } else {
-            return Err("No `token` was found on the handler.".to_string());
+            return Err(LavalinkError::MissingHandlerToken);
         };
         let endpoint = if let Some(x) = self.handler.unwrap().endpoint.as_ref() { x } else {
-            return Err("No `endpoint` was found on the handler.".to_string());
+            return Err(LavalinkError::MissingHandlerEndpoint);
+        };
+
+        let session_id = if let Some(x) = self.handler.unwrap().session_id.as_ref() { x } else {
+            return Err(LavalinkError::MissingHandlerSessionId);
         };
 
         let event = json!({
@@ -148,10 +154,6 @@ impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
             "guild_id" : &guild_id,
             "endpoint" : &endpoint
         });
-
-        let session_id = if let Some(x) = self.handler.unwrap().session_id.as_ref() { x } else {
-            return Err("No `session id` was found on the handler.".to_string());
-        };
 
         let payload = json!({
             "op" : "voiceUpdate",
@@ -161,13 +163,13 @@ impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
         });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `voiceUpdate` json.".to_string());
+            return Err(LavalinkError::InvalidDataToVoiceUpdate);
         };
 
         {
             let mut ws = socket.lock().await;
             if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `voiceUpdate` payload => {:?}", why));
+                return Err(LavalinkError::ErrorSendingVoiceUpdatePayload(why));
             };
         }
 
@@ -192,13 +194,13 @@ impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
         };
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `play` json.".to_string());
+            return Err(LavalinkError::InvalidDataToPlay);
         };
 
         {
             let mut ws = socket.lock().await;
             if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `play` payload => {:?}", why));
+                return Err(LavalinkError::ErrorSendingPlayPayload(why));
             };
         }
 
@@ -292,9 +294,9 @@ impl LavalinkClient {
         Ok(resp)
     }
 
-    pub async fn stop(&self, guild_id: &GuildId) -> Result<(), String> {
+    pub async fn stop(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
         let socket = if let Some(x) = &self.socket { x } else {
-            return Err("There is no initialized websocket.".to_string());
+            return Err(LavalinkError::NoWebsocket);
         };
 
         let payload = json!({
@@ -303,22 +305,22 @@ impl LavalinkClient {
         });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `stop` json.".to_string());
+            return Err(LavalinkError::InvalidDataToStop);
         };
 
         {
             let mut ws = socket.lock().await;
             if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `stop` operation => {:?}", why));
+                return Err(LavalinkError::ErrorSendingStopPayload(why));
             };
         }
 
         Ok(())
     }
 
-    pub async fn destroy(&self, guild_id: &GuildId) -> Result<(), String> {
+    pub async fn destroy(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
         let socket = if let Some(x) = &self.socket { x } else {
-            return Err("There is no initialized websocket.".to_string());
+            return Err(LavalinkError::NoWebsocket);
         };
 
         let payload = json!({
@@ -327,13 +329,13 @@ impl LavalinkClient {
         });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `destroy` json.".to_string());
+            return Err(LavalinkError::InvalidDataToDestroy);
         };
 
         {
             let mut ws = socket.lock().await;
             if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `destroy` operation => {:?}", why));
+                return Err(LavalinkError::ErrorSendingDestroyPayload(why));
             };
         }
 
@@ -348,9 +350,9 @@ impl LavalinkClient {
         p
     }
 
-    pub async fn set_pause(&self, guild_id: &GuildId, pause: bool) -> Result<(), String> {
+    pub async fn set_pause(&self, guild_id: &GuildId, pause: bool) -> Result<(), LavalinkError> {
         let socket = if let Some(x) = &self.socket { x } else {
-            return Err("There is no initialized websocket.".to_string());
+            return Err(LavalinkError::NoWebsocket);
         };
 
         let payload = json!({"op" : "pause",
@@ -359,30 +361,30 @@ impl LavalinkClient {
         });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `pause` json.".to_string());
+            return Err(LavalinkError::InvalidDataToPause);
         };
 
         {
             let mut ws = socket.lock().await;
             if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `pause` status => {:?}", why));
+                return Err(LavalinkError::ErrorSendingPausePayload(why));
             };
         }
 
         Ok(())
     }
 
-    pub async fn pause(&self, guild_id: &GuildId) -> Result<(), String> {
+    pub async fn pause(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
         self.set_pause(guild_id, true).await
     }
-    pub async fn resume(&self, guild_id: &GuildId) -> Result<(), String> {
+    pub async fn resume(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
         self.set_pause(guild_id, false).await
     }
 
-    pub async fn set_volume(&self, guild_id: &GuildId, mut volume: u16) -> Result<(), String> {
+    pub async fn set_volume(&self, guild_id: &GuildId, mut volume: u16) -> Result<(), LavalinkError> {
         volume = max(min(volume, 1000), 0);
         let socket = if let Some(x) = &self.socket { x } else {
-            return Err("There is no initialized websocket.".to_string());
+            return Err(LavalinkError::NoWebsocket);
         };
 
         let payload = json!({"op" : "volume",
@@ -391,22 +393,22 @@ impl LavalinkClient {
         });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `volume` json.".to_string());
+            return Err(LavalinkError::InvalidDataToVolume);
         };
 
         {
             let mut ws = socket.lock().await;
             if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `volume` value => {:?}", why));
+                return Err(LavalinkError::ErrorSendingVolumePayload(why));
             };
         }
 
         Ok(())
     }
 
-    pub async fn jump_to_time(&self, guild_id: &GuildId, time: Duration) -> Result<(), String> {
+    pub async fn jump_to_time(&self, guild_id: &GuildId, time: Duration) -> Result<(), LavalinkError> {
         let socket = if let Some(x) = &self.socket { x } else {
-            return Err("There is no initialized websocket.".to_string());
+            return Err(LavalinkError::NoWebsocket);
         };
 
         let payload = json!({"op" : "seek",
@@ -415,23 +417,23 @@ impl LavalinkClient {
         });
 
         let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err("Invalid data was provided to the `seek` json.".to_string());
+            return Err(LavalinkError::InvalidDataToSeek);
         };
 
         {
             let mut ws = socket.lock().await;
             if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(format!("There was an error sending the `seek` timestamp => {:?}", why));
+                return Err(LavalinkError::ErrorSendingSeekPayload(why));
             };
         }
 
         Ok(())
     }
 
-    pub async fn scrub(&self, guild_id: &GuildId, time: Duration) -> Result<(), String> {
+    pub async fn scrub(&self, guild_id: &GuildId, time: Duration) -> Result<(), LavalinkError> {
         self.jump_to_time(guild_id, time).await
     }
-    pub async fn seek(&self, guild_id: &GuildId, time: Duration) -> Result<(), String> {
+    pub async fn seek(&self, guild_id: &GuildId, time: Duration) -> Result<(), LavalinkError> {
         self.jump_to_time(guild_id, time).await
     }
 }

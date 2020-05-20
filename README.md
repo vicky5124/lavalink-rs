@@ -20,7 +20,7 @@ Note: This is not a fork of the [official repository](https://github.com/serenit
 - [X] Support easy queues natively.
 - [ ] Optimize the codebase.
 - [ ] Remove all the clones from examples.
-- [ ] Improve error handling.
+- [X] Improve error handling.
 - [ ] Add tracing and logging.
 - [ ] Add documentation.
 
