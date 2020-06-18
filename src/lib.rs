@@ -1,4 +1,5 @@
 pub mod nodes;
+pub mod discord_gateway;
 pub mod error;
 
 use nodes::*;
@@ -267,6 +268,22 @@ impl LavalinkClient {
         self.initialize().await
     }
 
+    pub async fn get_tracks<TS: ToString+ std::convert::AsRef<str>>(&self, query: TS) -> Result<Tracks, ReqwestError> {
+        let reqwest = ReqwestClient::new();
+        println!("1");
+        let url = Url::parse_with_params(&format!("{}/loadtracks", &self.rest_uri), &[("identifier", &query)]).expect("The query cannot be formated to a url.");
+        println!("11");
+
+        let resp = reqwest.get(url)
+            .headers(self.headers.clone().unwrap())
+            .send()
+            .await?
+            .json::<Tracks>()
+            .await?;
+
+        Ok(resp)
+    }
+
     pub async fn auto_search_tracks<TS: ToString + Display>(&self, query: TS) -> Result<Tracks, ReqwestError> {
         let r = Regex::new(r"https?://(?:www\.)?.+").unwrap();
         if r.is_match(&query.to_string()) {
@@ -280,19 +297,6 @@ impl LavalinkClient {
         self.get_tracks(format!("ytsearch:{}", query)).await
     }
 
-    pub async fn get_tracks<TS: ToString+ std::convert::AsRef<str>>(&self, query: TS) -> Result<Tracks, ReqwestError> {
-        let reqwest = ReqwestClient::new();
-        let url = Url::parse_with_params(&format!("{}/loadtracks", &self.socket_uri), &[("identifier", &query)]).expect("The query cannot be formated to a url.");
-
-        let resp = reqwest.get(url)
-            .headers(self.headers.clone().unwrap())
-            .send()
-            .await?
-            .json::<Tracks>()
-            .await?;
-
-        Ok(resp)
-    }
 
     pub async fn stop(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
         let socket = if let Some(x) = &self.socket { x } else {
