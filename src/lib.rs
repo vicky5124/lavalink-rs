@@ -270,9 +270,7 @@ impl LavalinkClient {
 
     pub async fn get_tracks<TS: ToString+ std::convert::AsRef<str>>(&self, query: TS) -> Result<Tracks, ReqwestError> {
         let reqwest = ReqwestClient::new();
-        println!("1");
         let url = Url::parse_with_params(&format!("{}/loadtracks", &self.rest_uri), &[("identifier", &query)]).expect("The query cannot be formated to a url.");
-        println!("11");
 
         let resp = reqwest.get(url)
             .headers(self.headers.clone().unwrap())
