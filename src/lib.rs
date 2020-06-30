@@ -76,7 +76,7 @@ pub struct Tracks {
 #[derive(Debug, Deserialize, Clone)]
 pub struct PlaylistInfo {
     #[serde(rename = "selectedTrack")]
-    pub selected_track: Option<u64>,
+    pub selected_track: Option<i64>,
 
     pub name: Option<String>,
 }
