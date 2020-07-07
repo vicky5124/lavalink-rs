@@ -32,8 +32,8 @@ features = ["tokio-runtime", "tokio-tls"]
 version = "0.4"
 
 [dependencies.serenity]
-git = "https://github.com/Lakelezz/serenity/"
-branch = "await"
+git = "https://github.com/acdenisSK/serenity/"
+branch = "await_next"
 default-features = false
-features = ["cache", "gateway", "http", "model", "voice", "native_tls_backend"]
+features = ["client", "cache", "gateway", "http", "model", "voice", "native_tls_backend"]
 #features = ["cache", "gateway", "http", "model", "voice", "rustls_backend"]

@@ -10,8 +10,8 @@ edition = "2018"
 path = "../../"
 
 [dependencies.serenity]
-git = "https://github.com/Lakelezz/serenity/"
-branch = "await"
+git = "https://github.com/acdenisSK/serenity/"
+branch = "await_next"
 features = ["cache", "framework", "standard_framework", "voice", "http", "rustls_backend"]
 
 [dependencies.tokio]
