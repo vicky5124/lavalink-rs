@@ -7,22 +7,22 @@ Note: This is not a fork of the [official repository](https://github.com/serenit
 
 ### TODO
 - [ ] Support multiple connections per region.
-- [X] Support nodes.
+- [ ] Support nodes.
 - [X] Support pause, resume, skip to time.
 - [X] Support starting at specific times and configurable replace current stream.
 - [ ] Support equalization.
 - [ ] Support identifiers.
 - [ ] Support both rustls and native_tls backends as features.
 - [ ] Support twilight.
+- [X] Support events.
 - [ ] Support raw events.
-- [ ] Implement my own event hander
-- [ ] Implement my own websocket connection to voice channels.
-- [X] Support easy queues natively.
-- [ ] Optimize the codebase.
-- [ ] Remove all the clones from examples.
+- [ ] Implement my own event hander for voice connections.
+- [?] Support easy queues natively.
+- [X] Optimize the codebase.
+- [X] Remove all the clones from examples.
 - [X] Improve error handling.
 - [ ] Add tracing and logging.
-- [ ] Add documentation.
+- [?] Add documentation.
 
 ### How to use
 

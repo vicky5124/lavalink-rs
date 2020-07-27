@@ -1,15 +1,15 @@
-pub mod nodes;
-pub mod discord_gateway;
+pub mod model;
+pub mod gateway;
 pub mod error;
 
-use nodes::*;
+use model::*;
+use gateway::*;
 use error::LavalinkError;
 
 use std::{
     sync::Arc,
-    fmt::Display,
     time::Duration,
-    collections::HashMap,
+    //collections::HashMap,
     cmp::{
         min,
         max,
@@ -21,7 +21,7 @@ use serenity::{
         guild::Region,
         id::{
             UserId,
-            GuildId,
+            //GuildId,
         },
     },
     voice::Handler,
@@ -43,10 +43,13 @@ use tokio::{
 };
 
 use regex::Regex;
-use serde::Deserialize;
-use serde_json::json;
 
-use futures::prelude::*;
+use futures::{
+    stream::{
+        SplitSink,
+        StreamExt,
+    },
+};
 use async_tungstenite::{
     tungstenite::{
         error::Error as TungsteniteError,
@@ -60,181 +63,132 @@ use async_tungstenite::{
     },
 };
 
-pub type WebsocketConnection = Arc<Mutex<WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TokioAdapter<TokioAdapter<TcpStream>>>>>>>>;
+pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TokioAdapter<TokioAdapter<TcpStream>>>>>>;
+pub type WebsocketConnection = Arc<Mutex<WsStream>>;
 
-#[derive(Debug, Deserialize, Clone)]
-pub struct Tracks {
-    #[serde(rename = "playlistInfo")]
-    pub playlist_info: PlaylistInfo,
-
-    #[serde(rename = "loadType")]
-    pub load_type: String,
-
-    pub tracks: Vec<Track>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct PlaylistInfo {
-    #[serde(rename = "selectedTrack")]
-    pub selected_track: Option<i64>,
-
-    pub name: Option<String>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct Track {
-    pub track: String,
-    pub info: Info,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct Info {
-    #[serde(rename = "isSeekable")]
-    pub is_seekable: bool,
-
-    #[serde(rename = "isStream")]
-    pub is_stream: bool,
-
-    pub identifier: String,
-    pub author: String,
-    pub length: u128,
-    pub position: u128,
-    pub title: String,
-    pub uri: String,
-}
-
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct LavalinkClient {
     pub host: String,
     pub port: u16,
     pub password: String,
-    pub shard_count: Option<u64>,
-    pub _region: Option<Region>,
-    pub _identifier: Option<String>,
-    pub _shard_id: Option<ShardId>,
+    pub shard_count: u64,
     pub bot_id: UserId,
     pub is_ssl: bool,
-    pub socket: Option<WebsocketConnection>,
+
     pub headers: Option<HeaderMap>,
+    pub socket_write: Option<SplitSink<WsStream, TungsteniteMessage>>,
+    //pub socket_read: Option<SplitStream<WsStream>>,
+
     pub rest_uri: String,
     pub socket_uri: String,
-    pub nodes: HashMap<GuildId, Node>,
-    pub loops: Vec<GuildId>,
+
+    // Unused
+    _region: Option<Region>,
+    _identifier: Option<String>,
+    _shard_id: Option<ShardId>,
+
+    //pub nodes: HashMap<GuildId, Node>,
+    //pub loops: Vec<GuildId>,
 }
 
-#[derive(Default, Clone, Copy)]
-pub struct PlayParameters<'a, 'b, 'c> {
-    pub client: Option<&'a LavalinkClient>,
-    pub handler: Option<&'b Handler>,
-    pub track: Option<&'c Track>,
+#[derive(Default)]
+pub struct PlayParameters {
+    pub track: String,
     pub replace: bool,
-    pub start: u128,
-    pub finish: u128,
+    pub start: u64,
+    pub finish: u64,
+    pub guild_id: u64,
 }
 
-impl<'a, 'b, 'c> PlayParameters<'a, 'b, 'c> {
-    pub async fn start(self) -> Result<(), LavalinkError> {
-        let socket = if let Some(x) = &self.client.unwrap().socket { x } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-        let guild_id = self.handler.unwrap().guild_id.0.to_string();
-
-        let token = if let Some(x) = self.handler.unwrap().token.as_ref() { x } else {
-            return Err(LavalinkError::MissingHandlerToken);
-        };
-        let endpoint = if let Some(x) = self.handler.unwrap().endpoint.as_ref() { x } else {
-            return Err(LavalinkError::MissingHandlerEndpoint);
+impl PlayParameters {
+    /// Starts playing the track.
+    pub async fn start(self, socket: &mut SplitSink<WsStream, TungsteniteMessage>) -> LavalinkResult<()> {
+        let payload = crate::model::Play {
+            track: self.track,
+            no_replace: !self.replace,
+            start_time: self.start,
+            end_time: if self.finish == 0 { None } else { Some(self.finish) },
         };
 
-        let session_id = if let Some(x) = self.handler.unwrap().session_id.as_ref() { x } else {
-            return Err(LavalinkError::MissingHandlerSessionId);
-        };
+        crate::model::SendOpcode::Play(payload).send(self.guild_id, socket).await?;
 
-        let event = json!({
-            "token" : &token,
-            "guild_id" : &guild_id,
-            "endpoint" : &endpoint
-        });
-
-        let payload = json!({
-            "op" : "voiceUpdate",
-            "guildId" : &guild_id,
-            "sessionId" : &session_id,
-            "event" : event
-        });
-
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err(LavalinkError::InvalidDataToVoiceUpdate);
-        };
-
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(LavalinkError::ErrorSendingVoiceUpdatePayload(why));
-            };
-        }
-
-        let payload = if self.finish > 0 {
-            json!({
-                "op" : "play",
-                "guildId" : &guild_id,
-                "track" : self.track.unwrap().track,
-                "noReplace" : !self.replace,
-                "startTime" : self.start.to_string(),
-                "endTime" : self.finish.to_string()
-            })
-        } else {
-            json!({
-                "op" : "play",
-                "guildId" : &guild_id,
-                "track" : self.track.unwrap().track,
-                "noReplace" : !self.replace,
-                "startTime" : self.start.to_string(),
-                "endTime" : self.finish.to_string()
-            })
-        };
-
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err(LavalinkError::InvalidDataToPlay);
-        };
-
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(LavalinkError::ErrorSendingPlayPayload(why));
-            };
-        }
 
         Ok(())
     }
 
+    /// Sets if the current playing track should be replaced with this new one.
     pub fn replace(&mut self, replace: bool) -> &mut Self {
         self.replace = replace;
         self
     }
 
+    /// Sets the time the track will start at.
     pub fn start_time(&mut self, start: Duration) -> &mut Self {
-        self.start = start.as_millis();
+        self.start = start.as_millis() as u64;
         self
     }
 
+    /// Sets the time the track will finish at.
     pub fn finish_time(&mut self, finish: Duration) -> &mut Self {
-        self.finish = finish.as_millis();
+        self.finish = finish.as_millis() as u64;
         self
     }
 }
 
 impl LavalinkClient {
-    pub fn new() -> Self {
+    /// Builds a basic uninitialized LavalinkClient.
+    pub fn new(bot_id: UserId) -> Self {
         let mut client = LavalinkClient::default();
         client.host = "localhost".to_string();
         client.port = 2333;
         client.password = "youshallnotpass".to_string();
-        client.shard_count = Some(1);
+        client.shard_count = 1;
+        client.bot_id = bot_id;
         client
     }
 
-    pub async fn initialize(&mut self) -> Result<&mut Self, TungsteniteError> {
+    /// Sets the host.
+    ///
+    /// DEFAULT: `localhost`
+    pub fn set_host(&mut self, host: impl ToString) {
+        self.host = host.to_string();
+    }
+
+    /// Sets the port.
+    ///
+    /// DEFAULT: `2333`
+    pub fn set_port(&mut self, port: u16) {
+        self.port = port;
+    }
+
+    /// Sets the number of shards.
+    ///
+    /// DEFAULT: `1`
+    pub fn set_shard_count(&mut self, shard_count: u64) {
+        self.shard_count = shard_count;
+    }
+
+    /// Sets the ID of the bot.
+    pub fn set_bot_id(&mut self, bot_id: UserId) {
+        self.bot_id = bot_id;
+    }
+
+    /// Sets if the lavalink server is behind SSL
+    ///
+    /// DEFAULT: `False`
+    pub fn set_is_ssl(&mut self, is_ssl: bool) {
+        self.is_ssl = is_ssl;
+    }
+
+    /// Sets the lavalink password.
+    ///
+    /// DEFAULT: `youshallnotpass`
+    pub fn set_password(&mut self, password: impl ToString) {
+        self.password = password.to_string();
+    }
+
+    /// Initializes the connection with the provided information.
+    pub async fn initialize(mut self, handler: impl LavalinkEventHandler + Send + Sync + 'static) -> Result<Arc<Mutex<Self>>, TungsteniteError> {
         if self.is_ssl {
             self.socket_uri = format!("wss://{}:{}", &self.host, &self.port);
             self.rest_uri = format!("https://{}:{}", &self.host, &self.port);
@@ -245,7 +199,7 @@ impl LavalinkClient {
 
         let mut headers = HeaderMap::new();
         headers.insert("Authorization", self.password.parse()?);
-        headers.insert("Num-Shards", self.shard_count.unwrap_or(1).to_string().parse()?);
+        headers.insert("Num-Shards", self.shard_count.to_string().parse()?);
         headers.insert("User-Id", self.bot_id.to_string().parse()?);
 
         self.headers = Some(headers);
@@ -253,24 +207,74 @@ impl LavalinkClient {
         let url = Request::builder()
             .uri(&self.socket_uri)
             .header("Authorization", &self.password)
-            .header("Num-Shards", &self.shard_count.unwrap_or(1).to_string())
+            .header("Num-Shards", &self.shard_count.to_string())
             .header("User-Id", &self.bot_id.to_string())
             .body(())
             .unwrap();
 
         let (ws_stream, _) = connect_async(url).await?;
 
-        self.socket = Some(Arc::new(Mutex::new(ws_stream)));
-        Ok(self)
+        let (write, mut read) = ws_stream.split();
+        self.socket_write = Some(write);
+        //self.socket = Some(Arc::new(Mutex::new(ws_stream)));
+
+        let client = Arc::new(Mutex::new(self));
+        let client_clone = Arc::clone(&client);
+
+        tokio::spawn(async move {
+            while let Some(resp) = read.next().await {
+                if let Ok(resp) = resp {
+                    match &resp {
+                        TungsteniteMessage::Text(x) => {
+                            if let Ok(base_event) = serde_json::from_str::<GatewayEvent>(&x) {
+                                match base_event.op.as_str() {
+                                    "stats" => {
+                                        if let Ok(stats) = serde_json::from_str::<Stats>(&x) {
+                                            handler.stats(Arc::clone(&client), stats).await;
+                                        }
+                                    },
+                                    "playerUpdate" => {
+                                        if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(&x) {
+                                            handler.player_update(Arc::clone(&client), player_update).await;
+                                        }
+                                    },
+                                    "event" => {
+                                        match base_event.event_type.unwrap().as_str() {
+                                            "TrackStartEvent" => {
+                                                if let Ok(track_start) = serde_json::from_str::<TrackStart>(&x) {
+                                                    handler.track_start(Arc::clone(&client), track_start).await;
+                                                }
+                                            },
+                                            "TrackEndEvent" => {
+                                                if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(&x) {
+                                                    handler.track_finish(Arc::clone(&client), track_finish).await;
+                                                }
+                                            },
+                                            _ => (),
+                                        }
+                                    },
+                                    _ => (),
+                                }
+                            }
+                        },
+                        _ => (),
+                    }
+                }
+            }
+        });
+
+        Ok(client_clone)
     }
 
-    pub async fn init(&mut self) -> Result<&mut Self, TungsteniteError> {
-        self.initialize().await
+    /// Alias to `initialize()`
+    pub async fn init(self, handler: impl LavalinkEventHandler + Send + Sync + 'static) -> Result<Arc<Mutex<Self>>, TungsteniteError> {
+        self.initialize(handler).await
     }
 
-    pub async fn get_tracks<TS: ToString+ std::convert::AsRef<str>>(&self, query: TS) -> Result<Tracks, ReqwestError> {
+    /// Returns the tracks from the URL or query provided.
+    pub async fn get_tracks(&self, query: impl ToString) -> Result<Tracks, ReqwestError> {
         let reqwest = ReqwestClient::new();
-        let url = Url::parse_with_params(&format!("{}/loadtracks", &self.rest_uri), &[("identifier", &query)]).expect("The query cannot be formated to a url.");
+        let url = Url::parse_with_params(&format!("{}/loadtracks", &self.rest_uri), &[("identifier", &query.to_string())]).expect("The query cannot be formated to a url.");
 
         let resp = reqwest.get(url)
             .headers(self.headers.clone().unwrap())
@@ -282,160 +286,153 @@ impl LavalinkClient {
         Ok(resp)
     }
 
-    pub async fn auto_search_tracks<TS: ToString + Display>(&self, query: TS) -> Result<Tracks, ReqwestError> {
+    /// Will automatically search the query if it's not a valid URL.
+    pub async fn auto_search_tracks(&self, query: impl ToString) -> Result<Tracks, ReqwestError> {
         let r = Regex::new(r"https?://(?:www\.)?.+").unwrap();
         if r.is_match(&query.to_string()) {
             self.get_tracks(query.to_string()).await
         } else {
-            self.get_tracks(format!("ytsearch:{}", query)).await
+            self.get_tracks(format!("ytsearch:{}", query.to_string())).await
         }
     }
 
-    pub async fn search_tracks<TS: ToString + Display>(&self, query: TS) -> Result<Tracks, ReqwestError> {
-        self.get_tracks(format!("ytsearch:{}", query)).await
+    /// Returns tracks from the search query.
+    pub async fn search_tracks(&self, query: impl ToString) -> Result<Tracks, ReqwestError> {
+        self.get_tracks(format!("ytsearch:{}", query.to_string())).await
     }
 
+    /// Creates a lavalink session on the specified guild.
+    pub async fn create_session(&mut self, guild_id: impl Into<GuildId>, handler: &Handler) -> LavalinkResult<()> {
+        let guild_id = guild_id.into();
 
-    pub async fn stop(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
-        let socket = if let Some(x) = &self.socket { x } else {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
             return Err(LavalinkError::NoWebsocket);
         };
+        let guild_id_str = guild_id.0.to_string();
 
-        let payload = json!({
-            "op" : "stop",
-            "guildId" : guild_id.0.to_string()
-        });
-
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err(LavalinkError::InvalidDataToStop);
+        let token = if let Some(x) = handler.token.as_ref() { x } else {
+            return Err(LavalinkError::MissingHandlerToken);
+        };
+        let endpoint = if let Some(x) = handler.endpoint.as_ref() { x } else {
+            return Err(LavalinkError::MissingHandlerEndpoint);
         };
 
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(LavalinkError::ErrorSendingStopPayload(why));
-            };
-        }
+        let session_id = if let Some(x) = handler.session_id.as_ref() { x } else {
+            return Err(LavalinkError::MissingHandlerSessionId);
+        };
+
+        
+        let event = crate::model::Event {
+            token: token.to_string(),
+            endpoint: endpoint.to_string(),
+            guild_id: guild_id_str,
+        };
+
+        let payload = crate::model::VoiceUpdate {
+            session_id: session_id.to_string(),
+            event: event,
+        };
+
+        crate::model::SendOpcode::VoiceUpdate(payload).send(guild_id, socket).await?;
 
         Ok(())
     }
 
-    pub async fn destroy(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
-        let socket = if let Some(x) = &self.socket { x } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-
-        let payload = json!({
-            "op" : "destroy",
-            "guildId" : guild_id.0.to_string()
-        });
-
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err(LavalinkError::InvalidDataToDestroy);
-        };
-
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(LavalinkError::ErrorSendingDestroyPayload(why));
-            };
-        }
-
-        Ok(())
-    }
-
-    pub fn play<'a, 'b, 'c>(&'a self, handler: &'b Handler, track: &'c Track) -> PlayParameters<'a, 'b, 'c> {
+    /// Constructor for playing a track.
+    pub fn play(guild_id: impl Into<GuildId>, track: &Track) -> PlayParameters {
         let mut p = PlayParameters::default();
-        p.client = Some(self);
-        p.handler = Some(handler);
-        p.track = Some(track);
+        p.track = track.track.to_string();
+        p.guild_id = guild_id.into().0;
         p
     }
 
-    pub async fn set_pause(&self, guild_id: &GuildId, pause: bool) -> Result<(), LavalinkError> {
-        let socket = if let Some(x) = &self.socket { x } else {
+    /// Destroys the current player.
+    /// When this is ran, `create_session()` needs to be ran again.
+    pub async fn destroy(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
             return Err(LavalinkError::NoWebsocket);
         };
 
-        let payload = json!({"op" : "pause",
-            "guildId" : guild_id.0.to_string(),
-            "pause" : pause
-        });
-
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err(LavalinkError::InvalidDataToPause);
-        };
-
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(LavalinkError::ErrorSendingPausePayload(why));
-            };
-        }
+        crate::model::SendOpcode::Destroy.send(guild_id, socket).await?;
 
         Ok(())
     }
 
-    pub async fn pause(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
+    /// Stops the current player.
+    pub async fn stop(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
+            return Err(LavalinkError::NoWebsocket);
+        };
+
+        crate::model::SendOpcode::Stop.send(guild_id, socket).await?;
+
+        Ok(())
+    }
+
+    /// Sets the pause status.
+    pub async fn set_pause(&mut self, guild_id: impl Into<GuildId>, pause: bool) -> LavalinkResult<()> {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
+            return Err(LavalinkError::NoWebsocket);
+        };
+
+        let payload = crate::model::Pause {
+            pause: pause,
+        };
+
+        crate::model::SendOpcode::Pause(payload).send(guild_id, socket).await?;
+
+        Ok(())
+    }
+
+    /// Sets pause status to `True`
+    pub async fn pause(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         self.set_pause(guild_id, true).await
     }
-    pub async fn resume(&self, guild_id: &GuildId) -> Result<(), LavalinkError> {
+
+    /// Sets pause status to `False`
+    pub async fn resume(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         self.set_pause(guild_id, false).await
     }
 
-    pub async fn set_volume(&self, guild_id: &GuildId, mut volume: u16) -> Result<(), LavalinkError> {
-        volume = max(min(volume, 1000), 0);
-        let socket = if let Some(x) = &self.socket { x } else {
+    /// Jumps to a specific time in the currently playing track.
+    pub async fn seek(&mut self, guild_id: impl Into<GuildId>, time: Duration) -> LavalinkResult<()> {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
             return Err(LavalinkError::NoWebsocket);
         };
 
-        let payload = json!({"op" : "volume",
-            "guildId" : guild_id.0.to_string(),
-            "volume" : volume
-        });
-
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err(LavalinkError::InvalidDataToVolume);
+        let payload = crate::model::Seek {
+            position: time.as_millis() as u64,
         };
 
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(LavalinkError::ErrorSendingVolumePayload(why));
-            };
-        }
+        crate::model::SendOpcode::Seek(payload).send(guild_id, socket).await?;
 
         Ok(())
     }
 
-    pub async fn jump_to_time(&self, guild_id: &GuildId, time: Duration) -> Result<(), LavalinkError> {
-        let socket = if let Some(x) = &self.socket { x } else {
+    /// Alias to `seek()`
+    pub async fn jump_to_time(&mut self, guild_id: impl Into<GuildId>, time: Duration) -> LavalinkResult<()> {
+        self.seek(guild_id, time).await
+    }
+
+    /// Alias to `seek()`
+    pub async fn scrub(&mut self, guild_id: impl Into<GuildId>, time: Duration) -> LavalinkResult<()> {
+        self.seek(guild_id, time).await
+    }
+
+    /// Sets the volume of the player.
+    pub async fn volume(&mut self, guild_id: impl Into<GuildId>, volume: u16) -> LavalinkResult<()> {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
             return Err(LavalinkError::NoWebsocket);
         };
 
-        let payload = json!({"op" : "seek",
-            "guildId" : guild_id.0.to_string(),
-            "position" : time.as_millis().to_string()
-        });
+        let good_volume = max(min(volume, 1000), 0);
 
-        let formated_payload = if let Ok(x) = serde_json::to_string(&payload) { x } else {
-            return Err(LavalinkError::InvalidDataToSeek);
+        let payload = crate::model::Volume {
+            volume: good_volume,
         };
 
-        {
-            let mut ws = socket.lock().await;
-            if let Err(why) = ws.send(TungsteniteMessage::text(formated_payload)).await {
-                return Err(LavalinkError::ErrorSendingSeekPayload(why));
-            };
-        }
+        crate::model::SendOpcode::Volume(payload).send(guild_id, socket).await?;
 
         Ok(())
-    }
-
-    pub async fn scrub(&self, guild_id: &GuildId, time: Duration) -> Result<(), LavalinkError> {
-        self.jump_to_time(guild_id, time).await
-    }
-    pub async fn seek(&self, guild_id: &GuildId, time: Duration) -> Result<(), LavalinkError> {
-        self.jump_to_time(guild_id, time).await
     }
 }

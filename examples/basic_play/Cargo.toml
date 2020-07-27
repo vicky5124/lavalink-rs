@@ -6,7 +6,7 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies.serenity-lavalink]
+[dependencies.lavalink-rs]
 path = "../../"
 
 [dependencies.serenity]
@@ -16,4 +16,4 @@ features = ["client", "cache", "framework", "standard_framework", "voice", "http
 
 [dependencies.tokio]
 version = "0.2"
-features = ["macros"]
+features = ["full"]
