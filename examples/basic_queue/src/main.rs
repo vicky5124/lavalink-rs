@@ -90,14 +90,12 @@ impl LavalinkEventHandler for LavalinkHandler {
     async fn track_start(&self, _client: Arc<Mutex<LavalinkClient>>, event: TrackStart) {
         println!("Track started!\nGuild: {}", event.guild_id);
     }
-    async fn track_finish(&self, _client: Arc<Mutex<LavalinkClient>>, event: TrackFinish) {
+    async fn track_finish(&self, client: Arc<Mutex<LavalinkClient>>, event: TrackFinish) {
+        let mut client = client.lock().await;
+        let node = client.nodes.get_mut(&event.guild_id).unwrap();
+        node.now_playing = None;
+
         println!("Track finished!\nGuild: {}", event.guild_id);
-    }
-    async fn stats(&self, _client: Arc<Mutex<LavalinkClient>>, _event: Stats) {
-        println!("Stats");
-    }
-    async fn player_update(&self, _client: Arc<Mutex<LavalinkClient>>, event: PlayerUpdate) {
-        println!("Player Update: {:#?}", event);
     }
 }
 
@@ -111,7 +109,7 @@ async fn after(_ctx: &Context, _msg: &Message, command_name: &str, command_resul
 
 #[group]
 #[only_in(guilds)]
-#[commands(join, leave, play, ping)]
+#[commands(join, leave, play, now_playing, ping)]
 struct General;
 
 #[tokio::main]
@@ -262,7 +260,7 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     if let Some(_handler) = manager.get_mut(guild_id) {
         let mut data = ctx.data.write().await;
         let lava_client_lock = data.get_mut::<Lavalink>().expect("Expected a lavalink client in TypeMap");
-        let mut lava_client = lava_client_lock.lock().await;
+        let lava_client = lava_client_lock.lock().await;
 
         let query_information = lava_client.auto_search_tracks(&query).await?;
 
@@ -271,20 +269,39 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             return Ok(());
         }
 
-        if let Some(ref mut socket) = lava_client.socket_write {
-            if let Err(why) = LavalinkClient::play(guild_id, query_information.tracks[0].clone()).start(socket).await {
-                eprintln!("{}", why);
-                return Ok(());
-            };
-            check_msg(msg.channel_id.say(&ctx.http, format!("Now playing: {}", query_information.tracks[0].info.as_ref().unwrap().title)).await);
-        } else {
+        drop(lava_client);
 
-            eprintln!("No websocket found");
-        }
+        if let Err(why) = LavalinkClient::play(guild_id, query_information.tracks[0].clone()).queue(Arc::clone(lava_client_lock)).await {
+            eprintln!("{}", why);
+            return Ok(());
+        };
+        check_msg(msg.channel_id.say(&ctx.http, format!("Added to queue: {}", query_information.tracks[0].info.as_ref().unwrap().title)).await);
 
     } else {
         check_msg(msg.channel_id.say(&ctx.http, "Use `~join` first, to connect the bot to your current voice channel.").await);
     }
+
+    Ok(())
+}
+
+#[command]
+#[aliases(np)]
+async fn now_playing(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut data = ctx.data.write().await;
+    let lava_client_lock = data.get_mut::<Lavalink>().expect("Expected a lavalink client in TypeMap");
+    let lava_client = lava_client_lock.lock().await;
+
+    if let Some(node) = lava_client.nodes.get(&msg.guild_id.unwrap().0) {
+        if let Some(x) = &node.now_playing {
+            check_msg(msg.channel_id.say(&ctx.http, format!("Now Playing: {}", x.track.info.as_ref().unwrap().title)).await);
+        } else {
+            check_msg(msg.channel_id.say(&ctx.http, "Nothing is playing at the moment.").await);
+        }
+    } else {
+        check_msg(msg.channel_id.say(&ctx.http, "Nothing is playing at the moment.").await);
+    }
+
+
 
     Ok(())
 }

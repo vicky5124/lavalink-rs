@@ -7,7 +7,7 @@ Note: This is not a fork of the [official repository](https://github.com/serenit
 
 ### TODO
 - [ ] Support multiple connections per region.
-- [ ] Support nodes.
+- [X] Support nodes.
 - [X] Support pause, resume, skip to time.
 - [X] Support starting at specific times and configurable replace current stream.
 - [ ] Support equalization.
@@ -17,7 +17,7 @@ Note: This is not a fork of the [official repository](https://github.com/serenit
 - [X] Support events.
 - [ ] Support raw events.
 - [ ] Implement my own event hander for voice connections.
-- [?] Support easy queues natively.
+- [X] Support easy queues natively.
 - [X] Optimize the codebase.
 - [X] Remove all the clones from examples.
 - [X] Improve error handling.

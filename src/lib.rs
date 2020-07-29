@@ -9,7 +9,7 @@ use error::LavalinkError;
 use std::{
     sync::Arc,
     time::Duration,
-    //collections::HashMap,
+    collections::HashMap,
     cmp::{
         min,
         max,
@@ -21,7 +21,6 @@ use serenity::{
         guild::Region,
         id::{
             UserId,
-            //GuildId,
         },
     },
     voice::Handler,
@@ -87,13 +86,13 @@ pub struct LavalinkClient {
     _identifier: Option<String>,
     _shard_id: Option<ShardId>,
 
-    //pub nodes: HashMap<GuildId, Node>,
-    //pub loops: Vec<GuildId>,
+    pub nodes: HashMap<u64, Node>,
+    pub loops: Vec<u64>,
 }
 
 #[derive(Default)]
 pub struct PlayParameters {
-    pub track: String,
+    pub track: Track,
     pub replace: bool,
     pub start: u64,
     pub finish: u64,
@@ -104,13 +103,75 @@ impl PlayParameters {
     /// Starts playing the track.
     pub async fn start(self, socket: &mut SplitSink<WsStream, TungsteniteMessage>) -> LavalinkResult<()> {
         let payload = crate::model::Play {
-            track: self.track,
+            track: self.track.track,
             no_replace: !self.replace,
             start_time: self.start,
             end_time: if self.finish == 0 { None } else { Some(self.finish) },
         };
 
         crate::model::SendOpcode::Play(payload).send(self.guild_id, socket).await?;
+
+
+        Ok(())
+    }
+
+    pub async fn queue(self, client: Arc<Mutex<LavalinkClient>>) -> LavalinkResult<()> {
+        let track = crate::model::TrackQueue {
+            track: self.track,
+            start_time: self.start,
+            end_time: if self.finish == 0 { None } else { Some(self.finish) },
+        };
+
+        let client_clone = Arc::clone(&client);
+        let mut client = client.lock().await;
+
+        if !client.loops.contains(&self.guild_id) {
+            let guild_id = self.guild_id;
+
+            client.nodes.insert(guild_id, Node::default());
+            client.loops.push(guild_id);
+
+            let node = client.nodes.get_mut(&guild_id).unwrap();
+            node.queue.push(track.clone());
+
+            drop(client);
+
+            tokio::spawn(async move {
+                loop {
+                    let mut client = client_clone.lock().await;
+                    let node = client.nodes.get_mut(&guild_id).unwrap();
+
+                    if !node.queue.is_empty() && node.now_playing.is_none() {
+                        let track = node.queue[0].clone();
+
+                        node.now_playing = Some(node.queue[0].clone());
+                        node.queue.remove(0);
+
+
+                        let payload = crate::model::Play {
+                            track: track.track.track.clone(), // track
+                            no_replace: false,
+                            start_time: track.start_time,
+                            end_time: track.end_time,
+                        };
+
+                        if let Some(ref mut socket) = &mut client.socket_write {
+                            if let Err(why) = crate::model::SendOpcode::Play(payload).send(guild_id, socket).await {
+                                eprintln!("Error playing queue on guild {} -> {}", guild_id, why);
+                            }
+                        } else {
+                            eprintln!("Error playing queue on guild {} -> No Socket Found", guild_id);
+                        }
+                    }
+
+                    drop(client);
+                    tokio::time::delay_for(Duration::from_secs(1)).await;
+                }
+            });
+        } else {
+            let node = client.nodes.get_mut(&self.guild_id).unwrap();
+            node.queue.push(track);
+        }
 
 
         Ok(())
@@ -339,9 +400,9 @@ impl LavalinkClient {
     }
 
     /// Constructor for playing a track.
-    pub fn play(guild_id: impl Into<GuildId>, track: &Track) -> PlayParameters {
+    pub fn play(guild_id: impl Into<GuildId>, track: Track) -> PlayParameters {
         let mut p = PlayParameters::default();
-        p.track = track.track.to_string();
+        p.track = track;
         p.guild_id = guild_id.into().0;
         p
     }

@@ -7,6 +7,7 @@ use serde_json::{
     json,
     Value,
 };
+use serde_aux::prelude::*;
 use serde::{
     Deserialize,
     Serialize
@@ -103,7 +104,7 @@ pub struct Pause {
     pub pause: bool,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub struct GuildId(pub u64);
 
 impl From<SerenityGuildId> for GuildId {
@@ -193,7 +194,24 @@ impl SendOpcode {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Node {
+    pub guild: GuildId,
+
+    pub now_playing: Option<TrackQueue>,
+    pub is_paused: bool,
+    pub volume: u16,
+    pub queue: Vec<TrackQueue>,
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct TrackQueue {
+    pub track: Track,
+    pub start_time: u64,
+    pub end_time: Option<u64>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Tracks {
     #[serde(rename = "playlistInfo")]
     pub playlist_info: PlaylistInfo,
@@ -204,7 +222,7 @@ pub struct Tracks {
     pub tracks: Vec<Track>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct PlaylistInfo {
     #[serde(rename = "selectedTrack")]
     pub selected_track: Option<i64>,
@@ -212,13 +230,13 @@ pub struct PlaylistInfo {
     pub name: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Track {
     pub track: String,
     pub info: Option<Info>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Info {
     #[serde(rename = "isSeekable")]
     pub is_seekable: bool,
@@ -309,7 +327,8 @@ pub struct PlayerUpdate {
     pub op: String,
     pub state: State,
     #[serde(rename = "guildId")]
-    pub guild_id: String,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -319,7 +338,8 @@ pub struct TrackStart {
     pub track_start_type: String,
     pub track: String,
     #[serde(rename = "guildId")]
-    pub guild_id: String,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -330,5 +350,6 @@ pub struct TrackFinish {
     pub track_finish_type: String,
     pub track: String,
     #[serde(rename = "guildId")]
-    pub guild_id: String,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: u64,
 }
