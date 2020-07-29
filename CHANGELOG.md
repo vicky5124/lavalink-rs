@@ -1,3 +1,10 @@
+# 0.1.0-alpha
+- Rewrote the library.
+- Added events.
+- Optimized the codebase.
+- Removed all the clones from the examples.
+- Remade easy queues.
+
 # 0.0.3-alpha
 - Added easy queues
 - Added nodes
