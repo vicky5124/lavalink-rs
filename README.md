@@ -34,9 +34,9 @@ Note: This is not a fork of the [official repository](https://github.com/serenit
 
 
 ```toml
-serenity-lavalink = { git = "https://gitlab.com/nitsuga5124/serenity-lavalink/", branch = "master" }
+lavalink-rs = { git = "https://gitlab.com/nitsuga5124/lavalink-rs/", branch = "master" }
 # or
-[dependencies.serenity-lavalink]
-git = "https://gitlab.com/nitsuga5124/serenity-lavalink/"
+[dependencies.lavalink-rs]
+git = "https://gitlab.com/nitsuga5124/lavalink-rs/"
 branch = "master"
 ```
