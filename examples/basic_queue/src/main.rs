@@ -90,11 +90,7 @@ impl LavalinkEventHandler for LavalinkHandler {
     async fn track_start(&self, _client: Arc<Mutex<LavalinkClient>>, event: TrackStart) {
         println!("Track started!\nGuild: {}", event.guild_id);
     }
-    async fn track_finish(&self, client: Arc<Mutex<LavalinkClient>>, event: TrackFinish) {
-        let mut client = client.lock().await;
-        let node = client.nodes.get_mut(&event.guild_id).unwrap();
-        node.now_playing = None;
-
+    async fn track_finish(&self, _client: Arc<Mutex<LavalinkClient>>, event: TrackFinish) {
         println!("Track finished!\nGuild: {}", event.guild_id);
     }
 }
@@ -109,7 +105,7 @@ async fn after(_ctx: &Context, _msg: &Message, command_name: &str, command_resul
 
 #[group]
 #[only_in(guilds)]
-#[commands(join, leave, play, now_playing, ping)]
+#[commands(join, leave, play, now_playing, skip, ping)]
 struct General;
 
 #[tokio::main]
@@ -292,8 +288,8 @@ async fn now_playing(ctx: &Context, msg: &Message) -> CommandResult {
     let lava_client = lava_client_lock.lock().await;
 
     if let Some(node) = lava_client.nodes.get(&msg.guild_id.unwrap().0) {
-        if let Some(x) = &node.now_playing {
-            check_msg(msg.channel_id.say(&ctx.http, format!("Now Playing: {}", x.track.info.as_ref().unwrap().title)).await);
+        if let Some(track) = &node.now_playing {
+            check_msg(msg.channel_id.say(&ctx.http, format!("Now Playing: {}", track.track.info.as_ref().unwrap().title)).await);
         } else {
             check_msg(msg.channel_id.say(&ctx.http, "Nothing is playing at the moment.").await);
         }
@@ -301,7 +297,19 @@ async fn now_playing(ctx: &Context, msg: &Message) -> CommandResult {
         check_msg(msg.channel_id.say(&ctx.http, "Nothing is playing at the moment.").await);
     }
 
+    Ok(())
+}
 
+#[command]
+async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut data = ctx.data.write().await;
+    let lava_client_lock = data.get_mut::<Lavalink>().expect("Expected a lavalink client in TypeMap");
+
+    if let Some(track) = lava_client_lock.lock().await.skip(msg.guild_id.unwrap()).await {
+        check_msg(msg.channel_id.say(ctx, format!("Skipped: {}", track.track.info.as_ref().unwrap().title)).await);
+    } else {
+        check_msg(msg.channel_id.say(ctx, "Nothing to skip.").await);
+    }
 
     Ok(())
 }

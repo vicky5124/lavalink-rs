@@ -145,8 +145,6 @@ impl PlayParameters {
                         let track = node.queue[0].clone();
 
                         node.now_playing = Some(node.queue[0].clone());
-                        node.queue.remove(0);
-
 
                         let payload = crate::model::Play {
                             track: track.track.track.clone(), // track
@@ -307,8 +305,18 @@ impl LavalinkClient {
                                                 }
                                             },
                                             "TrackEndEvent" => {
+                                                let client_clone = Arc::clone(&client);
                                                 if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(&x) {
-                                                    handler.track_finish(Arc::clone(&client), track_finish).await;
+                                                    if track_finish.reason == "FINISHED" {
+                                                        let mut client = client_clone.lock().await;
+
+                                                        if let Some(node) = client.nodes.get_mut(&track_finish.guild_id) {
+                                                            node.queue.remove(0);
+                                                            node.now_playing = None;
+                                                        }
+                                                    }
+
+                                                    handler.track_finish(client_clone, track_finish).await;
                                                 }
                                             },
                                             _ => (),
@@ -428,6 +436,17 @@ impl LavalinkClient {
         crate::model::SendOpcode::Stop.send(guild_id, socket).await?;
 
         Ok(())
+    }
+
+    /// Skips the current playing track to the next item on the queue.
+    ///
+    /// If nothing is in the queue, the currently playing track will keep playing.
+    /// Check if the queue is empty and run `stop()` if that's the case.
+    pub async fn skip(&mut self, guild_id: impl Into<GuildId>) -> Option<TrackQueue> {
+        let node = self.nodes.get_mut(&guild_id.into().0)?;
+
+        node.now_playing = None;
+        Some(node.queue.remove(0))
     }
 
     /// Sets the pause status.
