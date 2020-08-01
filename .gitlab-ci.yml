@@ -1,0 +1,25 @@
+stages:
+  - build
+  #- check
+
+variables:
+  CARGO_HOME: $CI_PROJECT_DIR/cargo
+
+build:
+  image: "rust"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq libssl-dev libsodium-dev libopus-dev pkg-config
+    - cargo --version
+    - rustc --version
+  stage: build
+  script:
+    - cargo build --example basic_play
+    - cargo build --example basic_queue
+  cache:
+    untracked: true
+    paths:
+      - target/
+      - cargo/
+  only:
+  - master
+
