@@ -38,3 +38,17 @@ branch = "await_next"
 default-features = false
 features = ["client", "gateway", "model", "voice", "cache", "framework", "native_tls_backend"]
 #features = ["client", "gateway", "model", "voice", "cache", "framework", "rustls_backend"]
+
+[[example]]
+name = "basic_play"
+
+[[example]]
+name = "basic_queue"
+
+[dev-dependencies.tokio]
+version = "0.2"
+features = ["full"]
+
+[dev-dependencies.serenity]
+git = "https://github.com/acdenisSK/serenity/"
+branch = "await_next"
