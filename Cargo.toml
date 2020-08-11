@@ -23,7 +23,7 @@ tokio-tls = "0.3"
 http = "0.2"
 
 [dependencies.tokio]
-version = "0.2.13"
+version = "0.2"
 features = ["full"]
 
 [dependencies.serde]
@@ -31,7 +31,7 @@ version = "1.0"
 features = ["derive"]
 
 [dependencies.reqwest]
-version = "*"
+version = "0.10"
 features = ["json"]
 
 [dependencies.async-tungstenite]
@@ -41,8 +41,6 @@ version = "0.4"
 
 [dependencies.serenity]
 version = "0.9.0-rc.0"
-#git = "https://github.com/acdenisSK/serenity/"
-#branch = "await_next"
 default-features = false
 features = ["client", "gateway", "model", "voice", "cache", "framework", "native_tls_backend"]
 #features = ["client", "gateway", "model", "voice", "cache", "framework", "rustls_backend"]
