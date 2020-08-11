@@ -26,12 +26,17 @@ Note: This is not a fork of the [official repository](https://github.com/serenit
 
 ### How to use
 
-1: Install openssl (because native_tls_backend requires openssl in serenity)
+1: Install `openssl-dev` (because native_tls_backend requires openssl in serenity)
 - if the library is native and the bot is rustls, it works
 - if the library is rustls and the bot is native, it works
 - if the library and the bot are both native, it works
 - but if the library and  the bot are rustl, it doesn't work
 
+2: Install the version from crates.io:
+```toml
+lavalink-rs = "0.1.1-alpha"
+```
+Or the development release:
 
 ```toml
 lavalink-rs = { git = "https://gitlab.com/nitsuga5124/lavalink-rs/", branch = "master" }
