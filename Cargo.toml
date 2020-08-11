@@ -58,5 +58,4 @@ version = "0.2"
 features = ["full"]
 
 [dev-dependencies.serenity]
-git = "https://github.com/acdenisSK/serenity/"
-branch = "await_next"
+version = "0.9.0-rc.0"
