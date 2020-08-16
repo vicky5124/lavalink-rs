@@ -62,6 +62,11 @@ use async_tungstenite::{
     },
 };
 
+pub const EQ_BASE: [f64; 15] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+pub const EQ_BOOST: [f64; 15] = [-0.075, 0.125, 0.125, 0.1, 0.1, 0.05, 0.075, 0.0, 0.0, 0.0, 0.0, 0.0, 0.125, 0.15, 0.05];
+pub const EQ_METAL: [f64; 15] = [0.0, 0.1, 0.1, 0.15, 0.13, 0.1, 0.0, 0.125, 0.175, 0.175, 0.125, 0.125, 0.1, 0.075, 0.0];
+pub const EQ_PIANO: [f64; 15] = [-0.25, -0.25, -0.125, 0.0, 0.25, 0.25, 0.0, -0.25, -0.25, 0.0, 0.0, 0.5, 0.25, -0.025, 0.0];
+
 pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TokioAdapter<TokioAdapter<TcpStream>>>>>>;
 pub type WebsocketConnection = Arc<Mutex<WsStream>>;
 
@@ -512,6 +517,70 @@ impl LavalinkClient {
         };
 
         crate::model::SendOpcode::Volume(payload).send(guild_id, socket).await?;
+
+        Ok(())
+    }
+
+    /// Sets all equalizer levels.
+    ///
+    /// There are 15 bands (0-14) that can be changed.
+    /// The floating point value is the multiplier for the given band. The default value is 0.
+    /// Valid values range from -0.25 to 1.0, where -0.25 means the given band is completely muted, and 0.25 means it is doubled.
+    /// Modifying the gain could also change the volume of the output.
+    pub async fn equalize_all(&mut self, guild_id: impl Into<GuildId>, bands: [f64; 15]) -> LavalinkResult<()> {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
+            return Err(LavalinkError::NoWebsocket);
+        };
+
+        let bands = bands.iter().enumerate().map(|(index, i)| {
+            crate::model::Band {
+                band: index as u8,
+                gain: *i,
+            }
+        }).collect::<Vec<_>>();
+
+        let payload = crate::model::Equalizer {
+            bands: bands,
+        };
+
+        crate::model::SendOpcode::Equalizer(payload).send(guild_id, socket).await?;
+
+        Ok(())
+    }
+
+    /// Equalizes a specific band.
+    pub async fn equalize_band(&mut self, guild_id: impl Into<GuildId>, band: crate::model::Band) -> LavalinkResult<()> {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
+            return Err(LavalinkError::NoWebsocket);
+        };
+
+        let payload = crate::model::Equalizer {
+            bands: vec![band],
+        };
+
+        crate::model::SendOpcode::Equalizer(payload).send(guild_id, socket).await?;
+
+        Ok(())
+    }
+
+    /// Resets all equalizer levels.
+    pub async fn equalize_reset(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+        let socket = if let Some(x) = &mut self.socket_write { x } else {
+            return Err(LavalinkError::NoWebsocket);
+        };
+
+        let bands = (0..=14).map(|i| {
+            crate::model::Band {
+                band: i as u8,
+                gain: 0.,
+            }
+        }).collect::<Vec<_>>();
+
+        let payload = crate::model::Equalizer {
+            bands: bands,
+        };
+
+        crate::model::SendOpcode::Equalizer(payload).send(guild_id, socket).await?;
 
         Ok(())
     }

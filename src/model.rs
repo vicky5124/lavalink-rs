@@ -46,8 +46,8 @@ fn merge(a: &mut Value, b: Value) {
 pub enum SendOpcode {
     /// Destroy a player from a node.
     Destroy,
-    // /// Equalize a player.
-    // Equalizer,
+    /// Equalize a player.
+    Equalizer(Equalizer),
     /// Pause a player.
     Pause(Pause),
     /// Play a track.
@@ -102,6 +102,19 @@ pub struct Seek {
 #[serde(rename_all = "camelCase")]
 pub struct Pause {
     pub pause: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Equalizer {
+    pub bands: Vec<Band>,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Band {
+    pub band: u8,
+    pub gain: f64,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
@@ -175,6 +188,14 @@ impl SendOpcode {
             Self::Volume(data) => {
                 let mut x = json!({
                     "op" : "volume",
+                    "guildId" : &guild_id.into().0.to_string(),
+                });
+                merge(&mut x, serde_json::to_value(data).unwrap());
+                x
+            },
+            Self::Equalizer(data) => {
+                let mut x = json!({
+                    "op" : "equalizer",
                     "guildId" : &guild_id.into().0.to_string(),
                 });
                 merge(&mut x, serde_json::to_value(data).unwrap());
