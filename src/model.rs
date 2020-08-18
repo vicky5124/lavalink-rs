@@ -140,13 +140,8 @@ impl From<i64> for GuildId {
 
 impl GuildId {
     #[inline]
-    fn as_serenity(&self) -> &SerenityGuildId {
-        &SerenityGuildId(self.0)
-    }
-
-    #[inline]
-    fn as_mut_serenity(&mut self) -> &mut SerenityGuildId {
-        &mut SerenityGuildId(self.0)
+    pub fn to_serenity(&self) -> SerenityGuildId {
+        SerenityGuildId(self.0)
     }
 
     #[inline]
@@ -157,16 +152,6 @@ impl GuildId {
     #[inline]
     pub fn as_mut_u64(&mut self) -> &mut u64 {
         &mut self.0
-    }
-
-    #[inline]
-    pub fn as_i64(&self) -> &i64 {
-        &self.0 as i64
-    }
-
-    #[inline]
-    pub fn as_mut_i64(&mut self) -> &mut i64 {
-        &mut self.0 as i64
     }
 }
 

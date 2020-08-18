@@ -201,7 +201,7 @@ impl PlayParameters {
 
 impl LavalinkClient {
     /// Builds a basic uninitialized LavalinkClient.
-    pub fn new(bot_id: Into<UserId>) -> Self {
+    pub fn new<U: Into<UserId>>(bot_id: U) -> Self {
         let mut client = LavalinkClient::default();
         client.host = "localhost".to_string();
         client.port = 2333;
@@ -233,7 +233,7 @@ impl LavalinkClient {
     }
 
     /// Sets the ID of the bot.
-    pub fn set_bot_id(&mut self, bot_id: Into<UserId>) {
+    pub fn set_bot_id<U: Into<UserId>>(&mut self, bot_id: U) {
         self.bot_id = bot_id.into();
     }
 
