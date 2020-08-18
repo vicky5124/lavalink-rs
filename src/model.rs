@@ -117,7 +117,7 @@ pub struct Band {
     pub gain: f64,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash)]
 pub struct GuildId(pub u64);
 
 impl From<SerenityGuildId> for GuildId {
