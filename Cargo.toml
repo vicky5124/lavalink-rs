@@ -1,8 +1,9 @@
 [package]
 name = "lavalink-rs"
-version = "0.1.2-alpha"
+version = "0.1.3-alpha"
 authors = ["nitsuga5124 <nitsuga5124@gmail.com>"]
 edition = "2018"
+license = "MPL-v2.0"
 license-file = "LICENSE"
 description = "Lavalink bindings for discord bot crates"
 readme = "README.md"
