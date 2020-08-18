@@ -201,13 +201,13 @@ impl PlayParameters {
 
 impl LavalinkClient {
     /// Builds a basic uninitialized LavalinkClient.
-    pub fn new(bot_id: UserId) -> Self {
+    pub fn new(bot_id: Into<UserId>) -> Self {
         let mut client = LavalinkClient::default();
         client.host = "localhost".to_string();
         client.port = 2333;
         client.password = "youshallnotpass".to_string();
         client.shard_count = 1;
-        client.bot_id = bot_id;
+        client.bot_id = bot_id.into();
         client
     }
 
@@ -233,8 +233,8 @@ impl LavalinkClient {
     }
 
     /// Sets the ID of the bot.
-    pub fn set_bot_id(&mut self, bot_id: UserId) {
-        self.bot_id = bot_id;
+    pub fn set_bot_id(&mut self, bot_id: Into<UserId>) {
+        self.bot_id = bot_id.into();
     }
 
     /// Sets if the lavalink server is behind SSL

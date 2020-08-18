@@ -138,6 +138,38 @@ impl From<i64> for GuildId {
     }
 }
 
+impl GuildId {
+    #[inline]
+    fn as_serenity(&self) -> &SerenityGuildId {
+        &SerenityGuildId(self.0)
+    }
+
+    #[inline]
+    fn as_mut_serenity(&mut self) -> &mut SerenityGuildId {
+        &mut SerenityGuildId(self.0)
+    }
+
+    #[inline]
+    pub fn as_u64(&self) -> &u64 {
+        &self.0
+    }
+
+    #[inline]
+    pub fn as_mut_u64(&mut self) -> &mut u64 {
+        &mut self.0
+    }
+
+    #[inline]
+    pub fn as_i64(&self) -> &i64 {
+        &self.0 as i64
+    }
+
+    #[inline]
+    pub fn as_mut_i64(&mut self) -> &mut i64 {
+        &mut self.0 as i64
+    }
+}
+
 impl SendOpcode {
     pub async fn send(&self, guild_id: impl Into<GuildId>, socket: &mut SplitSink<WsStream, TungsteniteMessage>) -> LavalinkResult<()> {
         let value = match self {
