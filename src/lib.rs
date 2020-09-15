@@ -299,6 +299,13 @@ impl LavalinkClient {
                                     },
                                     "playerUpdate" => {
                                         if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(&x) {
+                                            let mut client_lock = client.lock().await;
+                                            if let Some(node) = client_lock.nodes.get_mut(&player_update.guild_id) {
+                                                let mut current_track = node.now_playing.as_mut().unwrap();
+                                                let mut info = current_track.track.info.as_mut().unwrap().clone();
+                                                info.position = player_update.state.position as u64;
+                                                current_track.track.info = Some(info);
+                                            }
                                             handler.player_update(Arc::clone(&client), player_update).await;
                                         }
                                     },
