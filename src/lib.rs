@@ -17,12 +17,7 @@ use std::{
 };
 
 use serenity::{
-    model::{
-        guild::Region,
-        id::{
-            UserId,
-        },
-    },
+    model::guild::Region,
     voice::Handler,
     client::bridge::gateway::ShardId,
 };
@@ -102,6 +97,7 @@ pub struct PlayParameters {
     pub start: u64,
     pub finish: u64,
     pub guild_id: u64,
+    pub requester: Option<UserId>,
 }
 
 impl PlayParameters {
@@ -125,6 +121,7 @@ impl PlayParameters {
             track: self.track,
             start_time: self.start,
             end_time: if self.finish == 0 { None } else { Some(self.finish) },
+            requester: self.requester,
         };
 
         let client_clone = Arc::clone(&client);
@@ -178,6 +175,12 @@ impl PlayParameters {
 
 
         Ok(())
+    }
+
+    /// Sets the person that requested the song
+    pub fn requester(&mut self, requester: impl Into<UserId>) -> &mut Self {
+        self.requester = Some(requester.into());
+        self
     }
 
     /// Sets if the current playing track should be replaced with this new one.

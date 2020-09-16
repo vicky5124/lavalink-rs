@@ -1,7 +1,12 @@
+use std::fmt;
+
 use crate::error::LavalinkError;
 use crate::WsStream;
 
-use serenity::model::id::GuildId as SerenityGuildId;
+use serenity::model::id::{
+    GuildId as SerenityGuildId,
+    UserId as SerenityUserId,
+};
 
 use serde_json::{
     json,
@@ -117,8 +122,11 @@ pub struct Band {
     pub gain: f64,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Serialize, Deserialize)]
 pub struct GuildId(pub u64);
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Serialize, Deserialize)]
+pub struct UserId(pub u64);
 
 impl From<SerenityGuildId> for GuildId {
     fn from(guild_id: SerenityGuildId) -> GuildId {
@@ -138,10 +146,57 @@ impl From<i64> for GuildId {
     }
 }
 
+impl From<SerenityUserId> for UserId {
+    fn from(user_id: SerenityUserId) -> UserId {
+        UserId(user_id.0)
+    }
+}
+
+impl From<u64> for UserId {
+    fn from(user_id: u64) -> UserId {
+        UserId(user_id)
+    }
+}
+
+impl From<i64> for UserId {
+    fn from(user_id: i64) -> UserId {
+        UserId(user_id as u64)
+    }
+}
+
+impl fmt::Display for UserId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)  
+    }
+}
+
+impl fmt::Display for GuildId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl GuildId {
     #[inline]
     pub fn to_serenity(&self) -> SerenityGuildId {
         SerenityGuildId(self.0)
+    }
+
+    #[inline]
+    pub fn as_u64(&self) -> &u64 {
+        &self.0
+    }
+
+    #[inline]
+    pub fn as_mut_u64(&mut self) -> &mut u64 {
+        &mut self.0
+    }
+}
+
+impl UserId {
+    #[inline]
+    pub fn to_serenity(&self) -> SerenityUserId {
+        SerenityUserId(self.0)
     }
 
     #[inline]
@@ -247,6 +302,7 @@ pub struct TrackQueue {
     pub track: Track,
     pub start_time: u64,
     pub end_time: Option<u64>,
+    pub requester: Option<UserId>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
