@@ -1,3 +1,22 @@
+# 0.2.0-alpha
+- (Breaking) added data field to Node.
+- Update now_playing position in player_update
+- Add requester field to TrackQueue
+- Destroy now skips if possible.
+
+# 0.1.4-alpha
+- UserId parameters take Into trait.
+- Added some methods to GuildId.
+
+# 0.1.3-alpha
+- Added has to GuildID
+
+# 0.1.2-alpha
+- added equalization support.
+
+# 0.1.1-alpha
+- Pushed to crates.io
+
 # 0.1.0-alpha
 - Rewrote the library.
 - Added events.
