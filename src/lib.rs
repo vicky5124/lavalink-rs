@@ -38,11 +38,9 @@ use tokio::{
 
 use regex::Regex;
 
-use futures::{
-    stream::{
-        SplitSink,
-        StreamExt,
-    },
+use futures::stream::{
+    SplitSink,
+    StreamExt,
 };
 use async_tungstenite::{
     tungstenite::{
@@ -414,7 +412,7 @@ impl LavalinkClient {
 
         let payload = crate::model::VoiceUpdate {
             session_id: session_id.to_string(),
-            event: event,
+            event,
         };
 
         crate::model::SendOpcode::VoiceUpdate(payload).send(guild_id, socket).await?;
@@ -433,9 +431,19 @@ impl LavalinkClient {
     /// Destroys the current player.
     /// When this is ran, `create_session()` needs to be ran again.
     pub async fn destroy(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+        let guild_id = guild_id.into();
+
         let socket = if let Some(x) = &mut self.socket_write { x } else {
             return Err(LavalinkError::NoWebsocket);
         };
+
+        if let Some(node) = self.nodes.get_mut(&guild_id.0) {
+            node.now_playing = None;
+
+            if !node.queue.is_empty() {
+                node.queue.remove(0);
+            }
+        }
 
         crate::model::SendOpcode::Destroy.send(guild_id, socket).await?;
 
@@ -461,7 +469,12 @@ impl LavalinkClient {
         let node = self.nodes.get_mut(&guild_id.into().0)?;
 
         node.now_playing = None;
-        Some(node.queue.remove(0))
+
+        if node.queue.is_empty() {
+            None
+        } else {
+            Some(node.queue.remove(0))
+        }
     }
 
     /// Sets the pause status.
@@ -471,7 +484,7 @@ impl LavalinkClient {
         };
 
         let payload = crate::model::Pause {
-            pause: pause,
+            pause,
         };
 
         crate::model::SendOpcode::Pause(payload).send(guild_id, socket).await?;
@@ -550,7 +563,7 @@ impl LavalinkClient {
         }).collect::<Vec<_>>();
 
         let payload = crate::model::Equalizer {
-            bands: bands,
+            bands,
         };
 
         crate::model::SendOpcode::Equalizer(payload).send(guild_id, socket).await?;
@@ -587,7 +600,7 @@ impl LavalinkClient {
         }).collect::<Vec<_>>();
 
         let payload = crate::model::Equalizer {
-            bands: bands,
+            bands,
         };
 
         crate::model::SendOpcode::Equalizer(payload).send(guild_id, socket).await?;
