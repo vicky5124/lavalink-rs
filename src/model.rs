@@ -1,7 +1,10 @@
-use std::fmt;
-
 use crate::error::LavalinkError;
 use crate::WsStream;
+
+use std::fmt;
+use std::sync::Arc;
+
+use typemap_rev::TypeMap;
 
 use serenity::model::id::{
     GuildId as SerenityGuildId,
@@ -20,13 +23,10 @@ use serde::{
 
 use futures::{
     sink::SinkExt,
-    stream::{
-        SplitSink,
-    },
+    stream::SplitSink,
 };
-use async_tungstenite::{
-    tungstenite::Message as TungsteniteMessage,
-};
+use async_tungstenite::tungstenite::Message as TungsteniteMessage;
+use tokio::sync::RwLock;
 
 
 pub type LavalinkResult<T> = Result<T, LavalinkError>;
@@ -287,7 +287,7 @@ impl SendOpcode {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone)]
 pub struct Node {
     pub guild: GuildId,
 
@@ -295,6 +295,22 @@ pub struct Node {
     pub is_paused: bool,
     pub volume: u16,
     pub queue: Vec<TrackQueue>,
+    /// Use this to store whatever information you wish that's guild specific, such as invocation
+    /// channel id's, for example.
+    pub data: Arc<RwLock<TypeMap>> ,
+}
+
+impl Default for Node {
+    fn default() -> Self {
+        Node {
+            guild: GuildId(0),
+            now_playing: None,
+            is_paused: false,
+            volume: 100,
+            queue: vec![],
+            data: Arc::new(RwLock::new(TypeMap::new())),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Default)]

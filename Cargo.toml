@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.1.4-alpha"
+version = "0.2.0-alpha"
 authors = ["nitsuga5124 <nitsuga5124@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
@@ -21,6 +21,7 @@ futures = "0.3"
 tracing-log = "0.1"
 tokio-tls = "0.3"
 http = "0.2"
+typemap_rev = "0.1"
 
 [dependencies.tokio]
 version = "0.2"
