@@ -34,7 +34,7 @@ A lavalink binder library for every Asynchronous discord crate.
 
 2: Install the version from crates.io:
 ```toml
-lavalink-rs = "0.1.2-alpha"
+lavalink-rs = "0.2.0-alpha"
 ```
 Or the development release:
 
