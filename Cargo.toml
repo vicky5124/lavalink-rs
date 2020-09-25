@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.2.0-alpha"
+version = "0.2.1-alpha"
 authors = ["nitsuga5124 <nitsuga5124@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
@@ -41,7 +41,7 @@ features = ["tokio-runtime", "tokio-tls"]
 version = "0.4"
 
 [dependencies.serenity]
-version = "0.9.0-rc.0"
+version = "0.9.0-rc.1"
 default-features = false
 features = ["client", "gateway", "model", "voice", "cache", "framework", "native_tls_backend"]
 #features = ["client", "gateway", "model", "voice", "cache", "framework", "rustls_backend"]
@@ -57,4 +57,4 @@ version = "0.2"
 features = ["full"]
 
 [dev-dependencies.serenity]
-version = "0.9.0-rc.0"
+version = "0.9.0-rc.1"

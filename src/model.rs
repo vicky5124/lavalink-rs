@@ -73,6 +73,7 @@ pub struct Play {
     pub track: String,
     pub no_replace: bool,
     pub start_time: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub end_time: Option<u64>,
 }
 
