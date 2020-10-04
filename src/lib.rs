@@ -176,25 +176,25 @@ impl PlayParameters {
     }
 
     /// Sets the person that requested the song
-    pub fn requester(&mut self, requester: impl Into<UserId>) -> &mut Self {
+    pub fn requester(mut self, requester: impl Into<UserId>) -> Self {
         self.requester = Some(requester.into());
         self
     }
 
     /// Sets if the current playing track should be replaced with this new one.
-    pub fn replace(&mut self, replace: bool) -> &mut Self {
+    pub fn replace(mut self, replace: bool) -> Self {
         self.replace = replace;
         self
     }
 
     /// Sets the time the track will start at.
-    pub fn start_time(&mut self, start: Duration) -> &mut Self {
+    pub fn start_time(mut self, start: Duration) -> Self {
         self.start = start.as_millis() as u64;
         self
     }
 
     /// Sets the time the track will finish at.
-    pub fn finish_time(&mut self, finish: Duration) -> &mut Self {
+    pub fn finish_time(mut self, finish: Duration) -> Self {
         self.finish = finish.as_millis() as u64;
         self
     }
