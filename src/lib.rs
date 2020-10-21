@@ -287,60 +287,62 @@ impl LavalinkClient {
         let client_clone = Arc::clone(&client);
 
         tokio::spawn(async move {
-            while let Some(resp) = read.next().await {
-                if let Ok(resp) = resp {
-                    match &resp {
-                        TungsteniteMessage::Text(x) => {
-                            if let Ok(base_event) = serde_json::from_str::<GatewayEvent>(&x) {
-                                match base_event.op.as_str() {
-                                    "stats" => {
-                                        if let Ok(stats) = serde_json::from_str::<Stats>(&x) {
-                                            handler.stats(Arc::clone(&client), stats).await;
-                                        }
-                                    },
-                                    "playerUpdate" => {
-                                        if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(&x) {
+            while let Some(Ok(resp)) = read.next().await {
+                match &resp {
+                    TungsteniteMessage::Text(x) => {
+                        if let Ok(base_event) = serde_json::from_str::<GatewayEvent>(&x) {
+                            match base_event.op.as_str() {
+                                "stats" => {
+                                    if let Ok(stats) = serde_json::from_str::<Stats>(&x) {
+                                        handler.stats(Arc::clone(&client), stats).await;
+                                    }
+                                },
+                                "playerUpdate" => {
+                                    if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(&x) {
+                                        {
                                             let mut client_lock = client.lock().await;
+
                                             if let Some(node) = client_lock.nodes.get_mut(&player_update.guild_id) {
-                                                let mut current_track = node.now_playing.as_mut().unwrap();
-                                                let mut info = current_track.track.info.as_mut().unwrap().clone();
-                                                info.position = player_update.state.position as u64;
-                                                current_track.track.info = Some(info);
+                                                if let Some(mut current_track) = node.now_playing.as_mut() {
+                                                    let mut info = current_track.track.info.as_mut().unwrap().clone();
+                                                    info.position = player_update.state.position as u64;
+                                                    current_track.track.info = Some(info);
+                                                }
                                             }
-                                            handler.player_update(Arc::clone(&client), player_update).await;
                                         }
-                                    },
-                                    "event" => {
-                                        match base_event.event_type.unwrap().as_str() {
-                                            "TrackStartEvent" => {
-                                                if let Ok(track_start) = serde_json::from_str::<TrackStart>(&x) {
-                                                    handler.track_start(Arc::clone(&client), track_start).await;
-                                                }
-                                            },
-                                            "TrackEndEvent" => {
-                                                let client_clone = Arc::clone(&client);
-                                                if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(&x) {
-                                                    if track_finish.reason == "FINISHED" {
-                                                        let mut client = client_clone.lock().await;
+                                        handler.player_update(Arc::clone(&client), player_update).await;
+                                    }
+                                },
+                                "event" => {
+                                    match base_event.event_type.unwrap().as_str() {
+                                        "TrackStartEvent" => {
+                                            if let Ok(track_start) = serde_json::from_str::<TrackStart>(&x) {
+                                                handler.track_start(Arc::clone(&client), track_start).await;
+                                            }
+                                        },
+                                        "TrackEndEvent" => {
+                                            let client_clone = Arc::clone(&client);
+                                            if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(&x) {
+                                                if track_finish.reason == "FINISHED" {
+                                                    let mut client = client_clone.lock().await;
 
-                                                        if let Some(node) = client.nodes.get_mut(&track_finish.guild_id) {
-                                                            node.queue.remove(0);
-                                                            node.now_playing = None;
-                                                        }
+                                                    if let Some(node) = client.nodes.get_mut(&track_finish.guild_id) {
+                                                        node.queue.remove(0);
+                                                        node.now_playing = None;
                                                     }
-
-                                                    handler.track_finish(client_clone, track_finish).await;
                                                 }
-                                            },
-                                            _ => (),
-                                        }
-                                    },
-                                    _ => (),
-                                }
+
+                                                handler.track_finish(client_clone, track_finish).await;
+                                            }
+                                        },
+                                        _ => (),
+                                    }
+                                },
+                                _ => (),
                             }
-                        },
-                        _ => (),
-                    }
+                        }
+                    },
+                    _ => (),
                 }
             }
         });
