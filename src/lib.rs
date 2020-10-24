@@ -139,27 +139,29 @@ impl PlayParameters {
             tokio::spawn(async move {
                 loop {
                     let mut client = client_clone.lock().await;
-                    let node = client.nodes.get_mut(&guild_id).unwrap();
+                    if let Some(node) = client.nodes.get_mut(&guild_id) {
+                        if !node.queue.is_empty() && node.now_playing.is_none() {
+                            let track = node.queue[0].clone();
 
-                    if !node.queue.is_empty() && node.now_playing.is_none() {
-                        let track = node.queue[0].clone();
+                            node.now_playing = Some(node.queue[0].clone());
 
-                        node.now_playing = Some(node.queue[0].clone());
+                            let payload = crate::model::Play {
+                                track: track.track.track.clone(), // track
+                                no_replace: false,
+                                start_time: track.start_time,
+                                end_time: track.end_time,
+                            };
 
-                        let payload = crate::model::Play {
-                            track: track.track.track.clone(), // track
-                            no_replace: false,
-                            start_time: track.start_time,
-                            end_time: track.end_time,
-                        };
-
-                        if let Some(ref mut socket) = &mut client.socket_write {
-                            if let Err(why) = crate::model::SendOpcode::Play(payload).send(guild_id, socket).await {
-                                eprintln!("Error playing queue on guild {} -> {}", guild_id, why);
+                            if let Some(ref mut socket) = &mut client.socket_write {
+                                if let Err(why) = crate::model::SendOpcode::Play(payload).send(guild_id, socket).await {
+                                    eprintln!("Error playing queue on guild {} -> {}", guild_id, why);
+                                }
+                            } else {
+                                eprintln!("Error playing queue on guild {} -> No Socket Found", guild_id);
                             }
-                        } else {
-                            eprintln!("Error playing queue on guild {} -> No Socket Found", guild_id);
                         }
+                    } else {
+                        break
                     }
 
                     drop(client);
