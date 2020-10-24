@@ -41,7 +41,7 @@ features = ["tokio-runtime", "tokio-tls"]
 version = "0.4"
 
 [dependencies.serenity]
-version = "0.9.0-rc.2"
+version = "=0.9.0-rc.2"
 default-features = false
 features = ["client", "gateway", "model", "voice", "cache", "framework", "native_tls_backend"]
 #features = ["client", "gateway", "model", "voice", "cache", "framework", "rustls_backend"]
@@ -57,4 +57,4 @@ version = "0.2"
 features = ["full"]
 
 [dev-dependencies.serenity]
-version = "0.9.0-rc.1"
+version = "=0.9.0-rc.2"
