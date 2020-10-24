@@ -34,7 +34,7 @@ A lavalink binder library for every Asynchronous discord crate.
 
 2: Install the version from crates.io:
 ```toml
-lavalink-rs = "0.2.0-alpha"
+lavalink-rs = "0.3.0-alpha"
 ```
 Or the development release:
 
@@ -44,4 +44,11 @@ lavalink-rs = { git = "https://gitlab.com/nitsuga5124/lavalink-rs/", branch = "m
 [dependencies.lavalink-rs]
 git = "https://gitlab.com/nitsuga5124/lavalink-rs/"
 branch = "master"
+```
+
+If you wish to use a development version of serenity, add the following to the Cargo.toml:
+```toml
+[patch.crates-io.serenity]
+git = "https://github.com/serenity-rs/serenity"
+branch = "next"
 ```
