@@ -41,10 +41,21 @@ features = ["tokio-runtime", "tokio-tls"]
 version = "0.4"
 
 [dependencies.serenity]
-version = "0.9.0-rc.4"
+git = "https://github.com/serenity-rs/serenity/"
+rev = "0b46b476cc84deae38bbfacb8c7d3d8070f93ccf"
+#branch = "next"
+#version = "0.9.0-rc.4"
 default-features = false
-features = ["client", "gateway", "model", "voice", "cache", "framework", "native_tls_backend"]
+features=["model", "native_tls_backend"]
+#features = ["client", "gateway", "model", "voice", "cache", "framework", "native_tls_backend"]
 #features = ["client", "gateway", "model", "voice", "cache", "framework", "rustls_backend"]
+
+[dependencies.songbird]
+git = "https://github.com/serenity-rs/serenity/"
+rev = "0b46b476cc84deae38bbfacb8c7d3d8070f93ccf"
+#branch = "next"
+default-features = false
+features = ["serenity-native", "gateway"]
 
 [[example]]
 name = "basic_play"
@@ -57,4 +68,16 @@ version = "0.2"
 features = ["full"]
 
 [dev-dependencies.serenity]
-version = "0.9.0-rc.4"
+git = "https://github.com/serenity-rs/serenity/"
+rev = "0b46b476cc84deae38bbfacb8c7d3d8070f93ccf"
+#branch = "next"
+#version = "0.9.0-rc.4"
+default-features = false
+features = ["client", "cache", "standard_framework", "voice", "default_native_tls"]
+
+[dev-dependencies.songbird]
+git = "https://github.com/serenity-rs/serenity/"
+rev = "0b46b476cc84deae38bbfacb8c7d3d8070f93ccf"
+#branch = "next"
+default-features = false
+features = ["serenity-native", "gateway"]
