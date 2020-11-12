@@ -42,8 +42,8 @@ version = "0.4"
 
 [dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity/"
-rev = "fd6f08b7ca8239cd4c17865b023cb06867c1ff98"
-#branch = "next"
+#rev = "fd6f08b7ca8239cd4c17865b023cb06867c1ff98"
+branch = "next"
 #version = "0.9.0-rc.4"
 default-features = false
 features=["model", "native_tls_backend"]
@@ -52,8 +52,8 @@ features=["model", "native_tls_backend"]
 
 [dependencies.songbird]
 git = "https://github.com/serenity-rs/serenity/"
-rev = "fd6f08b7ca8239cd4c17865b023cb06867c1ff98"
-#branch = "next"
+#rev = "fd6f08b7ca8239cd4c17865b023cb06867c1ff98"
+branch = "next"
 default-features = false
 features = ["serenity-native", "gateway"]
 
@@ -69,15 +69,15 @@ features = ["full"]
 
 [dev-dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity/"
-rev = "fd6f08b7ca8239cd4c17865b023cb06867c1ff98"
-#branch = "next"
+#rev = "fd6f08b7ca8239cd4c17865b023cb06867c1ff98"
+branch = "next"
 #version = "0.9.0-rc.4"
 default-features = false
 features = ["client", "cache", "standard_framework", "voice", "default_native_tls"]
 
 [dev-dependencies.songbird]
 git = "https://github.com/serenity-rs/serenity/"
-rev = "fd6f08b7ca8239cd4c17865b023cb06867c1ff98"
-#branch = "next"
+#rev = "fd6f08b7ca8239cd4c17865b023cb06867c1ff98"
+branch = "next"
 default-features = false
 features = ["serenity-native", "gateway"]
