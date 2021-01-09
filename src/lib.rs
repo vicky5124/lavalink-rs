@@ -27,7 +27,7 @@ use reqwest::{
     Error as ReqwestError,
 };
 
-use tokio_tls::TlsStream;
+use tokio_native_tls::TlsStream;
 use tokio::{
     sync::Mutex,
     net::TcpStream,
@@ -57,7 +57,7 @@ pub const EQ_BOOST: [f64; 15] = [-0.075, 0.125, 0.125, 0.1, 0.1, 0.05, 0.075, 0.
 pub const EQ_METAL: [f64; 15] = [0.0, 0.1, 0.1, 0.15, 0.13, 0.1, 0.0, 0.125, 0.175, 0.175, 0.125, 0.125, 0.1, 0.075, 0.0];
 pub const EQ_PIANO: [f64; 15] = [-0.25, -0.25, -0.125, 0.0, 0.25, 0.25, 0.0, -0.25, -0.25, 0.0, 0.0, 0.5, 0.25, -0.025, 0.0];
 
-pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TokioAdapter<TokioAdapter<TcpStream>>>>>>;
+pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
 pub type WebsocketConnection = Arc<Mutex<WsStream>>;
 
 #[derive(Default)]
@@ -70,6 +70,7 @@ pub struct LavalinkClient {
     pub is_ssl: bool,
 
     pub headers: Option<HeaderMap>,
+    //pub socket_write: Option<SplitSink<WsStream, TungsteniteMessage>>,
     pub socket_write: Option<SplitSink<WsStream, TungsteniteMessage>>,
     //pub socket_read: Option<SplitStream<WsStream>>,
 
@@ -162,7 +163,7 @@ impl PlayParameters {
                     }
 
                     drop(client);
-                    tokio::time::delay_for(Duration::from_secs(1)).await;
+                    tokio::time::sleep(Duration::from_secs(1)).await;
                 }
             });
         } else {

@@ -147,7 +147,7 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
         Ok(connection_info) => {
             let mut data = ctx.data.write().await;
             let lava_client_lock = data.get_mut::<Lavalink>().expect("Expected a lavalink client in TypeMap");
-            lava_client_lock.lock().await.create_session(guild_id, &connection_info.recv_async().await?).await?;
+            lava_client_lock.lock().await.create_session(guild_id, &connection_info).await?;
 
             check_msg(msg.channel_id.say(&ctx.http, &format!("Joined {}", connect_to.mention())).await);
         }
