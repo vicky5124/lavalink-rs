@@ -20,6 +20,3 @@ build:
     paths:
       - target/
       - cargo/
-  only:
-  - master
-
