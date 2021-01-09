@@ -1,11 +1,14 @@
 # Lavalink-rs
+
 A lavalink binder library for every Asynchronous discord crate.
 
-### Links to download stuff you will need
+## Links to download stuff you will need
+
 - [Lavalink repository](https://github.com/Frederikam/Lavalink)
 - [Java download](https://jdk.java.net/archive/) (11 or newer, 13 Recommended, 14+ Don't work)
 
-### TODO
+## TODO
+
 - [ ] Support multiple connections per region.
 - [X] Support nodes.
 - [X] Support pause, resume, skip to time.
@@ -24,18 +27,21 @@ A lavalink binder library for every Asynchronous discord crate.
 - [ ] Add tracing and logging.
 - [?] Add documentation.
 
-### How to use
+## How to use
 
-1: Install `openssl-dev` or `libssl-dev` (because native_tls_backend requires openssl in serenity)
+1: Install `openssl-dev` or `libssl-dev` (because native_tls requires openssl)
+
 - if the library is native and the bot is rustls, it works
 - if the library is rustls and the bot is native, it works
 - if the library and the bot are both native, it works
 - but if the library and  the bot are rustl, it doesn't work
 
 2: Install the version from crates.io:
+
 ```toml
-lavalink-rs = "0.3.0-alpha"
+lavalink-rs = "0.4.0-alpha"
 ```
+
 Or the development release:
 
 ```toml
@@ -47,6 +53,7 @@ branch = "master"
 ```
 
 If you wish to use a development version of serenity, add the following to the Cargo.toml:
+
 ```toml
 [patch.crates-io.serenity]
 git = "https://github.com/serenity-rs/serenity"
