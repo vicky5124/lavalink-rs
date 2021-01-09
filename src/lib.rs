@@ -16,11 +16,8 @@ use std::{
     },
 };
 
-use serenity::{
-    model::guild::Region,
-    voice::Handler,
-    client::bridge::gateway::ShardId,
-};
+use serenity::model::guild::Region;
+use songbird::ConnectionInfo;
 
 use http::Request;
 use reqwest::{
@@ -30,7 +27,7 @@ use reqwest::{
     Error as ReqwestError,
 };
 
-use tokio_tls::TlsStream;
+use tokio_native_tls::TlsStream;
 use tokio::{
     sync::Mutex,
     net::TcpStream,
@@ -60,7 +57,7 @@ pub const EQ_BOOST: [f64; 15] = [-0.075, 0.125, 0.125, 0.1, 0.1, 0.05, 0.075, 0.
 pub const EQ_METAL: [f64; 15] = [0.0, 0.1, 0.1, 0.15, 0.13, 0.1, 0.0, 0.125, 0.175, 0.175, 0.125, 0.125, 0.1, 0.075, 0.0];
 pub const EQ_PIANO: [f64; 15] = [-0.25, -0.25, -0.125, 0.0, 0.25, 0.25, 0.0, -0.25, -0.25, 0.0, 0.0, 0.5, 0.25, -0.025, 0.0];
 
-pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TokioAdapter<TokioAdapter<TcpStream>>>>>>;
+pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
 pub type WebsocketConnection = Arc<Mutex<WsStream>>;
 
 #[derive(Default)]
@@ -73,6 +70,7 @@ pub struct LavalinkClient {
     pub is_ssl: bool,
 
     pub headers: Option<HeaderMap>,
+    //pub socket_write: Option<SplitSink<WsStream, TungsteniteMessage>>,
     pub socket_write: Option<SplitSink<WsStream, TungsteniteMessage>>,
     //pub socket_read: Option<SplitStream<WsStream>>,
 
@@ -82,7 +80,7 @@ pub struct LavalinkClient {
     // Unused
     _region: Option<Region>,
     _identifier: Option<String>,
-    _shard_id: Option<ShardId>,
+    //_shard_id: Option<ShardId>,
 
     pub nodes: HashMap<u64, Node>,
     pub loops: Vec<u64>,
@@ -165,7 +163,7 @@ impl PlayParameters {
                     }
 
                     drop(client);
-                    tokio::time::delay_for(Duration::from_secs(1)).await;
+                    tokio::time::sleep(Duration::from_secs(1)).await;
                 }
             });
         } else {
@@ -388,24 +386,29 @@ impl LavalinkClient {
     }
 
     /// Creates a lavalink session on the specified guild.
-    pub async fn create_session(&mut self, guild_id: impl Into<GuildId>, handler: &Handler) -> LavalinkResult<()> {
+    pub async fn create_session(&mut self, guild_id: impl Into<GuildId>, connection_info: &ConnectionInfo) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
 
         let socket = if let Some(x) = &mut self.socket_write { x } else {
             return Err(LavalinkError::NoWebsocket);
         };
+
         let guild_id_str = guild_id.0.to_string();
 
-        let token = if let Some(x) = handler.token.as_ref() { x } else {
-            return Err(LavalinkError::MissingHandlerToken);
-        };
-        let endpoint = if let Some(x) = handler.endpoint.as_ref() { x } else {
-            return Err(LavalinkError::MissingHandlerEndpoint);
-        };
+        let token = &connection_info.token;
+        if token.is_empty() {
+            return Err(LavalinkError::MissingHandlerToken)
+        }
 
-        let session_id = if let Some(x) = handler.session_id.as_ref() { x } else {
-            return Err(LavalinkError::MissingHandlerSessionId);
-        };
+        let endpoint = &connection_info.endpoint;
+        if endpoint.is_empty() {
+            return Err(LavalinkError::MissingHandlerEndpoint)
+        }
+
+        let session_id = &connection_info.session_id;
+        if session_id.is_empty() {
+            return Err(LavalinkError::MissingHandlerSessionId)
+        }
 
         
         let event = crate::model::Event {

@@ -16,15 +16,15 @@ categories = ["multimedia"]
 [dependencies]
 regex = "1.3"
 serde_json = "1.0"
-serde-aux = "0.6"
+serde-aux = "2"
 futures = "0.3"
 tracing-log = "0.1"
-tokio-tls = "0.3"
+tokio-native-tls = "0.3"
 http = "0.2"
 typemap_rev = "0.1"
 
 [dependencies.tokio]
-version = "0.2"
+version = "1"
 features = ["full"]
 
 [dependencies.serde]
@@ -32,19 +32,23 @@ version = "1.0"
 features = ["derive"]
 
 [dependencies.reqwest]
-version = "0.10"
+version = "0.11"
 features = ["json"]
 
 [dependencies.async-tungstenite]
 default-features = false
-features = ["tokio-runtime", "tokio-tls"]
-version = "0.4"
+features = ["tokio-runtime", "tokio-native-tls"]
+version = "0.11"
 
 [dependencies.serenity]
-version = "0.9.0-rc.4"
+version = "0.10"
 default-features = false
-features = ["client", "gateway", "model", "voice", "cache", "framework", "native_tls_backend"]
-#features = ["client", "gateway", "model", "voice", "cache", "framework", "rustls_backend"]
+features=["model", "native_tls_backend"]
+
+[dependencies.songbird]
+version = "0.1"
+default-features = false
+features = ["serenity-native", "gateway"]
 
 [[example]]
 name = "basic_play"
@@ -53,8 +57,15 @@ name = "basic_play"
 name = "basic_queue"
 
 [dev-dependencies.tokio]
-version = "0.2"
+version = "1"
 features = ["full"]
 
 [dev-dependencies.serenity]
-version = "0.9.0-rc.4"
+version = "0.10"
+default-features = false
+features = ["client", "cache", "standard_framework", "voice", "default_native_tls"]
+
+[dev-dependencies.songbird]
+version = "0.1"
+default-features = false
+features = ["serenity-native", "gateway"]
