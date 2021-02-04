@@ -16,10 +16,18 @@ use std::{
     },
 };
 
+#[cfg(feature = "tokio-02-marker")]
+use reqwest_compat as reqwest;
+#[cfg(feature = "tokio-02-marker")]
+use tokio_compat as tokio;
+#[cfg(feature = "tokio-02-marker")]
+use async_tungstenite_compat as async_tungstenite;
+
 use serenity::model::guild::Region;
 use songbird::ConnectionInfo;
 
 use http::Request;
+
 use reqwest::{
     Client as ReqwestClient,
     header::*,
@@ -27,7 +35,25 @@ use reqwest::{
     Error as ReqwestError,
 };
 
+#[cfg(all(feature = "native-marker", not(feature = "tokio-02-marker")))]
 use tokio_native_tls::TlsStream;
+
+#[cfg(all(feature = "rustls-marker", not(feature = "tokio-02-marker")))]
+use tokio_rustls::client::TlsStream;
+
+#[cfg(all(feature = "native-marker", feature = "tokio-02-marker"))]
+use tokio_native_tls_compat::TlsStream;
+
+#[cfg(all(feature = "rustls-marker", feature = "tokio-02-marker"))]
+use tokio_rustls_compat::client::TlsStream;
+
+
+#[cfg(feature = "tokio-02-marker")]
+use tokio::time::delay_for as sleep;
+
+#[cfg(not(feature = "tokio-02-marker"))]
+use tokio::time::sleep;
+
 use tokio::{
     sync::Mutex,
     net::TcpStream,
@@ -39,6 +65,8 @@ use futures::stream::{
     SplitSink,
     StreamExt,
 };
+
+
 use async_tungstenite::{
     tungstenite::{
         error::Error as TungsteniteError,
@@ -57,7 +85,11 @@ pub const EQ_BOOST: [f64; 15] = [-0.075, 0.125, 0.125, 0.1, 0.1, 0.05, 0.075, 0.
 pub const EQ_METAL: [f64; 15] = [0.0, 0.1, 0.1, 0.15, 0.13, 0.1, 0.0, 0.125, 0.175, 0.175, 0.125, 0.125, 0.1, 0.075, 0.0];
 pub const EQ_PIANO: [f64; 15] = [-0.25, -0.25, -0.125, 0.0, 0.25, 0.25, 0.0, -0.25, -0.25, 0.0, 0.0, 0.5, 0.25, -0.025, 0.0];
 
+#[cfg(not(feature = "tokio-02-marker"))]
 pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
+#[cfg(feature = "tokio-02-marker")]
+pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
+
 pub type WebsocketConnection = Arc<Mutex<WsStream>>;
 
 #[derive(Default)]
@@ -70,7 +102,6 @@ pub struct LavalinkClient {
     pub is_ssl: bool,
 
     pub headers: Option<HeaderMap>,
-    //pub socket_write: Option<SplitSink<WsStream, TungsteniteMessage>>,
     pub socket_write: Option<SplitSink<WsStream, TungsteniteMessage>>,
     //pub socket_read: Option<SplitStream<WsStream>>,
 
@@ -163,7 +194,7 @@ impl PlayParameters {
                     }
 
                     drop(client);
-                    tokio::time::sleep(Duration::from_secs(1)).await;
+                    sleep(Duration::from_secs(1)).await;
                 }
             });
         } else {

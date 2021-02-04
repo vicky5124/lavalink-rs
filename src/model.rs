@@ -25,6 +25,13 @@ use futures::{
     sink::SinkExt,
     stream::SplitSink,
 };
+
+#[cfg(feature = "tokio-02-marker")]
+use tokio_compat as tokio;
+
+#[cfg(feature = "tokio-02-marker")]
+use async_tungstenite_compat as async_tungstenite;
+
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
 use tokio::sync::RwLock;
 

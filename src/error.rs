@@ -6,6 +6,9 @@ use std::{
         Result,
     },
 };
+
+#[cfg(feature = "tokio-02-marker")]
+use async_tungstenite_compat as async_tungstenite;
 use async_tungstenite::tungstenite::error::Error as TungsteniteError;
 
 #[derive(Debug)]

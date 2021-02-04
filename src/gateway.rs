@@ -4,6 +4,10 @@ use crate::model::*;
 use std::sync::Arc;
 
 use serenity::async_trait;
+
+#[cfg(feature = "tokio-02-marker")]
+use tokio_compat as tokio;
+
 use tokio::sync::Mutex;
 
 #[async_trait]

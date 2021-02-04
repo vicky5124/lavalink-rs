@@ -1,21 +1,23 @@
 # Lavalink-rs
 
-A lavalink binder library for every Asynchronous discord crate.
+A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate.
 
 ## Links to download stuff you will need
 
 - [Lavalink repository](https://github.com/Frederikam/Lavalink)
-- [Java download](https://jdk.java.net/archive/) (11 or newer, 13 Recommended, 14+ Don't work)
+- [Andesite Repository](https://github.com/natanbc/andesite)
+- [Java download](https://adoptopenjdk.net/) (11 or newer, 15 recommended, OpenJ9 works)
 
 ## TODO
 
 - [ ] Support multiple connections per region.
 - [X] Support nodes.
+- [ ] Support actual nodes.
+- [ ] Support identifiers.
 - [X] Support pause, resume, skip to time.
 - [X] Support starting at specific times and configurable replace current stream.
 - [X] Support equalization.
-- [ ] Support identifiers.
-- [ ] Support both rustls and native_tls backends as features.
+- [X] Support both rustls and native_tls backends as features.
 - [ ] Support twilight.
 - [X] Support events.
 - [ ] Support raw events.
@@ -25,21 +27,18 @@ A lavalink binder library for every Asynchronous discord crate.
 - [X] Remove all the clones from examples.
 - [X] Improve error handling.
 - [ ] Add tracing and logging.
-- [?] Add documentation.
+- [ ] Add documentation.
 
 ## How to use
 
-1: Install `openssl-dev` or `libssl-dev` (because native_tls requires openssl)
-
-- if the library is native and the bot is rustls, it works
-- if the library is rustls and the bot is native, it works
-- if the library and the bot are both native, it works
-- but if the library and  the bot are rustl, it doesn't work
-
-2: Install the version from crates.io:
+Install the version from crates.io:
 
 ```toml
-lavalink-rs = "0.4.0-alpha"
+lavalink-rs = { version = "0.5", features = ["rustls"] }
+# or
+[dependencies.lavalink-rs]
+version = "0.5"
+features = ["rustls"]
 ```
 
 Or the development release:
@@ -59,3 +58,13 @@ If you wish to use a development version of serenity, add the following to the C
 git = "https://github.com/serenity-rs/serenity"
 branch = "next"
 ```
+
+### Features
+
+No default features are set, so you will need to specify them yourself.
+These are the available ones:
+
+- `rustls`: Use the rustls TLS backend.
+- `native`: Uses the system native TLS backend (OpenSSL on linux).
+- `rustls-tokio-02`: rustls, but uses tokio 0.2 instead of 1.x
+- `native-tokio-02`: native, but uses tokio 0.2 instead of 1.x
