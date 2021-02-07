@@ -1,6 +1,5 @@
 stages:
   - build
-  #- check
 
 variables:
   CARGO_HOME: $CI_PROJECT_DIR/cargo
@@ -13,8 +12,8 @@ build:
     - rustc --version
   stage: build
   script:
-    - cargo build --example basic_play
-    - cargo build --example basic_queue
+    - cargo build --example basic_play --features rustls
+    - cargo build --example basic_queue --features rustls
   cache:
     untracked: true
     paths:
