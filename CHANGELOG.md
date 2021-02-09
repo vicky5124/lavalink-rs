@@ -1,6 +1,23 @@
 # Changelog
 
+## 0.5.2
+
+- Properly handle no features
+- Fixed docs.rs build
+
+## 0.5.1
+
+- Fixed reqwest tls features
+- Added missing features warning
+
+## 0.5.0
+
+- First non-alpha release
+- Added support for native-tls and rustls as features
+- Added support for tokio 0.2 as features
+
 ## 0.4.0-alpha
+
 - Switched to Songbird
 - Updated to tokio 1.0
 - Updated to serenity 0.10
