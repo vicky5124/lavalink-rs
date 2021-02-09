@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.5.1"
+version = "0.5.2"
 authors = ["nitsuga5124 <nitsuga5124@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
@@ -10,6 +10,7 @@ homepage = "https://gitlab.com/nitsuga5124/lavalink-rs/"
 repository =  "https://gitlab.com/nitsuga5124/lavalink-rs/"
 keywords = ["lavalink", "discord", "serenity", "async"]
 categories = ["multimedia"]
+documentation = "https://docs.rs/lavalink-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -73,6 +74,9 @@ native-tokio-02 = [
     "native-marker",
     "tokio-02-marker"
 ]
+
+[package.metadata.docs.rs]
+features = ["rustls"]
 
 [dependencies]
 regex = "1.3"
