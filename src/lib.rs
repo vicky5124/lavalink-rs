@@ -80,17 +80,11 @@ use async_tungstenite::{
     },
 };
 
-#[cfg(all(not(feature = "rustls-marker"), not(feature = "native-marker")))]
-compile_error!("Please specify a feature, either `rustls` or `native`");
-
 pub const EQ_BASE: [f64; 15] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 pub const EQ_BOOST: [f64; 15] = [-0.075, 0.125, 0.125, 0.1, 0.1, 0.05, 0.075, 0.0, 0.0, 0.0, 0.0, 0.0, 0.125, 0.15, 0.05];
 pub const EQ_METAL: [f64; 15] = [0.0, 0.1, 0.1, 0.15, 0.13, 0.1, 0.0, 0.125, 0.175, 0.175, 0.125, 0.125, 0.1, 0.075, 0.0];
 pub const EQ_PIANO: [f64; 15] = [-0.25, -0.25, -0.125, 0.0, 0.25, 0.25, 0.0, -0.25, -0.25, 0.0, 0.0, 0.5, 0.25, -0.025, 0.0];
 
-#[cfg(not(feature = "tokio-02-marker"))]
-pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
-#[cfg(feature = "tokio-02-marker")]
 pub type WsStream = WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
 
 pub type WebsocketConnection = Arc<Mutex<WsStream>>;
