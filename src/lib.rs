@@ -7,6 +7,7 @@ use gateway::*;
 use error::LavalinkError;
 
 use std::{
+    net::SocketAddr,
     sync::Arc,
     time::Duration,
     collections::HashMap,
@@ -252,6 +253,13 @@ impl LavalinkClient {
     /// DEFAULT: `2333`
     pub fn set_port(&mut self, port: u16) {
         self.port = port;
+    }
+
+    /// Sets the address.
+    /// This calls `set_host` and `set_port` under the hood.
+    pub fn set_addr(&mut self, addr: SocketAddr) {
+        self.set_host(addr.ip());
+        self.set_port(addr.port());
     }
 
     /// Sets the number of shards.
