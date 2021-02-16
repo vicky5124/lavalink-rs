@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.3
+
+- Added basic andesite feature to fix the different playlist information sent by it
+
 ## 0.5.2
 
 - Properly handle no features
