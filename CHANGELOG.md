@@ -2,7 +2,7 @@
 
 ## 0.5.4
 
-- Added LavalinkClient.set_addr() - @Sui #8
+- Added LavalinkClient.set_addr() - @suisei #8
 - Fixed deserialization error causing a bad result on track loading.
 
 ## 0.5.3
