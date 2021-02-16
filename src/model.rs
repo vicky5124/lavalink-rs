@@ -337,9 +337,12 @@ pub struct Tracks {
     #[cfg(not(feature = "andesite"))]
     pub playlist_info: PlaylistInfo,
 
+    /// This field will be an Enum in the future, but for now only `LOAD_FAILED` and `TRACK_LOADED`
+    /// are known if you need to handle them.
     #[serde(rename = "loadType")]
     pub load_type: String,
 
+    #[serde(default = "Vec::new")]
     pub tracks: Vec<Track>,
 }
 
