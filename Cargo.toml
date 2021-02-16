@@ -20,6 +20,7 @@ default = []
 rustls-marker = []
 native-marker = []
 tokio-02-marker = []
+andesite = []
 
 rustls = [
     "async-tungstenite/tokio-rustls",

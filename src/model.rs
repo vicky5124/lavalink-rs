@@ -332,6 +332,9 @@ pub struct TrackQueue {
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Tracks {
     #[serde(rename = "playlistInfo")]
+    #[cfg(feature = "andesite")]
+    pub playlist_info: Option<PlaylistInfo>,
+    #[cfg(not(feature = "andesite"))]
     pub playlist_info: PlaylistInfo,
 
     #[serde(rename = "loadType")]
