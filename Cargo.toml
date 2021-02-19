@@ -137,7 +137,7 @@ features = ["json"]
 optional = true
 
 [dependencies.async-tungstenite]
-version = "0.12"
+version = "0.13"
 default-features = false
 features = ["tokio-runtime"]
 optional = true
