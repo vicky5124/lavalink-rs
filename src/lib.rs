@@ -257,7 +257,8 @@ impl LavalinkClient {
 
     /// Sets the address.
     /// This calls `set_host` and `set_port` under the hood.
-    pub fn set_addr(&mut self, addr: SocketAddr) {
+    pub fn set_addr(&mut self, addr: impl Into<SocketAddr>) {
+        let addr = addr.into();
         self.set_host(addr.ip());
         self.set_port(addr.port());
     }

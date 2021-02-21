@@ -13,6 +13,8 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 - [ ] Support multiple connections per region.
 - [X] Support nodes.
 - [ ] Support actual nodes.
+- [ ] Switch to internal lock handles.
+- [ ] Support all andesite features.
 - [ ] Support identifiers.
 - [X] Support pause, resume, skip to time.
 - [X] Support starting at specific times and configurable replace current stream.
