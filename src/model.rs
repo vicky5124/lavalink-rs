@@ -6,25 +6,13 @@ use std::sync::Arc;
 
 use typemap_rev::TypeMap;
 
-use serenity::model::id::{
-    GuildId as SerenityGuildId,
-    UserId as SerenityUserId,
-};
+use serenity::model::id::{GuildId as SerenityGuildId, UserId as SerenityUserId};
 
-use serde_json::{
-    json,
-    Value,
-};
+use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
-use serde::{
-    Deserialize,
-    Serialize
-};
+use serde_json::{json, Value};
 
-use futures::{
-    sink::SinkExt,
-    stream::SplitSink,
-};
+use futures::{sink::SinkExt, stream::SplitSink};
 
 #[cfg(feature = "tokio-02-marker")]
 use tokio_compat as tokio;
@@ -34,7 +22,6 @@ use async_tungstenite_compat as async_tungstenite;
 
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
 use tokio::sync::RwLock;
-
 
 pub type LavalinkResult<T> = Result<T, LavalinkError>;
 
@@ -88,7 +75,7 @@ pub struct Play {
 #[serde(rename_all = "camelCase")]
 pub struct VoiceUpdate {
     pub session_id: String,
-    pub event: Event
+    pub event: Event,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -174,7 +161,7 @@ impl From<i64> for UserId {
 
 impl fmt::Display for UserId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)  
+        write!(f, "{}", self.0)
     }
 }
 
@@ -219,20 +206,24 @@ impl UserId {
 }
 
 impl SendOpcode {
-    pub async fn send(&self, guild_id: impl Into<GuildId>, socket: &mut SplitSink<WsStream, TungsteniteMessage>) -> LavalinkResult<()> {
+    pub async fn send(
+        &self,
+        guild_id: impl Into<GuildId>,
+        socket: &mut SplitSink<WsStream, TungsteniteMessage>,
+    ) -> LavalinkResult<()> {
         let value = match self {
             Self::Destroy => {
                 json!({
                     "op" : self,
                     "guildId" : &guild_id.into().0.to_string()
                 })
-            },
+            }
             Self::Stop => {
                 json!({
                     "op" : self,
                     "guildId" : &guild_id.into().0.to_string()
                 })
-            },
+            }
             Self::Seek(data) => {
                 let mut x = json!({
                     "op" : "seek",
@@ -240,7 +231,7 @@ impl SendOpcode {
                 });
                 merge(&mut x, serde_json::to_value(data).unwrap());
                 x
-            },
+            }
             Self::Pause(data) => {
                 let mut x = json!({
                     "op" : "pause",
@@ -248,7 +239,7 @@ impl SendOpcode {
                 });
                 merge(&mut x, serde_json::to_value(data).unwrap());
                 x
-            },
+            }
             Self::Play(data) => {
                 let mut x = json!({
                     "op" : "play",
@@ -256,7 +247,7 @@ impl SendOpcode {
                 });
                 merge(&mut x, serde_json::to_value(data).unwrap());
                 x
-            },
+            }
             Self::VoiceUpdate(data) => {
                 let mut x = json!({
                     "op" : "voiceUpdate",
@@ -264,7 +255,7 @@ impl SendOpcode {
                 });
                 merge(&mut x, serde_json::to_value(data).unwrap());
                 x
-            },
+            }
             Self::Volume(data) => {
                 let mut x = json!({
                     "op" : "volume",
@@ -272,7 +263,7 @@ impl SendOpcode {
                 });
                 merge(&mut x, serde_json::to_value(data).unwrap());
                 x
-            },
+            }
             Self::Equalizer(data) => {
                 let mut x = json!({
                     "op" : "equalizer",
@@ -280,7 +271,7 @@ impl SendOpcode {
                 });
                 merge(&mut x, serde_json::to_value(data).unwrap());
                 x
-            },
+            }
         };
 
         let payload = serde_json::to_string(&value).unwrap();
@@ -305,7 +296,7 @@ pub struct Node {
     pub queue: Vec<TrackQueue>,
     /// Use this to store whatever information you wish that's guild specific, such as invocation
     /// channel id's, for example.
-    pub data: Arc<RwLock<TypeMap>> ,
+    pub data: Arc<RwLock<TypeMap>>,
 }
 
 impl Default for Node {

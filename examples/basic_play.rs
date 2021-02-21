@@ -1,47 +1,25 @@
-use std::{
-    env,
-    sync::Arc,
-};
+use std::{env, sync::Arc};
 
-use serenity::{
-    client::Context,
-    prelude::Mutex,
-};
+use serenity::{client::Context, prelude::Mutex};
 
 use serenity::{
     async_trait,
-    client::{
-        Client,
-        EventHandler
+    client::{Client, EventHandler},
+    framework::{
+        standard::{
+            macros::{command, group, hook},
+            Args, CommandResult,
+        },
+        StandardFramework,
     },
     http::Http,
-    framework::{
-        StandardFramework,
-        standard::{
-            Args,
-            CommandResult,
-            macros::{
-                command,
-                group,
-                hook,
-            },
-        },
-    },
-    model::{
-        channel::Message,
-        gateway::Ready,
-        misc::Mentionable,
-    },
+    model::{channel::Message, gateway::Ready, misc::Mentionable},
     Result as SerenityResult,
 };
 
+use lavalink_rs::{gateway::*, model::*, LavalinkClient};
 use serenity::prelude::*;
 use songbird::SerenityInit;
-use lavalink_rs::{
-    LavalinkClient,
-    model::*,
-    gateway::*,
-};
 
 struct Lavalink;
 
@@ -72,7 +50,10 @@ impl LavalinkEventHandler for LavalinkHandler {
 #[hook]
 async fn after(_ctx: &Context, _msg: &Message, command_name: &str, command_result: CommandResult) {
     match command_result {
-        Err(why) => println!("Command '{}' returned error {:?} => {}", command_name, why, why),
+        Err(why) => println!(
+            "Command '{}' returned error {:?} => {}",
+            command_name, why, why
+        ),
         _ => (),
     }
 }
@@ -84,8 +65,7 @@ struct General;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let token = env::var("DISCORD_TOKEN")
-        .expect("Expected a token in the environment");
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
     let http = Http::new_with_token(&token);
 
@@ -116,7 +96,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         data.insert::<Lavalink>(lava);
     }
 
-    let _ = client.start().await.map_err(|why| println!("Client ended: {:?}", why));
+    let _ = client
+        .start()
+        .await
+        .map_err(|why| println!("Client ended: {:?}", why));
 
     Ok(())
 }
@@ -127,7 +110,8 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     let guild_id = guild.id;
 
     let channel_id = guild
-        .voice_states.get(&msg.author.id)
+        .voice_states
+        .get(&msg.author.id)
         .and_then(|voice_state| voice_state.channel_id);
 
     let connect_to = match channel_id {
@@ -146,12 +130,26 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     match handler {
         Ok(connection_info) => {
             let mut data = ctx.data.write().await;
-            let lava_client_lock = data.get_mut::<Lavalink>().expect("Expected a lavalink client in TypeMap");
-            lava_client_lock.lock().await.create_session(guild_id, &connection_info).await?;
+            let lava_client_lock = data
+                .get_mut::<Lavalink>()
+                .expect("Expected a lavalink client in TypeMap");
+            lava_client_lock
+                .lock()
+                .await
+                .create_session(guild_id, &connection_info)
+                .await?;
 
-            check_msg(msg.channel_id.say(&ctx.http, &format!("Joined {}", connect_to.mention())).await);
+            check_msg(
+                msg.channel_id
+                    .say(&ctx.http, &format!("Joined {}", connect_to.mention()))
+                    .await,
+            );
         }
-        Err(why) => check_msg(msg.channel_id.say(&ctx.http, format!("Error joining the channel: {}", why)).await),
+        Err(why) => check_msg(
+            msg.channel_id
+                .say(&ctx.http, format!("Error joining the channel: {}", why))
+                .await,
+        ),
     }
 
     Ok(())
@@ -167,12 +165,18 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
 
     if has_handler {
         if let Err(e) = manager.remove(guild_id).await {
-            check_msg(msg.channel_id.say(&ctx.http, format!("Failed: {:?}", e)).await);
+            check_msg(
+                msg.channel_id
+                    .say(&ctx.http, format!("Failed: {:?}", e))
+                    .await,
+            );
         }
 
         {
             let mut data = ctx.data.write().await;
-            let lava_client_lock = data.get_mut::<Lavalink>().expect("Expected a lavalink client in TypeMap");
+            let lava_client_lock = data
+                .get_mut::<Lavalink>()
+                .expect("Expected a lavalink client in TypeMap");
             lava_client_lock.lock().await.destroy(guild_id).await?;
         }
 
@@ -199,38 +203,67 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match ctx.cache.guild_channel(msg.channel_id).await {
         Some(channel) => channel.guild_id,
         None => {
-            check_msg(msg.channel_id.say(&ctx.http, "Error finding channel info").await);
+            check_msg(
+                msg.channel_id
+                    .say(&ctx.http, "Error finding channel info")
+                    .await,
+            );
 
             return Ok(());
-        },
+        }
     };
 
     let manager = songbird::get(ctx).await.unwrap().clone();
 
     if let Some(_handler_lock) = manager.get(guild_id) {
         let data = ctx.data.read().await;
-        let lava_client_lock = data.get::<Lavalink>().expect("Expected a lavalink client in TypeMap");
+        let lava_client_lock = data
+            .get::<Lavalink>()
+            .expect("Expected a lavalink client in TypeMap");
         let mut lava_client = lava_client_lock.lock().await;
 
         let query_information = lava_client.auto_search_tracks(&query).await?;
 
         if query_information.tracks.is_empty() {
-            check_msg(msg.channel_id.say(&ctx, "Could not find any video of the search query.").await);
+            check_msg(
+                msg.channel_id
+                    .say(&ctx, "Could not find any video of the search query.")
+                    .await,
+            );
             return Ok(());
         }
 
         if let Some(ref mut socket) = lava_client.socket_write {
-            if let Err(why) = LavalinkClient::play(guild_id, query_information.tracks[0].clone()).start(socket).await {
+            if let Err(why) = LavalinkClient::play(guild_id, query_information.tracks[0].clone())
+                .start(socket)
+                .await
+            {
                 eprintln!("{}", why);
                 return Ok(());
             };
-            check_msg(msg.channel_id.say(&ctx.http, format!("Now playing: {}", query_information.tracks[0].info.as_ref().unwrap().title)).await);
+            check_msg(
+                msg.channel_id
+                    .say(
+                        &ctx.http,
+                        format!(
+                            "Now playing: {}",
+                            query_information.tracks[0].info.as_ref().unwrap().title
+                        ),
+                    )
+                    .await,
+            );
         } else {
-
             eprintln!("No websocket found");
         }
     } else {
-        check_msg(msg.channel_id.say(&ctx.http, "Use `~join` first, to connect the bot to your current voice channel.").await);
+        check_msg(
+            msg.channel_id
+                .say(
+                    &ctx.http,
+                    "Use `~join` first, to connect the bot to your current voice channel.",
+                )
+                .await,
+        );
     }
 
     Ok(())
@@ -240,17 +273,34 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 #[aliases(np)]
 async fn now_playing(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;
-    let lava_client_lock = data.get_mut::<Lavalink>().expect("Expected a lavalink client in TypeMap");
+    let lava_client_lock = data
+        .get_mut::<Lavalink>()
+        .expect("Expected a lavalink client in TypeMap");
     let lava_client = lava_client_lock.lock().await;
 
     if let Some(node) = lava_client.nodes.get(&msg.guild_id.unwrap().0) {
         if let Some(track) = &node.now_playing {
-            check_msg(msg.channel_id.say(&ctx.http, format!("Now Playing: {}", track.track.info.as_ref().unwrap().title)).await);
+            check_msg(
+                msg.channel_id
+                    .say(
+                        &ctx.http,
+                        format!("Now Playing: {}", track.track.info.as_ref().unwrap().title),
+                    )
+                    .await,
+            );
         } else {
-            check_msg(msg.channel_id.say(&ctx.http, "Nothing is playing at the moment.").await);
+            check_msg(
+                msg.channel_id
+                    .say(&ctx.http, "Nothing is playing at the moment.")
+                    .await,
+            );
         }
     } else {
-        check_msg(msg.channel_id.say(&ctx.http, "Nothing is playing at the moment.").await);
+        check_msg(
+            msg.channel_id
+                .say(&ctx.http, "Nothing is playing at the moment.")
+                .await,
+        );
     }
 
     Ok(())
@@ -259,10 +309,24 @@ async fn now_playing(ctx: &Context, msg: &Message) -> CommandResult {
 #[command]
 async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;
-    let lava_client_lock = data.get_mut::<Lavalink>().expect("Expected a lavalink client in TypeMap");
+    let lava_client_lock = data
+        .get_mut::<Lavalink>()
+        .expect("Expected a lavalink client in TypeMap");
 
-    if let Some(track) = lava_client_lock.lock().await.skip(msg.guild_id.unwrap()).await {
-        check_msg(msg.channel_id.say(ctx, format!("Skipped: {}", track.track.info.as_ref().unwrap().title)).await);
+    if let Some(track) = lava_client_lock
+        .lock()
+        .await
+        .skip(msg.guild_id.unwrap())
+        .await
+    {
+        check_msg(
+            msg.channel_id
+                .say(
+                    ctx,
+                    format!("Skipped: {}", track.track.info.as_ref().unwrap().title),
+                )
+                .await,
+        );
     } else {
         check_msg(msg.channel_id.say(ctx, "Nothing to skip.").await);
     }

@@ -1,5 +1,5 @@
-use crate::LavalinkClient;
 use crate::model::*;
+use crate::LavalinkClient;
 
 use std::sync::Arc;
 
