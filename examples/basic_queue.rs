@@ -1,10 +1,11 @@
-use std::{env, sync::Arc};
+#[macro_use]
+extern crate tracing;
 
-use serenity::{client::Context, prelude::Mutex};
+use std::env;
 
 use serenity::{
     async_trait,
-    client::{Client, EventHandler},
+    client::{Client, Context, EventHandler},
     framework::{
         standard::{
             macros::{command, group, hook},
@@ -13,7 +14,7 @@ use serenity::{
         StandardFramework,
     },
     http::Http,
-    model::{channel::Message, gateway::Ready, misc::Mentionable},
+    model::{channel::Message, gateway::Ready, id::GuildId, misc::Mentionable},
     Result as SerenityResult,
 };
 
@@ -24,7 +25,7 @@ use songbird::SerenityInit;
 struct Lavalink;
 
 impl TypeMapKey for Lavalink {
-    type Value = Arc<Mutex<LavalinkClient>>;
+    type Value = LavalinkClient;
 }
 
 struct Handler;
@@ -33,17 +34,21 @@ struct LavalinkHandler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, _: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
+        info!("{} is connected!", ready.user.name);
+    }
+
+    async fn cache_ready(&self, _: Context, guilds: Vec<GuildId>) {
+        info!("cache is ready!\n{:#?}", guilds);
     }
 }
 
 #[async_trait]
 impl LavalinkEventHandler for LavalinkHandler {
-    async fn track_start(&self, _client: Arc<Mutex<LavalinkClient>>, event: TrackStart) {
-        println!("Track started!\nGuild: {}", event.guild_id);
+    async fn track_start(&self, _client: LavalinkClient, event: TrackStart) {
+        info!("Track started!\nGuild: {}", event.guild_id);
     }
-    async fn track_finish(&self, _client: Arc<Mutex<LavalinkClient>>, event: TrackFinish) {
-        println!("Track finished!\nGuild: {}", event.guild_id);
+    async fn track_finish(&self, _client: LavalinkClient, event: TrackFinish) {
+        info!("Track finished!\nGuild: {}", event.guild_id);
     }
 }
 
@@ -64,7 +69,12 @@ async fn after(_ctx: &Context, _msg: &Message, command_name: &str, command_resul
 struct General;
 
 #[tokio::main]
+//#[tracing::instrument]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env::set_var("RUST_LOG", "info,lavalink_rs=debug");
+    tracing_subscriber::fmt::init();
+    info!("Tracing initialized");
+
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
     let http = Http::new_with_token(&token);
@@ -75,7 +85,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let framework = StandardFramework::new()
-        .configure(|c| c.prefix("~"))
+        .configure(|c| c.prefix(","))
         .after(after)
         .group(&GENERAL_GROUP);
 
@@ -86,14 +96,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .expect("Err creating client");
 
-    let mut lava_client = LavalinkClient::new(bot_id);
-    lava_client.set_host("127.0.0.1");
-
-    let lava = lava_client.initialize(LavalinkHandler).await?;
+    let lava_client = LavalinkClient::builder(bot_id)
+        .set_host("127.0.0.1")
+        .set_password(env::var("LAVALINK_PASSWORD").unwrap_or("youshallnotpass".to_string()))
+        .build(LavalinkHandler)
+        .await?;
 
     {
         let mut data = client.data.write().await;
-        data.insert::<Lavalink>(lava);
+        data.insert::<Lavalink>(lava_client);
     }
 
     let _ = client
@@ -129,15 +140,9 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
 
     match handler {
         Ok(connection_info) => {
-            let mut data = ctx.data.write().await;
-            let lava_client_lock = data
-                .get_mut::<Lavalink>()
-                .expect("Expected a lavalink client in TypeMap");
-            lava_client_lock
-                .lock()
-                .await
-                .create_session(guild_id, &connection_info)
-                .await?;
+            let data = ctx.data.read().await;
+            let lava_client = data.get::<Lavalink>().unwrap().clone();
+            lava_client.create_session(&connection_info).await?;
 
             check_msg(
                 msg.channel_id
@@ -173,11 +178,9 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
         }
 
         {
-            let mut data = ctx.data.write().await;
-            let lava_client_lock = data
-                .get_mut::<Lavalink>()
-                .expect("Expected a lavalink client in TypeMap");
-            lava_client_lock.lock().await.destroy(guild_id).await?;
+            let data = ctx.data.read().await;
+            let lava_client = data.get::<Lavalink>().unwrap().clone();
+            lava_client.destroy(guild_id).await?;
         }
 
         check_msg(msg.channel_id.say(&ctx.http, "Left voice channel").await);
@@ -215,12 +218,9 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let manager = songbird::get(ctx).await.unwrap().clone();
 
-    if let Some(_handler_lock) = manager.get(guild_id) {
+    if let Some(_handler) = manager.get(guild_id) {
         let data = ctx.data.read().await;
-        let lava_client_lock = data
-            .get::<Lavalink>()
-            .expect("Expected a lavalink client in TypeMap");
-        let lava_client = lava_client_lock.lock().await;
+        let lava_client = data.get::<Lavalink>().unwrap().clone();
 
         let query_information = lava_client.auto_search_tracks(&query).await?;
 
@@ -233,11 +233,11 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             return Ok(());
         }
 
-        drop(lava_client);
-
-        if let Err(why) = LavalinkClient::play(guild_id, query_information.tracks[0].clone())
-            .queue(Arc::clone(lava_client_lock))
-            .await
+        if let Err(why) =
+            LavalinkClient::play(&lava_client, guild_id, query_information.tracks[0].clone())
+                // Change this to play() if you want your own custom queue or no queue at all.
+                .queue()
+                .await
         {
             eprintln!("{}", why);
             return Ok(());
@@ -270,13 +270,10 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 #[command]
 #[aliases(np)]
 async fn now_playing(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut data = ctx.data.write().await;
-    let lava_client_lock = data
-        .get_mut::<Lavalink>()
-        .expect("Expected a lavalink client in TypeMap");
-    let lava_client = lava_client_lock.lock().await;
+    let data = ctx.data.read().await;
+    let lava_client = data.get::<Lavalink>().unwrap().clone();
 
-    if let Some(node) = lava_client.nodes.get(&msg.guild_id.unwrap().0) {
+    if let Some(node) = lava_client.nodes().await.get(&msg.guild_id.unwrap().0) {
         if let Some(track) = &node.now_playing {
             check_msg(
                 msg.channel_id
@@ -306,17 +303,10 @@ async fn now_playing(ctx: &Context, msg: &Message) -> CommandResult {
 
 #[command]
 async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut data = ctx.data.write().await;
-    let lava_client_lock = data
-        .get_mut::<Lavalink>()
-        .expect("Expected a lavalink client in TypeMap");
+    let data = ctx.data.read().await;
+    let lava_client = data.get::<Lavalink>().unwrap().clone();
 
-    if let Some(track) = lava_client_lock
-        .lock()
-        .await
-        .skip(msg.guild_id.unwrap())
-        .await
-    {
+    if let Some(track) = lava_client.skip(msg.guild_id.unwrap()).await {
         check_msg(
             msg.channel_id
                 .say(

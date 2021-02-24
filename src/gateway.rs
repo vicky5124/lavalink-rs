@@ -1,25 +1,18 @@
 use crate::model::*;
 use crate::LavalinkClient;
 
-use std::sync::Arc;
-
-use serenity::async_trait;
-
-#[cfg(feature = "tokio-02-marker")]
-use tokio_compat as tokio;
-
-use tokio::sync::Mutex;
+use async_trait::async_trait;
 
 #[async_trait]
 pub trait LavalinkEventHandler {
     /// Periodic event that returns the statistics of the server.
-    async fn stats(&self, _client: Arc<Mutex<LavalinkClient>>, _event: Stats) {}
+    async fn stats(&self, _client: LavalinkClient, _event: Stats) {}
     /// Event that triggers when a player updates.
-    async fn player_update(&self, _client: Arc<Mutex<LavalinkClient>>, _event: PlayerUpdate) {}
+    async fn player_update(&self, _client: LavalinkClient, _event: PlayerUpdate) {}
     /// Event that triggers when a track starts playing.
-    async fn track_start(&self, _client: Arc<Mutex<LavalinkClient>>, _event: TrackStart) {}
+    async fn track_start(&self, _client: LavalinkClient, _event: TrackStart) {}
     /// Event that triggers when a track finishes playing.
-    async fn track_finish(&self, _client: Arc<Mutex<LavalinkClient>>, _event: TrackFinish) {}
+    async fn track_finish(&self, _client: LavalinkClient, _event: TrackFinish) {}
 }
 
 /*

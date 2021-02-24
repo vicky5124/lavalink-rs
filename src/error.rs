@@ -3,16 +3,17 @@ use std::{
     fmt::{Display, Formatter, Result},
 };
 
-use async_tungstenite::tungstenite::error::Error as TungsteniteError;
 #[cfg(feature = "tokio-02-marker")]
 use async_tungstenite_compat as async_tungstenite;
+#[cfg(feature = "tokio-02-marker")]
+use reqwest_compat as reqwest;
+
+use async_tungstenite::tungstenite::error::Error as TungsteniteError;
+use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
 
 #[derive(Debug)]
 pub enum LavalinkError {
     NoWebsocket,
-    MissingHandlerToken,
-    MissingHandlerEndpoint,
-    MissingHandlerSessionId,
     InvalidDataToVoiceUpdate,
     InvalidDataToPlay,
     InvalidDataToStop,
@@ -20,13 +21,9 @@ pub enum LavalinkError {
     InvalidDataToPause,
     InvalidDataToVolume,
     InvalidDataToSeek,
-    ErrorSendingVoiceUpdatePayload(TungsteniteError),
-    ErrorSendingPlayPayload(TungsteniteError),
-    ErrorSendingStopPayload(TungsteniteError),
-    ErrorSendingDestroyPayload(TungsteniteError),
-    ErrorSendingPausePayload(TungsteniteError),
-    ErrorSendingVolumePayload(TungsteniteError),
-    ErrorSendingSeekPayload(TungsteniteError),
+    ErrorWebsocketPayload(TungsteniteError),
+    InvalidHeaderValue(InvalidHeaderValue),
+    ReqwestError(ReqwestError),
 }
 
 impl Error for LavalinkError {}
@@ -35,13 +32,6 @@ impl Display for LavalinkError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match self {
             LavalinkError::NoWebsocket => write!(f, "There is no initialized websocket."),
-            LavalinkError::MissingHandlerToken => write!(f, "No `token` was found on the handler."),
-            LavalinkError::MissingHandlerEndpoint => {
-                write!(f, "No `endpoint` was found on the handler.")
-            }
-            LavalinkError::MissingHandlerSessionId => {
-                write!(f, "No `session_id` was found on the hander")
-            }
             LavalinkError::InvalidDataToPlay => {
                 write!(f, "Invalid data was provided to the `play` json.")
             }
@@ -63,30 +53,37 @@ impl Display for LavalinkError {
             LavalinkError::InvalidDataToVoiceUpdate => {
                 write!(f, "Invalid data was provided to the `voiceUpdate` json.")
             }
-            LavalinkError::ErrorSendingPlayPayload(why) => {
-                write!(f, "Error while sending payload `play` json => {:?}", why)
+            LavalinkError::ErrorWebsocketPayload(why) => {
+                write!(
+                    f,
+                    "Error while sending payload to the websocket => {:?}",
+                    why
+                )
             }
-            LavalinkError::ErrorSendingStopPayload(why) => {
-                write!(f, "Error while sending payload `stop` json => {:?}", why)
+            LavalinkError::InvalidHeaderValue(why) => {
+                write!(f, "Invalid Header Value => {:?}", why)
             }
-            LavalinkError::ErrorSendingDestroyPayload(why) => {
-                write!(f, "Error while sending payload `destroy` json => {:?}", why)
-            }
-            LavalinkError::ErrorSendingPausePayload(why) => {
-                write!(f, "Error while sending payload `pause` json => {:?}", why)
-            }
-            LavalinkError::ErrorSendingVolumePayload(why) => {
-                write!(f, "Error while sending payload `volume` json => {:?}", why)
-            }
-            LavalinkError::ErrorSendingSeekPayload(why) => {
-                write!(f, "Error while sending payload `seek` json => {:?}", why)
-            }
-            LavalinkError::ErrorSendingVoiceUpdatePayload(why) => write!(
-                f,
-                "Error while sending payload `voiceUpdate` json => {:?}",
-                why
-            ),
-            //_ => write!(f, "Unhandled error occurred."),
+            LavalinkError::ReqwestError(why) => {
+                write!(f, "Reqwest Error => {:?}", why)
+            } //_ => write!(f, "Unhandled error occurred."),
         }
+    }
+}
+
+impl From<TungsteniteError> for LavalinkError {
+    fn from(err: TungsteniteError) -> LavalinkError {
+        LavalinkError::ErrorWebsocketPayload(err)
+    }
+}
+
+impl From<InvalidHeaderValue> for LavalinkError {
+    fn from(err: InvalidHeaderValue) -> LavalinkError {
+        LavalinkError::InvalidHeaderValue(err)
+    }
+}
+
+impl From<ReqwestError> for LavalinkError {
+    fn from(err: ReqwestError) -> LavalinkError {
+        LavalinkError::ReqwestError(err)
     }
 }

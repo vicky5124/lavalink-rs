@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0-rc.0
+
+- YaY another rewrite! *mostly*
+- Switched to internal locks only.
+- Added builder module.
+- Added a LavalinkClient builder.
+- Removed unneeded function parameters.
+- Removed unneeded `Option<T>`.
+- Removed unneeded Errors.
+- Implement `From<Error>` for various external library errors.
+- Made `LavalinkClient.set_addr()` take an `impl Into<_>`.
+
 ## 0.5.4
 
 - Added LavalinkClient.set_addr() - @suisei #8

@@ -7,6 +7,7 @@ use std::sync::Arc;
 use typemap_rev::TypeMap;
 
 use serenity::model::id::{GuildId as SerenityGuildId, UserId as SerenityUserId};
+use songbird::id::{GuildId as SongbirdGuildId, UserId as SongbirdUserId};
 
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
@@ -83,6 +84,7 @@ pub struct VoiceUpdate {
 pub struct Event {
     pub token: String,
     pub endpoint: String,
+    #[serde(deserialize_with = "deserialize_string_from_number")]
     pub guild_id: String,
 }
 
@@ -129,6 +131,12 @@ impl From<SerenityGuildId> for GuildId {
     }
 }
 
+impl From<SongbirdGuildId> for GuildId {
+    fn from(guild_id: SongbirdGuildId) -> GuildId {
+        GuildId(guild_id.0)
+    }
+}
+
 impl From<u64> for GuildId {
     fn from(guild_id: u64) -> GuildId {
         GuildId(guild_id)
@@ -143,6 +151,12 @@ impl From<i64> for GuildId {
 
 impl From<SerenityUserId> for UserId {
     fn from(user_id: SerenityUserId) -> UserId {
+        UserId(user_id.0)
+    }
+}
+
+impl From<SongbirdUserId> for UserId {
+    fn from(user_id: SongbirdUserId) -> UserId {
         UserId(user_id.0)
     }
 }
@@ -278,7 +292,7 @@ impl SendOpcode {
 
         {
             if let Err(why) = socket.send(TungsteniteMessage::text(&payload)).await {
-                return Err(LavalinkError::ErrorSendingVoiceUpdatePayload(why));
+                return Err(why.into());
             };
         }
 
@@ -323,10 +337,7 @@ pub struct TrackQueue {
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Tracks {
     #[serde(rename = "playlistInfo")]
-    #[cfg(feature = "andesite")]
     pub playlist_info: Option<PlaylistInfo>,
-    #[cfg(not(feature = "andesite"))]
-    pub playlist_info: PlaylistInfo,
 
     /// This field will be an Enum in the future, but for now only `LOAD_FAILED` and `TRACK_LOADED`
     /// are known if you need to handle them.

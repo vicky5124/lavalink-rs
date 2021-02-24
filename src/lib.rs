@@ -1,15 +1,14 @@
+pub mod builders;
 pub mod error;
 pub mod gateway;
 pub mod model;
 
-use error::LavalinkError;
-use gateway::*;
+use builders::*;
+use gateway::LavalinkEventHandler;
 use model::*;
 
 use std::{
     cmp::{max, min},
-    collections::HashMap,
-    net::SocketAddr,
     sync::Arc,
     time::Duration,
 };
@@ -21,12 +20,11 @@ use reqwest_compat as reqwest;
 #[cfg(feature = "tokio-02-marker")]
 use tokio_compat as tokio;
 
-use serenity::model::guild::Region;
 use songbird::ConnectionInfo;
 
 use http::Request;
 
-use reqwest::{header::*, Client as ReqwestClient, Error as ReqwestError, Url};
+use reqwest::{header::*, Client as ReqwestClient, Url};
 
 #[cfg(all(feature = "native-marker", not(feature = "tokio-02-marker")))]
 use tokio_native_tls::TlsStream;
@@ -40,24 +38,20 @@ use tokio_native_tls_compat::TlsStream;
 #[cfg(all(feature = "rustls-marker", feature = "tokio-02-marker"))]
 use tokio_rustls_compat::client::TlsStream;
 
-#[cfg(feature = "tokio-02-marker")]
-use tokio::time::delay_for as sleep;
-
-#[cfg(not(feature = "tokio-02-marker"))]
-use tokio::time::sleep;
-
 use tokio::{net::TcpStream, sync::Mutex};
 
 use regex::Regex;
 
-use futures::stream::{SplitSink, StreamExt};
+use futures::stream::{SplitSink, SplitStream, StreamExt};
 
 use async_tungstenite::{
     stream::Stream,
     tokio::{connect_async, TokioAdapter},
-    tungstenite::{error::Error as TungsteniteError, Message as TungsteniteMessage},
+    tungstenite::Message as TungsteniteMessage,
     WebSocketStream,
 };
+
+use dashmap::{DashMap, DashSet};
 
 pub const EQ_BASE: [f64; 15] = [
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -77,362 +71,171 @@ pub type WsStream =
 
 pub type WebsocketConnection = Arc<Mutex<WsStream>>;
 
-#[derive(Default)]
-pub struct LavalinkClient {
-    pub host: String,
-    pub port: u16,
-    pub password: String,
-    pub shard_count: u64,
-    pub bot_id: UserId,
-    pub is_ssl: bool,
-
-    pub headers: Option<HeaderMap>,
-    pub socket_write: Option<SplitSink<WsStream, TungsteniteMessage>>,
-    //pub socket_read: Option<SplitStream<WsStream>>,
+/// All fields are public for those who want to do their own implementation of things.
+pub struct LavalinkClientInner {
     pub rest_uri: String,
-    pub socket_uri: String,
+    //pub socket_uri: String,
+    pub headers: HeaderMap,
 
-    // Unused
-    _region: Option<Region>,
-    _identifier: Option<String>,
+    pub socket_write: SplitSink<WsStream, TungsteniteMessage>,
+    // cannot be cloned, and cannot be behind a lock
+    // because it would always be open by the event loop.
+    //pub socket_read: SplitStream<WsStream>,
+
     //_shard_id: Option<ShardId>,
-    pub nodes: HashMap<u64, Node>,
-    pub loops: Vec<u64>,
+    // Arc in preparation for Node pools
+    pub nodes: Arc<DashMap<u64, Node>>,
+    pub loops: Arc<DashSet<u64>>,
+    // Unused
+    //_region: Option<Region>,
+    //_identifier: Option<String>,
 }
 
-#[derive(Default)]
-pub struct PlayParameters {
-    pub track: Track,
-    pub replace: bool,
-    pub start: u64,
-    pub finish: u64,
-    pub guild_id: u64,
-    pub requester: Option<UserId>,
+#[derive(Clone)]
+pub struct LavalinkClient {
+    /// Field is public for those who want to do their own implementation of things.
+    pub inner: Arc<Mutex<LavalinkClientInner>>,
 }
 
-impl PlayParameters {
-    /// Starts playing the track.
-    pub async fn start(
-        self,
-        socket: &mut SplitSink<WsStream, TungsteniteMessage>,
-    ) -> LavalinkResult<()> {
-        let payload = crate::model::Play {
-            track: self.track.track,
-            no_replace: !self.replace,
-            start_time: self.start,
-            end_time: if self.finish == 0 {
-                None
-            } else {
-                Some(self.finish)
-            },
-        };
+async fn event_loop(
+    mut read: SplitStream<WsStream>,
+    handler: impl LavalinkEventHandler + Send + Sync + 'static,
+    client: LavalinkClient,
+) {
+    while let Some(Ok(resp)) = read.next().await {
+        if let TungsteniteMessage::Text(x) = &resp {
+            if let Ok(base_event) = serde_json::from_str::<GatewayEvent>(&x) {
+                match base_event.op.as_str() {
+                    "stats" => {
+                        if let Ok(stats) = serde_json::from_str::<Stats>(&x) {
+                            handler.stats(client.clone(), stats).await;
+                        }
+                    }
+                    "playerUpdate" => {
+                        if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(&x) {
+                            {
+                                let client_clone = client.clone();
+                                let client_lock = client_clone.inner.lock().await;
 
-        crate::model::SendOpcode::Play(payload)
-            .send(self.guild_id, socket)
-            .await?;
-
-        Ok(())
-    }
-
-    pub async fn queue(self, client: Arc<Mutex<LavalinkClient>>) -> LavalinkResult<()> {
-        let track = crate::model::TrackQueue {
-            track: self.track,
-            start_time: self.start,
-            end_time: if self.finish == 0 {
-                None
-            } else {
-                Some(self.finish)
-            },
-            requester: self.requester,
-        };
-
-        let client_clone = Arc::clone(&client);
-        let mut client = client.lock().await;
-
-        if !client.loops.contains(&self.guild_id) {
-            let guild_id = self.guild_id;
-
-            client.nodes.insert(guild_id, Node::default());
-            client.loops.push(guild_id);
-
-            let node = client.nodes.get_mut(&guild_id).unwrap();
-            node.queue.push(track.clone());
-
-            drop(client);
-
-            tokio::spawn(async move {
-                loop {
-                    let mut client = client_clone.lock().await;
-                    if let Some(node) = client.nodes.get_mut(&guild_id) {
-                        if !node.queue.is_empty() && node.now_playing.is_none() {
-                            let track = node.queue[0].clone();
-
-                            node.now_playing = Some(node.queue[0].clone());
-
-                            let payload = crate::model::Play {
-                                track: track.track.track.clone(), // track
-                                no_replace: false,
-                                start_time: track.start_time,
-                                end_time: track.end_time,
-                            };
-
-                            if let Some(ref mut socket) = &mut client.socket_write {
-                                if let Err(why) = crate::model::SendOpcode::Play(payload)
-                                    .send(guild_id, socket)
-                                    .await
+                                if let Some(mut node) =
+                                    client_lock.nodes.get_mut(&player_update.guild_id)
                                 {
-                                    eprintln!(
-                                        "Error playing queue on guild {} -> {}",
-                                        guild_id, why
-                                    );
-                                }
-                            } else {
-                                eprintln!(
-                                    "Error playing queue on guild {} -> No Socket Found",
-                                    guild_id
-                                );
+                                    if let Some(mut current_track) = node.now_playing.as_mut() {
+                                        let mut info =
+                                            current_track.track.info.as_mut().unwrap().clone();
+                                        info.position = player_update.state.position as u64;
+                                        current_track.track.info = Some(info);
+                                    }
+                                };
+                            }
+
+                            handler.player_update(client.clone(), player_update).await;
+                        }
+                    }
+                    "event" => match base_event.event_type.unwrap().as_str() {
+                        "TrackStartEvent" => {
+                            if let Ok(track_start) = serde_json::from_str::<TrackStart>(&x) {
+                                handler.track_start(client.clone(), track_start).await;
                             }
                         }
-                    } else {
-                        break;
-                    }
+                        "TrackEndEvent" => {
+                            if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(&x) {
+                                if track_finish.reason == "FINISHED" {
+                                    let client_lock = client.inner.lock().await;
 
-                    drop(client);
-                    sleep(Duration::from_secs(1)).await;
+                                    if let Some(mut node) =
+                                        client_lock.nodes.get_mut(&track_finish.guild_id)
+                                    {
+                                        node.queue.remove(0);
+                                        node.now_playing = None;
+                                    };
+                                }
+
+                                handler.track_finish(client.clone(), track_finish).await;
+                            }
+                        }
+                        _ => (),
+                    },
+                    _ => (),
                 }
-            });
-        } else {
-            let node = client.nodes.get_mut(&self.guild_id).unwrap();
-            node.queue.push(track);
+            }
         }
-
-        Ok(())
-    }
-
-    /// Sets the person that requested the song
-    pub fn requester(mut self, requester: impl Into<UserId>) -> Self {
-        self.requester = Some(requester.into());
-        self
-    }
-
-    /// Sets if the current playing track should be replaced with this new one.
-    pub fn replace(mut self, replace: bool) -> Self {
-        self.replace = replace;
-        self
-    }
-
-    /// Sets the time the track will start at.
-    pub fn start_time(mut self, start: Duration) -> Self {
-        self.start = start.as_millis() as u64;
-        self
-    }
-
-    /// Sets the time the track will finish at.
-    pub fn finish_time(mut self, finish: Duration) -> Self {
-        self.finish = finish.as_millis() as u64;
-        self
     }
 }
 
 impl LavalinkClient {
     /// Builds a basic uninitialized LavalinkClient.
-    pub fn new<U: Into<UserId>>(bot_id: U) -> Self {
-        LavalinkClient {
-            host: "localhost".to_string(),
-            port: 2333,
-            password: "youshallnotpass".to_string(),
-            shard_count: 1,
-            bot_id: bot_id.into(),
-            ..Default::default()
-        }
-    }
-
-    /// Sets the host.
-    ///
-    /// DEFAULT: `localhost`
-    pub fn set_host(&mut self, host: impl ToString) {
-        self.host = host.to_string();
-    }
-
-    /// Sets the port.
-    ///
-    /// DEFAULT: `2333`
-    pub fn set_port(&mut self, port: u16) {
-        self.port = port;
-    }
-
-    /// Sets the address.
-    /// This calls `set_host` and `set_port` under the hood.
-    pub fn set_addr(&mut self, addr: impl Into<SocketAddr>) {
-        let addr = addr.into();
-        self.set_host(addr.ip());
-        self.set_port(addr.port());
-    }
-
-    /// Sets the number of shards.
-    ///
-    /// DEFAULT: `1`
-    pub fn set_shard_count(&mut self, shard_count: u64) {
-        self.shard_count = shard_count;
-    }
-
-    /// Sets the ID of the bot.
-    pub fn set_bot_id<U: Into<UserId>>(&mut self, bot_id: U) {
-        self.bot_id = bot_id.into();
-    }
-
-    /// Sets if the lavalink server is behind SSL
-    ///
-    /// DEFAULT: `False`
-    pub fn set_is_ssl(&mut self, is_ssl: bool) {
-        self.is_ssl = is_ssl;
-    }
-
-    /// Sets the lavalink password.
-    ///
-    /// DEFAULT: `youshallnotpass`
-    pub fn set_password(&mut self, password: impl ToString) {
-        self.password = password.to_string();
-    }
-
-    /// Initializes the connection with the provided information.
-    pub async fn initialize(
-        mut self,
+    pub async fn new(
+        builder: &LavalinkClientBuilder,
         handler: impl LavalinkEventHandler + Send + Sync + 'static,
-    ) -> Result<Arc<Mutex<Self>>, TungsteniteError> {
-        if self.is_ssl {
-            self.socket_uri = format!("wss://{}:{}", &self.host, &self.port);
-            self.rest_uri = format!("https://{}:{}", &self.host, &self.port);
+    ) -> LavalinkResult<Self> {
+        let socket_uri;
+        let rest_uri;
+
+        if builder.is_ssl {
+            socket_uri = format!("wss://{}:{}", &builder.host, builder.port);
+            rest_uri = format!("https://{}:{}", &builder.host, builder.port);
         } else {
-            self.socket_uri = format!("ws://{}:{}", &self.host, &self.port);
-            self.rest_uri = format!("http://{}:{}", &self.host, &self.port);
+            socket_uri = format!("ws://{}:{}", &builder.host, builder.port);
+            rest_uri = format!("http://{}:{}", &builder.host, builder.port);
         }
 
         let mut headers = HeaderMap::new();
-        headers.insert("Authorization", self.password.parse()?);
-        headers.insert("Num-Shards", self.shard_count.to_string().parse()?);
-        headers.insert("User-Id", self.bot_id.to_string().parse()?);
+        headers.insert("Authorization", builder.password.parse()?);
+        headers.insert("Num-Shards", builder.shard_count.to_string().parse()?);
+        headers.insert("User-Id", builder.bot_id.to_string().parse()?);
 
-        self.headers = Some(headers);
+        let mut url_builder = Request::builder();
 
-        let url = Request::builder()
-            .uri(&self.socket_uri)
-            .header("Authorization", &self.password)
-            .header("Num-Shards", &self.shard_count.to_string())
-            .header("User-Id", &self.bot_id.to_string())
-            .body(())
-            .unwrap();
+        {
+            let ref_headers = url_builder.headers_mut().unwrap();
+            *ref_headers = headers.clone();
+        }
+
+        let url = url_builder.uri(&socket_uri).body(()).unwrap();
 
         let (ws_stream, _) = connect_async(url).await?;
+        let (socket_write, socket_read) = ws_stream.split();
 
-        let (write, mut read) = ws_stream.split();
-        self.socket_write = Some(write);
-        //self.socket = Some(Arc::new(Mutex::new(ws_stream)));
+        let client_inner = LavalinkClientInner {
+            headers,
+            socket_write,
+            rest_uri,
+            nodes: Arc::new(DashMap::new()),
+            loops: Arc::new(DashSet::new()),
+        };
 
-        let client = Arc::new(Mutex::new(self));
-        let client_clone = Arc::clone(&client);
+        let client = Self {
+            inner: Arc::new(Mutex::new(client_inner)),
+        };
+
+        let client_clone = client.clone();
 
         tokio::spawn(async move {
-            while let Some(Ok(resp)) = read.next().await {
-                if let TungsteniteMessage::Text(x) = &resp {
-                    if let Ok(base_event) = serde_json::from_str::<GatewayEvent>(&x) {
-                        match base_event.op.as_str() {
-                            "stats" => {
-                                if let Ok(stats) = serde_json::from_str::<Stats>(&x) {
-                                    handler.stats(Arc::clone(&client), stats).await;
-                                }
-                            }
-                            "playerUpdate" => {
-                                if let Ok(player_update) =
-                                    serde_json::from_str::<PlayerUpdate>(&x)
-                                {
-                                    {
-                                        let mut client_lock = client.lock().await;
-
-                                        if let Some(node) =
-                                            client_lock.nodes.get_mut(&player_update.guild_id)
-                                        {
-                                            if let Some(mut current_track) =
-                                                node.now_playing.as_mut()
-                                            {
-                                                let mut info = current_track
-                                                    .track
-                                                    .info
-                                                    .as_mut()
-                                                    .unwrap()
-                                                    .clone();
-                                                info.position =
-                                                    player_update.state.position as u64;
-                                                current_track.track.info = Some(info);
-                                            }
-                                        }
-                                    }
-                                    handler
-                                        .player_update(Arc::clone(&client), player_update)
-                                        .await;
-                                }
-                            }
-                            "event" => match base_event.event_type.unwrap().as_str() {
-                                "TrackStartEvent" => {
-                                    if let Ok(track_start) =
-                                        serde_json::from_str::<TrackStart>(&x)
-                                    {
-                                        handler
-                                            .track_start(Arc::clone(&client), track_start)
-                                            .await;
-                                    }
-                                }
-                                "TrackEndEvent" => {
-                                    let client_clone = Arc::clone(&client);
-                                    if let Ok(track_finish) =
-                                        serde_json::from_str::<TrackFinish>(&x)
-                                    {
-                                        if track_finish.reason == "FINISHED" {
-                                            let mut client = client_clone.lock().await;
-
-                                            if let Some(node) =
-                                                client.nodes.get_mut(&track_finish.guild_id)
-                                            {
-                                                node.queue.remove(0);
-                                                node.now_playing = None;
-                                            }
-                                        }
-
-                                        handler.track_finish(client_clone, track_finish).await;
-                                    }
-                                }
-                                _ => (),
-                            },
-                            _ => (),
-                        }
-                    }
-                }
-            }
+            event_loop(socket_read, handler, client_clone).await;
         });
 
-        Ok(client_clone)
+        Ok(client)
     }
 
-    /// Alias to `initialize()`
-    pub async fn init(
-        self,
-        handler: impl LavalinkEventHandler + Send + Sync + 'static,
-    ) -> Result<Arc<Mutex<Self>>, TungsteniteError> {
-        self.initialize(handler).await
+    pub fn builder(user_id: impl Into<UserId>) -> LavalinkClientBuilder {
+        LavalinkClientBuilder::new(user_id)
     }
 
     /// Returns the tracks from the URL or query provided.
-    pub async fn get_tracks(&self, query: impl ToString) -> Result<Tracks, ReqwestError> {
+    pub async fn get_tracks(&self, query: impl ToString) -> LavalinkResult<Tracks> {
+        let client = self.inner.lock().await;
+
         let reqwest = ReqwestClient::new();
         let url = Url::parse_with_params(
-            &format!("{}/loadtracks", &self.rest_uri),
+            &format!("{}/loadtracks", &client.rest_uri),
             &[("identifier", &query.to_string())],
         )
         .expect("The query cannot be formated to a url.");
 
         let resp = reqwest
             .get(url)
-            .headers(self.headers.clone().unwrap())
+            .headers(client.headers.clone())
             .send()
             .await?
             .json::<Tracks>()
@@ -441,8 +244,8 @@ impl LavalinkClient {
         Ok(resp)
     }
 
-    /// Will automatically search the query if it's not a valid URL.
-    pub async fn auto_search_tracks(&self, query: impl ToString) -> Result<Tracks, ReqwestError> {
+    /// Will automatically search the query on youtube if it's not a valid URL.
+    pub async fn auto_search_tracks(&self, query: impl ToString) -> LavalinkResult<Tracks> {
         let r = Regex::new(r"https?://(?:www\.)?.+").unwrap();
         if r.is_match(&query.to_string()) {
             self.get_tracks(query.to_string()).await
@@ -453,81 +256,56 @@ impl LavalinkClient {
     }
 
     /// Returns tracks from the search query.
-    pub async fn search_tracks(&self, query: impl ToString) -> Result<Tracks, ReqwestError> {
+    /// Uses youtube to search.
+    pub async fn search_tracks(&self, query: impl ToString) -> LavalinkResult<Tracks> {
         self.get_tracks(format!("ytsearch:{}", query.to_string()))
             .await
     }
 
     /// Creates a lavalink session on the specified guild.
-    pub async fn create_session(
-        &mut self,
-        guild_id: impl Into<GuildId>,
-        connection_info: &ConnectionInfo,
-    ) -> LavalinkResult<()> {
-        let guild_id = guild_id.into();
-
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-
-        let guild_id_str = guild_id.0.to_string();
-
-        let token = &connection_info.token;
-        if token.is_empty() {
-            return Err(LavalinkError::MissingHandlerToken);
-        }
-
-        let endpoint = &connection_info.endpoint;
-        if endpoint.is_empty() {
-            return Err(LavalinkError::MissingHandlerEndpoint);
-        }
-
-        let session_id = &connection_info.session_id;
-        if session_id.is_empty() {
-            return Err(LavalinkError::MissingHandlerSessionId);
-        }
-
+    pub async fn create_session(&self, connection_info: &ConnectionInfo) -> LavalinkResult<()> {
         let event = crate::model::Event {
-            token: token.to_string(),
-            endpoint: endpoint.to_string(),
-            guild_id: guild_id_str,
+            token: connection_info.token.to_string(),
+            endpoint: connection_info.endpoint.to_string(),
+            guild_id: connection_info.guild_id.0.to_string(),
         };
 
         let payload = crate::model::VoiceUpdate {
-            session_id: session_id.to_string(),
+            session_id: connection_info.session_id.to_string(),
             event,
         };
 
+        let mut client = self.inner.lock().await;
+
         crate::model::SendOpcode::VoiceUpdate(payload)
-            .send(guild_id, socket)
+            .send(connection_info.guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
     }
 
     /// Constructor for playing a track.
-    pub fn play(guild_id: impl Into<GuildId>, track: Track) -> PlayParameters {
+    pub fn play(&self, guild_id: impl Into<GuildId>, track: Track) -> PlayParameters {
         PlayParameters {
             track,
             guild_id: guild_id.into().0,
-            ..Default::default()
+            client: self.clone(),
+            replace: false,
+            start: 0,
+            finish: 0,
+            requester: None,
         }
     }
 
+    // TODO: remove it from running loops too
     /// Destroys the current player.
     /// When this is ran, `create_session()` needs to be ran again.
-    pub async fn destroy(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+    pub async fn destroy(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
 
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
+        let mut client = self.inner.lock().await;
 
-        if let Some(node) = self.nodes.get_mut(&guild_id.0) {
+        if let Some(mut node) = client.nodes.get_mut(&guild_id.0) {
             node.now_playing = None;
 
             if !node.queue.is_empty() {
@@ -536,22 +314,18 @@ impl LavalinkClient {
         }
 
         crate::model::SendOpcode::Destroy
-            .send(guild_id, socket)
+            .send(guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
     }
 
     /// Stops the current player.
-    pub async fn stop(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
+    pub async fn stop(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+        let mut client = self.inner.lock().await;
 
         crate::model::SendOpcode::Stop
-            .send(guild_id, socket)
+            .send(guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
@@ -561,8 +335,10 @@ impl LavalinkClient {
     ///
     /// If nothing is in the queue, the currently playing track will keep playing.
     /// Check if the queue is empty and run `stop()` if that's the case.
-    pub async fn skip(&mut self, guild_id: impl Into<GuildId>) -> Option<TrackQueue> {
-        let node = self.nodes.get_mut(&guild_id.into().0)?;
+    pub async fn skip(&self, guild_id: impl Into<GuildId>) -> Option<TrackQueue> {
+        let client = self.inner.lock().await;
+
+        let mut node = client.nodes.get_mut(&guild_id.into().0)?;
 
         node.now_playing = None;
 
@@ -574,54 +350,38 @@ impl LavalinkClient {
     }
 
     /// Sets the pause status.
-    pub async fn set_pause(
-        &mut self,
-        guild_id: impl Into<GuildId>,
-        pause: bool,
-    ) -> LavalinkResult<()> {
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-
+    pub async fn set_pause(&self, guild_id: impl Into<GuildId>, pause: bool) -> LavalinkResult<()> {
         let payload = crate::model::Pause { pause };
 
+        let mut client = self.inner.lock().await;
+
         crate::model::SendOpcode::Pause(payload)
-            .send(guild_id, socket)
+            .send(guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
     }
 
     /// Sets pause status to `True`
-    pub async fn pause(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+    pub async fn pause(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         self.set_pause(guild_id, true).await
     }
 
     /// Sets pause status to `False`
-    pub async fn resume(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+    pub async fn resume(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         self.set_pause(guild_id, false).await
     }
 
     /// Jumps to a specific time in the currently playing track.
-    pub async fn seek(
-        &mut self,
-        guild_id: impl Into<GuildId>,
-        time: Duration,
-    ) -> LavalinkResult<()> {
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-
+    pub async fn seek(&self, guild_id: impl Into<GuildId>, time: Duration) -> LavalinkResult<()> {
         let payload = crate::model::Seek {
             position: time.as_millis() as u64,
         };
 
+        let mut client = self.inner.lock().await;
+
         crate::model::SendOpcode::Seek(payload)
-            .send(guild_id, socket)
+            .send(guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
@@ -629,7 +389,7 @@ impl LavalinkClient {
 
     /// Alias to `seek()`
     pub async fn jump_to_time(
-        &mut self,
+        &self,
         guild_id: impl Into<GuildId>,
         time: Duration,
     ) -> LavalinkResult<()> {
@@ -637,34 +397,22 @@ impl LavalinkClient {
     }
 
     /// Alias to `seek()`
-    pub async fn scrub(
-        &mut self,
-        guild_id: impl Into<GuildId>,
-        time: Duration,
-    ) -> LavalinkResult<()> {
+    pub async fn scrub(&self, guild_id: impl Into<GuildId>, time: Duration) -> LavalinkResult<()> {
         self.seek(guild_id, time).await
     }
 
     /// Sets the volume of the player.
-    pub async fn volume(
-        &mut self,
-        guild_id: impl Into<GuildId>,
-        volume: u16,
-    ) -> LavalinkResult<()> {
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-
+    pub async fn volume(&self, guild_id: impl Into<GuildId>, volume: u16) -> LavalinkResult<()> {
         let good_volume = max(min(volume, 1000), 0);
 
         let payload = crate::model::Volume {
             volume: good_volume,
         };
 
+        let mut client = self.inner.lock().await;
+
         crate::model::SendOpcode::Volume(payload)
-            .send(guild_id, socket)
+            .send(guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
@@ -677,16 +425,10 @@ impl LavalinkClient {
     /// Valid values range from -0.25 to 1.0, where -0.25 means the given band is completely muted, and 0.25 means it is doubled.
     /// Modifying the gain could also change the volume of the output.
     pub async fn equalize_all(
-        &mut self,
+        &self,
         guild_id: impl Into<GuildId>,
         bands: [f64; 15],
     ) -> LavalinkResult<()> {
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-
         let bands = bands
             .iter()
             .enumerate()
@@ -698,8 +440,10 @@ impl LavalinkClient {
 
         let payload = crate::model::Equalizer { bands };
 
+        let mut client = self.inner.lock().await;
+
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, socket)
+            .send(guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
@@ -707,33 +451,23 @@ impl LavalinkClient {
 
     /// Equalizes a specific band.
     pub async fn equalize_band(
-        &mut self,
+        &self,
         guild_id: impl Into<GuildId>,
         band: crate::model::Band,
     ) -> LavalinkResult<()> {
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-
         let payload = crate::model::Equalizer { bands: vec![band] };
 
+        let mut client = self.inner.lock().await;
+
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, socket)
+            .send(guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
     }
 
     /// Resets all equalizer levels.
-    pub async fn equalize_reset(&mut self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
-        let socket = if let Some(x) = &mut self.socket_write {
-            x
-        } else {
-            return Err(LavalinkError::NoWebsocket);
-        };
-
+    pub async fn equalize_reset(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         let bands = (0..=14)
             .map(|i| crate::model::Band {
                 band: i as u8,
@@ -743,10 +477,18 @@ impl LavalinkClient {
 
         let payload = crate::model::Equalizer { bands };
 
+        let mut client = self.inner.lock().await;
+
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, socket)
+            .send(guild_id, &mut client.socket_write)
             .await?;
 
         Ok(())
+    }
+
+    /// Obtains an atomic reference to the nodes
+    pub async fn nodes(&self) -> Arc<DashMap<u64, Node>> {
+        let client = self.inner.lock().await;
+        client.nodes.clone()
     }
 }

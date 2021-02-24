@@ -13,7 +13,7 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 - [ ] Support multiple connections per region.
 - [X] Support nodes.
 - [ ] Support actual nodes.
-- [ ] Switch to internal lock handles.
+- [X] Switch to internal lock handles.
 - [ ] Support all andesite features.
 - [ ] Support identifiers.
 - [X] Support pause, resume, skip to time.
@@ -30,16 +30,18 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 - [X] Improve error handling.
 - [ ] Add tracing and logging.
 - [ ] Add documentation.
+- [ ] Implement automatic reconnecting.
+- [X] Make a ClientBuilder
 
 ## How to use
 
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = { version = "0.5", features = ["rustls"] }
+lavalink-rs = { version = "0.6.0-rc.0", features = ["rustls"] }
 # or
 [dependencies.lavalink-rs]
-version = "0.5"
+version = "0.6.0-rc.0"
 features = ["rustls"]
 ```
 
