@@ -234,7 +234,7 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
 
         if let Err(why) =
-            LavalinkClient::play(&lava_client, guild_id, query_information.tracks[0].clone())
+            &lava_client.play(guild_id, query_information.tracks[0].clone())
                 // Change this to play() if you want your own custom queue or no queue at all.
                 .queue()
                 .await
