@@ -491,4 +491,10 @@ impl LavalinkClient {
         let client = self.inner.lock().await;
         client.nodes.clone()
     }
+
+    /// Obtains an atomic reference to the running queue loops
+    pub async fn loops(&self) -> Arc<DashSet<u64>> {
+        let client = self.inner.lock().await;
+        client.loops.clone()
+    }
 }

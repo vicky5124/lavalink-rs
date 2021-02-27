@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0-rc.1
+
+- Exposed loops() field via method.
+- Fixed self on play in the example.
+
 ## 0.6.0-rc.0
 
 - YaY another rewrite! *mostly*
