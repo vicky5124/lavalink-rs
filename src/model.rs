@@ -220,7 +220,6 @@ impl UserId {
 }
 
 impl SendOpcode {
-    #[instrument]
     pub async fn send(
         &self,
         guild_id: impl Into<GuildId>,
