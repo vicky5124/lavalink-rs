@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate tracing;
+
 pub mod builders;
 pub mod error;
 pub mod gateway;
@@ -125,6 +128,7 @@ async fn event_loop(
                                             current_track.track.info.as_mut().unwrap().clone();
                                         info.position = player_update.state.position as u64;
                                         current_track.track.info = Some(info);
+                                        trace!("Updated track {:?} with position {}", current_track.track.info.as_ref().unwrap(), player_update.state.position);
                                     }
                                 };
                             }
@@ -154,9 +158,9 @@ async fn event_loop(
                                 handler.track_finish(client.clone(), track_finish).await;
                             }
                         }
-                        _ => (),
+                        _ => warn!("Unknown event: {}", &x),
                     },
-                    _ => (),
+                    _ => warn!("Unknown socket response: {}", &x),
                 }
             }
         }
@@ -212,7 +216,9 @@ impl LavalinkClient {
         let client_clone = client.clone();
 
         tokio::spawn(async move {
+            debug!("Starting event loop.");
             event_loop(socket_read, handler, client_clone).await;
+            error!("Event loop ended unexpectedly.");
         });
 
         Ok(client)

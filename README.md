@@ -28,7 +28,7 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 - [X] Optimize the codebase.
 - [X] Remove all the clones from examples.
 - [X] Improve error handling.
-- [ ] Add tracing and logging.
+- [X] Add tracing and logging.
 - [ ] Add documentation.
 - [ ] Implement automatic reconnecting.
 - [X] Make a ClientBuilder
