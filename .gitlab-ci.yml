@@ -12,7 +12,7 @@ build:
     - rustc --version
   stage: build
   script:
-    - cargo build --example basic_queue --features rustls
+    - cargo build --features rustls,twilight,serenity,andesite
   cache:
     untracked: true
     paths:

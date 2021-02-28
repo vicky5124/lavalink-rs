@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0-rc.0
+
+- Added twilight support
+- Added serenity and twilight features.
+- Added 2 andesite (exclusive?) events.
+- Moved away from --example builds.
+- Added twilight example.
+
 ## 0.6.0
 
 - Added tracing and event logging.

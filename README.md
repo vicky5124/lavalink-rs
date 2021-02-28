@@ -20,7 +20,7 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 - [X] Support starting at specific times and configurable replace current stream.
 - [X] Support equalization.
 - [X] Support both rustls and native_tls backends as features.
-- [ ] Support twilight.
+- [X] Support twilight.
 - [X] Support events.
 - [ ] Support raw events.
 - [ ] Implement my own event hander for voice connections.
