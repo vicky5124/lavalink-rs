@@ -13,6 +13,12 @@ pub trait LavalinkEventHandler {
     async fn track_start(&self, _client: LavalinkClient, _event: TrackStart) {}
     /// Event that triggers when a track finishes playing.
     async fn track_finish(&self, _client: LavalinkClient, _event: TrackFinish) {}
+    #[cfg(feature = "andesite")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "andesite")))]
+    async fn websocket_closed(&self, _client: LavalinkClient, _event: WebSocketClosed) {}
+    #[cfg(feature = "andesite")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "andesite")))]
+    async fn player_destroyed(&self, _client: LavalinkClient, _event: PlayerDestroyed) {}
 }
 
 /*
@@ -28,5 +34,9 @@ pub trait LavalinkEventHandler {
 {"op":"event","type":"TrackStartEvent","track":"QAAAsAIATU5JR0hUV0lTSCAtIFRoZSBHcmVhdGVzdCBTaG93IG9uIEVhcnRoICh3aXRoIFJpY2hhcmQgRGF3a2lucykgKE9GRklDSUFMIExJVkUpAAlOaWdodHdpc2gAAAAAABMyEAALcXJNd3hlMnlhNUUAAQAraHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1xck13eGUyeWE1RQAHeW91dHViZQAAAAAAAAAA","guildId":"182892283111276544"}
 
 {"op":"event","reason":"FINISHED","type":"TrackEndEvent","track":"QAAAjAIAKk5pZ2h0d2lzaCAtIFRoZSBJc2xhbmRlciAoTGl2ZSBBdCBUYW1wZXJlKQAIRWRkIEpvc3MAAAAAAAV2cAALWm84bmNLXzVremMAAQAraHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1abzhuY0tfNWt6YwAHeW91dHViZQAAAAAABXKc","guildId":"182892283111276544"}
+
+{"op":"event","type":"WebSocketClosedEvent","userId":"601749512456896522","guildId":"182892283111276544","reason":"","code":1000,"byRemote":false}
+
+{"op":"event","type":"PlayerDestroyedEvent","cleanup":false,"guildId":"182892283111276544","userId":"601749512456896522"}
 
 */

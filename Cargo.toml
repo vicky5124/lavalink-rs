@@ -72,7 +72,7 @@ native-tokio-02 = [
 ]
 
 [package.metadata.docs.rs]
-features = ["rustls"]
+features = ["rustls", "twilight", "serenity", "andesite"]
 
 [dependencies]
 regex = "1.3"

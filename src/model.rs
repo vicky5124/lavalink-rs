@@ -503,6 +503,40 @@ pub struct TrackStart {
     pub guild_id: u64,
 }
 
+#[cfg(feature = "andesite")]
+#[cfg_attr(docsrs, doc(cfg(feature = "andesite")))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct WebSocketClosed {
+    pub op: String,
+    #[serde(rename = "type")]
+    pub websocket_closed_type: String,
+    #[serde(rename = "userId")]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub user_id: u64,
+    #[serde(rename = "guildId")]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: u64,
+    pub code: u64,
+    #[serde(rename = "byRemote")]
+    pub by_remote: bool,
+}
+
+#[cfg(feature = "andesite")]
+#[cfg_attr(docsrs, doc(cfg(feature = "andesite")))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PlayerDestroyed {
+    pub op: String,
+    #[serde(rename = "type")]
+    pub player_destroyed_type: String,
+    pub cleanup: bool,
+    #[serde(rename = "guildId")]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: u64,
+    #[serde(rename = "userId")]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub user_id: u64,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TrackFinish {
     pub op: String,

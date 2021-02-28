@@ -139,6 +139,18 @@ async fn event_loop(
                         }
                     }
                     "event" => match base_event.event_type.unwrap().as_str() {
+                        #[cfg(feature = "andesite")]
+                        "WebSocketClosedEvent" => {
+                            if let Ok(websocket_closed) = serde_json::from_str::<WebSocketClosed>(&x) {
+                                handler.websocket_closed(client.clone(), websocket_closed).await;
+                            }
+                        }
+                        #[cfg(feature = "andesite")]
+                        "PlayerDestroyedEvent" => {
+                            if let Ok(player_destroyed) = serde_json::from_str::<PlayerDestroyed>(&x) {
+                                handler.player_destroyed(client.clone(), player_destroyed).await;
+                            }
+                        }
                         "TrackStartEvent" => {
                             if let Ok(track_start) = serde_json::from_str::<TrackStart>(&x) {
                                 handler.track_start(client.clone(), track_start).await;
