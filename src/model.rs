@@ -6,7 +6,12 @@ use std::sync::Arc;
 
 use typemap_rev::TypeMap;
 
-use serenity::model::id::{GuildId as SerenityGuildId, UserId as SerenityUserId};
+#[cfg(feature = "serenity")]
+use serenity_dep::model::id::{GuildId as SerenityGuildId, UserId as SerenityUserId};
+
+#[cfg(feature = "twilight")]
+use twilight_model::id::{GuildId as TwilightGuildId, UserId as TwilightUserId};
+
 use songbird::id::{GuildId as SongbirdGuildId, UserId as SongbirdUserId};
 
 use serde::{Deserialize, Serialize};
@@ -125,8 +130,16 @@ pub struct GuildId(pub u64);
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Serialize, Deserialize)]
 pub struct UserId(pub u64);
 
+#[cfg(feature = "serenity")]
 impl From<SerenityGuildId> for GuildId {
     fn from(guild_id: SerenityGuildId) -> GuildId {
+        GuildId(guild_id.0)
+    }
+}
+
+#[cfg(feature = "twilight")]
+impl From<TwilightGuildId> for GuildId {
+    fn from(guild_id: TwilightGuildId) -> GuildId {
         GuildId(guild_id.0)
     }
 }
@@ -149,8 +162,16 @@ impl From<i64> for GuildId {
     }
 }
 
+#[cfg(feature = "serenity")]
 impl From<SerenityUserId> for UserId {
     fn from(user_id: SerenityUserId) -> UserId {
+        UserId(user_id.0)
+    }
+}
+
+#[cfg(feature = "twilight")]
+impl From<TwilightUserId> for UserId {
+    fn from(user_id: TwilightUserId) -> UserId {
         UserId(user_id.0)
     }
 }
@@ -187,8 +208,15 @@ impl fmt::Display for GuildId {
 
 impl GuildId {
     #[inline]
+    #[cfg(feature = "serenity")]
     pub fn to_serenity(&self) -> SerenityGuildId {
         SerenityGuildId(self.0)
+    }
+
+    #[inline]
+    #[cfg(feature = "twilight")]
+    pub fn to_twilight(&self) -> TwilightGuildId {
+        TwilightGuildId(self.0)
     }
 
     #[inline]
@@ -204,8 +232,15 @@ impl GuildId {
 
 impl UserId {
     #[inline]
+    #[cfg(feature = "serenity")]
     pub fn to_serenity(&self) -> SerenityUserId {
         SerenityUserId(self.0)
+    }
+
+    #[inline]
+    #[cfg(feature = "twilight")]
+    pub fn to_twilight(&self) -> TwilightUserId {
+        TwilightUserId(self.0)
     }
 
     #[inline]

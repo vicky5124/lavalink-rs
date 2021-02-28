@@ -4,11 +4,11 @@ version = "0.6.0"
 authors = ["nitsuga5124 <nitsuga5124@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
-description = "Lavalink bindings for discord bot crates"
+description = "Lavalink (and andesite) bindings for discord bot crates"
 readme = "README.md"
 homepage = "https://gitlab.com/nitsuga5124/lavalink-rs/"
 repository =  "https://gitlab.com/nitsuga5124/lavalink-rs/"
-keywords = ["lavalink", "discord", "serenity", "async"]
+keywords = ["lavalink", "discord", "serenity", "twilight", "tokio"]
 categories = ["multimedia"]
 documentation = "https://docs.rs/lavalink-rs"
 
@@ -21,6 +21,9 @@ rustls-marker = []
 native-marker = []
 tokio-02-marker = []
 andesite = []
+
+serenity = ["serenity-dep"]
+twilight = ["twilight-model"]
 
 rustls = [
     "async-tungstenite/tokio-rustls",
@@ -144,26 +147,27 @@ default-features = false
 features = ["tokio-runtime"]
 optional = true
 
-[dependencies.serenity]
-version = "^0.10.2"
+[dependencies.serenity-dep]
+package = "serenity"
+version = "0.10"
 default-features = false
 features=["model"]
+optional = true
+
+[dependencies.twilight-model]
+version = "0.3"
+optional = true
 
 [dependencies.songbird]
-version = "^0.1.3"
+version = "0.1"
 default-features = false
-
-#[[example]]
-#name = "basic_play"
-
-[[example]]
-name = "basic_queue"
 
 [dev-dependencies.tokio]
 version = "1"
 features = ["full"]
 
-[dev-dependencies.serenity]
+[dev-dependencies.serenity-dep]
+package = "serenity"
 version = "^0.10.2"
 features = ["client", "cache", "standard_framework", "voice"]
 

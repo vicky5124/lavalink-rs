@@ -6,6 +6,8 @@ pub mod error;
 pub mod gateway;
 pub mod model;
 
+pub use async_trait::async_trait;
+
 use builders::*;
 use gateway::LavalinkEventHandler;
 use model::*;
