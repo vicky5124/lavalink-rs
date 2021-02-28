@@ -24,8 +24,6 @@ andesite = []
 
 rustls = [
     "async-tungstenite/tokio-rustls",
-    "serenity/rustls_backend",
-    "songbird/serenity-rustls",
     "songbird/gateway",
     "tokio",
     "tokio-rustls",
@@ -37,8 +35,6 @@ rustls = [
 
 native = [
     "async-tungstenite/tokio-native-tls",
-    "serenity/native_tls_backend",
-    "songbird/serenity-native",
     "songbird/gateway",
     "tokio",
     "tokio-native-tls",
@@ -50,8 +46,6 @@ native = [
 
 rustls-tokio-02 = [
     "async-tungstenite-compat/tokio-rustls",
-    "serenity/rustls_tokio_0_2_backend",
-    "songbird/serenity-rustls-tokio-02",
     "songbird/gateway-tokio-02",
     "tokio-compat",
     "tokio-rustls-compat",
@@ -64,8 +58,6 @@ rustls-tokio-02 = [
 
 native-tokio-02 = [
     "async-tungstenite-compat/tokio-native-tls",
-    "serenity/native_tls_tokio_0_2_backend",
-    "songbird/serenity-native-tokio-02",
     "songbird/gateway-tokio-02",
     "tokio-compat",
     "tokio-native-tls-compat",

@@ -7,8 +7,6 @@ use std::{net::SocketAddr, time::Duration};
 //use serenity::model::guild::Region;
 
 #[cfg(feature = "tokio-02-marker")]
-use async_tungstenite_compat as async_tungstenite;
-#[cfg(feature = "tokio-02-marker")]
 use tokio_compat as tokio;
 
 #[cfg(feature = "tokio-02-marker")]
