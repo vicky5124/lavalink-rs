@@ -255,6 +255,26 @@ impl LavalinkClient {
     }
 
     /// Returns a builder to be used to create a Client.
+    ///
+    /// ```rust
+    /// struct LavalinkHandler;
+    ///
+    /// #[async_trait]
+    /// impl LavalinkEventHandler for LavalinkHandler {
+    ///     async fn track_start(&self, _client: LavalinkClient, event: TrackStart) {
+    ///         info!("Track started!\nGuild: {}", event.guild_id);
+    ///     }
+    ///     async fn track_finish(&self, _client: LavalinkClient, event: TrackFinish) {
+    ///         info!("Track finished!\nGuild: {}", event.guild_id);
+    ///     }
+    /// }
+    ///     
+    /// let lavalink_client = LavalinkClient::builder(bot_id)
+    ///     .set_host("127.0.0.1")
+    ///     .set_password(env::var("LAVALINK_PASSWORD").unwrap_or("youshallnotpass".to_string()))
+    ///     .build(LavalinkHandler)
+    ///     .await?;
+    /// ```
     pub fn builder(user_id: impl Into<UserId>) -> LavalinkClientBuilder {
         LavalinkClientBuilder::new(user_id)
     }
@@ -344,6 +364,18 @@ impl LavalinkClient {
     ///
     /// The running loops and the nodes can be obtained via `LavalinkClient::nodes()` and
     /// `LavalinkClient::loops()`
+    ///
+    /// ```rust,untested
+    /// lavalink_client.destroy(guild_id).await?;
+    ///
+    /// { 
+    ///     let nodes = lavalink_client.nodes().await;
+    ///     nodes.remove(&guild_id.0);
+    ///     
+    ///     let loops = lavalink_client.loops().await;
+    ///     loops.remove(&guild_id.0);
+    /// }
+    /// ```
     pub async fn destroy(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
 
