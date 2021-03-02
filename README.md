@@ -72,3 +72,6 @@ These are the available ones:
 - `native`: Uses the system native TLS backend (OpenSSL on linux).
 - `rustls-tokio-02`: rustls, but uses tokio 0.2 instead of 1.x
 - `native-tokio-02`: native, but uses tokio 0.2 instead of 1.x
+- `serenity`: Add support for serenity's models.
+- `twilight`: Add support for twilight-model.
+- `andesite`: Add andesite exclusive features.
