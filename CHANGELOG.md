@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0
+
+- Added documentation.
+- Added examples to the documentation.
+- Removed unused type alias.
+- Removed unused Error variants.
+
 ## 0.7.0-rc.0
 
 - Added twilight support
