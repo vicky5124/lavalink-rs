@@ -29,12 +29,12 @@ impl LavalinkClientBuilder {
     /// Builds the LavalinkClient.
     ///
     /// Default values:
-    ///   host: localhost
-    ///   port: 2333
-    ///   password: youshallnotpass
-    ///   shard_count: 1
-    ///   is_ssl: false
-    ///   bot_id: <required parameter>
+    ///   - host: localhost
+    ///   - port: 2333
+    ///   - password: youshallnotpass
+    ///   - shard_count: 1
+    ///   - is_ssl: false
+    ///   - bot_id: <required parameter>
     pub fn new(bot_id: impl Into<UserId>) -> Self {
         Self {
             host: "localhost".to_string(),
@@ -135,6 +135,10 @@ impl PlayParameters {
         Ok(())
     }
 
+    /// Adds the track to the node queue.
+    ///
+    /// If there's no queue loop running, this will start one up, and add it to the running loops
+    /// Set found on the Client.
     pub async fn queue(self) -> LavalinkResult<()> {
         let track = crate::model::TrackQueue {
             track: self.track,

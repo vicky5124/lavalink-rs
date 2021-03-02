@@ -1,3 +1,5 @@
+// oh god, this module looks terrible
+
 use crate::error::LavalinkError;
 use crate::WsStream;
 

@@ -1,11 +1,18 @@
+//! A Lavalink and Andesite API wrapper library for every tokio based discord bot library.
+
 #[macro_use]
 extern crate tracing;
 
+/// Builder structures
 pub mod builders;
+/// Library's errors
 pub mod error;
+/// Gateway events
 pub mod gateway;
+/// Library models
 pub mod model;
 
+/// Re-export to be used with the event handler.
 pub use async_trait::async_trait;
 
 use builders::*;
@@ -58,15 +65,20 @@ use async_tungstenite::{
 
 use dashmap::{DashMap, DashSet};
 
+/// All 0's equalizer preset. Default.
 pub const EQ_BASE: [f64; 15] = [
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 ];
+
+/// Basic boost equalizer with higher lows and highs.
 pub const EQ_BOOST: [f64; 15] = [
     -0.075, 0.125, 0.125, 0.1, 0.1, 0.05, 0.075, 0.0, 0.0, 0.0, 0.0, 0.0, 0.125, 0.15, 0.05,
 ];
+/// Equalizer preset for most metal music.
 pub const EQ_METAL: [f64; 15] = [
     0.0, 0.1, 0.1, 0.15, 0.13, 0.1, 0.0, 0.125, 0.175, 0.175, 0.125, 0.125, 0.1, 0.075, 0.0,
 ];
+/// Equalizer preset for piano and classical.
 pub const EQ_PIANO: [f64; 15] = [
     -0.25, -0.25, -0.125, 0.0, 0.25, 0.25, 0.0, -0.25, -0.25, 0.0, 0.0, 0.5, 0.25, -0.025, 0.0,
 ];
@@ -74,28 +86,32 @@ pub const EQ_PIANO: [f64; 15] = [
 pub type WsStream =
     WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
 
-pub type WebsocketConnection = Arc<Mutex<WsStream>>;
-
 /// All fields are public for those who want to do their own implementation of things.
 pub struct LavalinkClientInner {
-    pub rest_uri: String,
     //pub socket_uri: String,
+    pub rest_uri: String,
     pub headers: HeaderMap,
 
+    /// The sender websocket split.
     pub socket_write: SplitSink<WsStream, TungsteniteMessage>,
     // cannot be cloned, and cannot be behind a lock
     // because it would always be open by the event loop.
     //pub socket_read: SplitStream<WsStream>,
 
     //_shard_id: Option<ShardId>,
-    // Arc in preparation for Node pools
     pub nodes: Arc<DashMap<u64, Node>>,
     pub loops: Arc<DashSet<u64>>,
+
     // Unused
     //_region: Option<Region>,
     //_identifier: Option<String>,
 }
 
+/// A Client for Lavalink.
+///
+/// This structure is behind `Arc`, so it's clone and thread safe.
+///
+/// The inner field is public for those who want to tinker with it manually.
 #[derive(Clone)]
 pub struct LavalinkClient {
     /// Field is public for those who want to do their own implementation of things.
@@ -182,7 +198,7 @@ async fn event_loop(
 }
 
 impl LavalinkClient {
-    /// Builds a basic uninitialized LavalinkClient.
+    /// Builds the Client connection.
     pub async fn new(
         builder: &LavalinkClientBuilder,
         handler: impl LavalinkEventHandler + Send + Sync + 'static,
@@ -238,6 +254,7 @@ impl LavalinkClient {
         Ok(client)
     }
 
+    /// Returns a builder to be used to create a Client.
     pub fn builder(user_id: impl Into<UserId>) -> LavalinkClientBuilder {
         LavalinkClientBuilder::new(user_id)
     }
@@ -317,9 +334,16 @@ impl LavalinkClient {
         }
     }
 
-    // TODO: remove it from running loops too
     /// Destroys the current player.
     /// When this is ran, `create_session()` needs to be ran again.
+    ///
+    /// This method does not remove the guild from the running event loops, nor does it clear the
+    /// Node, this allows for reconnecting without losing data.
+    /// If you are having issues with disconnecting and reconnecting the bot to a voice channel,
+    /// remove the guild from the running event loops and reset the nodes.
+    ///
+    /// The running loops and the nodes can be obtained via `LavalinkClient::nodes()` and
+    /// `LavalinkClient::loops()`
     pub async fn destroy(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
 
