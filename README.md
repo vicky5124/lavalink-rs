@@ -38,10 +38,10 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = { version = "0.6.0-rc.0", features = ["rustls"] }
+lavalink-rs = { version = "0.7", features = ["rustls"] }
 # or
 [dependencies.lavalink-rs]
-version = "0.6.0-rc.0"
+version = "0.7"
 features = ["rustls"]
 ```
 
