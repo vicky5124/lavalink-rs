@@ -13,16 +13,11 @@ use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
 
 #[derive(Debug)]
 pub enum LavalinkError {
-    NoWebsocket,
-    InvalidDataToVoiceUpdate,
-    InvalidDataToPlay,
-    InvalidDataToStop,
-    InvalidDataToDestroy,
-    InvalidDataToPause,
-    InvalidDataToVolume,
-    InvalidDataToSeek,
+    /// TungsteniteError redirect.
     ErrorWebsocketPayload(TungsteniteError),
+    /// Invalid Headers redirect.
     InvalidHeaderValue(InvalidHeaderValue),
+    /// ReqwestError redirect.
     ReqwestError(ReqwestError),
 }
 
@@ -31,28 +26,6 @@ impl Error for LavalinkError {}
 impl Display for LavalinkError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match self {
-            LavalinkError::NoWebsocket => write!(f, "There is no initialized websocket."),
-            LavalinkError::InvalidDataToPlay => {
-                write!(f, "Invalid data was provided to the `play` json.")
-            }
-            LavalinkError::InvalidDataToStop => {
-                write!(f, "Invalid data was provided to the `stop` json.")
-            }
-            LavalinkError::InvalidDataToDestroy => {
-                write!(f, "Invalid data was provided to the `destroy` json.")
-            }
-            LavalinkError::InvalidDataToPause => {
-                write!(f, "Invalid data was provided to the `pause` json.")
-            }
-            LavalinkError::InvalidDataToVolume => {
-                write!(f, "Invalid data was provided to the `volume` json.")
-            }
-            LavalinkError::InvalidDataToSeek => {
-                write!(f, "Invalid data was provided to the `seek` json.")
-            }
-            LavalinkError::InvalidDataToVoiceUpdate => {
-                write!(f, "Invalid data was provided to the `voiceUpdate` json.")
-            }
             LavalinkError::ErrorWebsocketPayload(why) => {
                 write!(
                     f,
