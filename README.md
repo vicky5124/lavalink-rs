@@ -35,6 +35,8 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 
 ## How to use
 
+The minimum required Rust version is 1.51 due to a dependency of Songbird.
+
 Install the version from crates.io:
 
 ```toml

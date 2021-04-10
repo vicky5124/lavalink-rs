@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["nitsuga5124 <nitsuga5124@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
@@ -181,3 +181,6 @@ version = "0.1"
 
 [dev-dependencies.tracing-subscriber]
 version = "0.2"
+
+[build-dependencies]
+version_check = "0.9"

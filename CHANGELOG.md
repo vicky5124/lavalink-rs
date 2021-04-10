@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1
+
+- Added a minimum rust version check.
+
 ## 0.7.0
 
 - Added documentation.
