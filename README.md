@@ -4,7 +4,7 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 
 ## Links to download stuff you will need
 
-- [Lavalink repository](https://github.com/Frederikam/Lavalink)
+- [Lavalink repository](https://github.com/freyacodes/Lavalink)
 - [Andesite Repository](https://github.com/natanbc/andesite)
 - [Java download](https://adoptopenjdk.net/) (11 or newer, 15 recommended, OpenJ9 works)
 
