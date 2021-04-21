@@ -525,6 +525,22 @@ impl LavalinkClient {
         Ok(())
     }
 
+    pub async fn equalize_dynamic(
+        &self,
+        guild_id: impl Into<GuildId>,
+        bands: Vec<Band>,
+    ) -> LavalinkResult<()> {
+        let payload = crate::model::Equalizer { bands };
+
+        let mut client = self.inner.lock().await;
+
+        crate::model::SendOpcode::Equalizer(payload)
+            .send(guild_id, &mut client.socket_write)
+            .await?;
+
+        Ok(())
+    }
+
     /// Equalizes a specific band.
     pub async fn equalize_band(
         &self,
