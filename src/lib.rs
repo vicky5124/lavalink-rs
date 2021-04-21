@@ -496,10 +496,11 @@ impl LavalinkClient {
 
     /// Sets all equalizer levels.
     ///
-    /// There are 15 bands (0-14) that can be changed.
-    /// The floating point value is the multiplier for the given band. The default value is 0.
-    /// Valid values range from -0.25 to 1.0, where -0.25 means the given band is completely muted, and 0.25 means it is doubled.
-    /// Modifying the gain could also change the volume of the output.
+    /// - There are 15 bands (0-14) that can be changed.
+    /// - The floating point value is the multiplier for the given band.
+    /// - The default value is 0.
+    /// - Valid values range from -0.25 to 1.0, where -0.25 means the given band is completely muted, and 0.25 means it is doubled.
+    /// - Modifying the gain could also change the volume of the output.
     pub async fn equalize_all(
         &self,
         guild_id: impl Into<GuildId>,
@@ -525,6 +526,9 @@ impl LavalinkClient {
         Ok(())
     }
 
+    /// Equalize a dynamic set of bands, rather than just one or all of them at once.
+    ///
+    /// Unmentioned bands will remain unmodified.
     pub async fn equalize_dynamic(
         &self,
         guild_id: impl Into<GuildId>,

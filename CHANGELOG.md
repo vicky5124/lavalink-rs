@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.2
+
+- Add equalize_dynamic() method
+
 ## 0.7.1
 
 - Added a minimum rust version check.
