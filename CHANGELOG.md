@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+- Fixed typo on get_tracks()
+- Transitioned to Vicky
+- Create the Node on create_session() rather than queue()
+- Fixed warning on twilight example
+
 ## 0.7.2
 
 - Add equalize_dynamic() method
