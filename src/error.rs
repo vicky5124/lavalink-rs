@@ -19,6 +19,10 @@ pub enum LavalinkError {
     InvalidHeaderValue(InvalidHeaderValue),
     /// ReqwestError redirect.
     ReqwestError(ReqwestError),
+    /// Returned by [`PlayParameters::queue`] if no queue is present.
+    ///
+    /// [`PlayParameters::queue`]: crate::builders::PlayParameters
+    NoSessionPresent,
 }
 
 impl Error for LavalinkError {}
@@ -38,7 +42,10 @@ impl Display for LavalinkError {
             }
             LavalinkError::ReqwestError(why) => {
                 write!(f, "Reqwest Error => {:?}", why)
-            } //_ => write!(f, "Unhandled error occurred."),
+            }
+            LavalinkError::NoSessionPresent => {
+                write!(f, "Please, call client.create_session() for this method to work correctly.")
+            }
         }
     }
 }

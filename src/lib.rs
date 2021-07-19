@@ -86,7 +86,8 @@ pub const EQ_PIANO: [f64; 15] = [
 pub type WsStream =
     WebSocketStream<Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
 
-/// All fields are public for those who want to do their own implementation of things.
+/// NOTE: All fields are public for those who want to do their own implementation of things, you
+/// should not be touching them if you don't know what you are doing.
 pub struct LavalinkClientInner {
     //pub socket_uri: String,
     pub rest_uri: String,
@@ -320,6 +321,9 @@ impl LavalinkClient {
     }
 
     /// Creates a lavalink session on the specified guild.
+    ///
+    /// This also creates a Node and inserts it. The node is not added on loops unless
+    /// Play::queue() is ran.
     pub async fn create_session(&self, connection_info: &ConnectionInfo) -> LavalinkResult<()> {
         let event = crate::model::Event {
             token: connection_info.token.to_string(),
@@ -337,6 +341,8 @@ impl LavalinkClient {
         crate::model::SendOpcode::VoiceUpdate(payload)
             .send(connection_info.guild_id, &mut client.socket_write)
             .await?;
+
+        client.nodes.insert(connection_info.guild_id.0, Node::default());
 
         Ok(())
     }
@@ -589,6 +595,11 @@ impl LavalinkClient {
     }
 
     /// Obtains an atomic reference to the running queue loops
+    ///
+    /// A node guild_id is added here the first time [`PlayParameters::queue`] is called.
+    ///
+    /// [`PlayParameters::queue`]: crate::builders::PlayParameters
+
     pub async fn loops(&self) -> Arc<DashSet<u64>> {
         let client = self.inner.lock().await;
         client.loops.clone()

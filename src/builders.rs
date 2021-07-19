@@ -138,7 +138,12 @@ impl PlayParameters {
     /// Adds the track to the node queue.
     ///
     /// If there's no queue loop running, this will start one up, and add it to the running loops
-    /// Set found on the Client.
+    /// on [`LavalinkClient.loops`].
+    ///
+    /// Needs for [`LavalinkClient::create_session`] to be called first.
+    ///
+    /// [`LavalinkClient.loops`]: crate::LavalinkClientInner::loops
+    /// [`LavalinkClient::create_session`]: crate::LavalinkClient::create_session
     pub async fn queue(self) -> LavalinkResult<()> {
         let track = crate::model::TrackQueue {
             track: self.track,
@@ -157,8 +162,20 @@ impl PlayParameters {
 
         if !client_lock.loops.contains(&self.guild_id) {
             let guild_id = self.guild_id;
+            
+            if let Some(mut node) = client_lock.nodes.get_mut(&guild_id) {
+                if !node.is_on_loops {
+                    node.is_on_loops = true;
+                } else {
+                    let mut node = client_lock.nodes.get_mut(&self.guild_id).unwrap();
+                    node.queue.push(track);
 
-            client_lock.nodes.insert(guild_id, Node::default());
+                    return Ok(());
+                }
+            } else {
+                return Err(LavalinkError::NoSessionPresent)
+            }
+
             client_lock.loops.insert(guild_id);
 
             {
@@ -204,10 +221,12 @@ impl PlayParameters {
                     sleep(Duration::from_secs(1)).await;
                 }
             });
-        } else {
-            let mut node = client_lock.nodes.get_mut(&self.guild_id).unwrap();
-            node.queue.push(track);
+
+            return Ok(());
         }
+
+        let mut node = client_lock.nodes.get_mut(&self.guild_id).unwrap();
+        node.queue.push(track);
 
         Ok(())
     }

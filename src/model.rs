@@ -345,6 +345,8 @@ pub struct Node {
     pub is_paused: bool,
     pub volume: u16,
     pub queue: Vec<TrackQueue>,
+    /// Check used to know if the loop is on Client.loops
+    pub is_on_loops: bool,
     /// Use this to store whatever information you wish that's guild specific, such as invocation
     /// channel id's, for example.
     pub data: Arc<RwLock<TypeMap>>,
@@ -358,6 +360,7 @@ impl Default for Node {
             is_paused: false,
             volume: 100,
             queue: vec![],
+            is_on_loops: false,
             data: Arc::new(RwLock::new(TypeMap::new())),
         }
     }
