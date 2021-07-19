@@ -288,7 +288,7 @@ impl LavalinkClient {
             &format!("{}/loadtracks", &client.rest_uri),
             &[("identifier", &query.to_string())],
         )
-        .expect("The query cannot be formated to a url.");
+        .expect("The query cannot be formatted to a url.");
 
         let resp = reqwest
             .get(url)
