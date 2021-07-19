@@ -23,7 +23,7 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 - [X] Support twilight.
 - [X] Support events.
 - [ ] Support raw events.
-- [ ] Implement my own event hander for voice connections.
+- [ ] Implement my own event handler for voice connections.
 - [X] Support easy queues natively.
 - [X] Optimize the codebase.
 - [X] Remove all the clones from examples.
@@ -40,10 +40,10 @@ The minimum required Rust version is 1.51 due to a dependency of Songbird.
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = { version = "0.7", features = ["rustls"] }
+lavalink-rs = { version = "0.8", features = ["rustls"] }
 # or
 [dependencies.lavalink-rs]
-version = "0.7"
+version = "0.8"
 features = ["rustls"]
 ```
 
