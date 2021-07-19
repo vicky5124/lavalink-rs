@@ -1,13 +1,13 @@
 [package]
 name = "lavalink-rs"
 version = "0.7.2"
-authors = ["nitsuga5124 <nitsuga5124@gmail.com>"]
+authors = ["vicky5124 <vickyf5124@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
 description = "Lavalink (and andesite) bindings for discord bot crates"
 readme = "README.md"
-homepage = "https://gitlab.com/nitsuga5124/lavalink-rs/"
-repository =  "https://gitlab.com/nitsuga5124/lavalink-rs/"
+homepage = "https://gitlab.com/vicky5124/lavalink-rs/"
+repository =  "https://gitlab.com/vicky5124/lavalink-rs/"
 keywords = ["lavalink", "discord", "serenity", "twilight", "tokio"]
 categories = ["multimedia"]
 documentation = "https://docs.rs/lavalink-rs"

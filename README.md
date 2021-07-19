@@ -50,10 +50,10 @@ features = ["rustls"]
 Or the development release:
 
 ```toml
-lavalink-rs = { git = "https://gitlab.com/nitsuga5124/lavalink-rs/", branch = "master" }
+lavalink-rs = { git = "https://gitlab.com/vicky5124/lavalink-rs/", branch = "master" }
 # or
 [dependencies.lavalink-rs]
-git = "https://gitlab.com/nitsuga5124/lavalink-rs/"
+git = "https://gitlab.com/vicky5124/lavalink-rs/"
 branch = "master"
 ```
 
