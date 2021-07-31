@@ -50,11 +50,12 @@ features = ["rustls"]
 Or the development release:
 
 ```toml
-lavalink-rs = { git = "https://gitlab.com/vicky5124/lavalink-rs/", branch = "master" }
+lavalink-rs = { git = "https://gitlab.com/vicky5124/lavalink-rs/", branch = "master", features = ["rustls"] }
 # or
 [dependencies.lavalink-rs]
 git = "https://gitlab.com/vicky5124/lavalink-rs/"
 branch = "master"
+features = ["rustls"]
 ```
 
 If you wish to use a development version of serenity, add the following to the Cargo.toml:
