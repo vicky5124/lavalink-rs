@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0
+
+- Updated Songbird.
+- Updated Twilight.
+- Updated Tungstenite.
+- Updated readme to include missing required features.
+
 ## 0.8.0
 
 - Fixed typo on get_tracks()

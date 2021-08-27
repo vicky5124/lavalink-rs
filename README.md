@@ -40,10 +40,10 @@ The minimum required Rust version is 1.51 due to a dependency of Songbird.
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = { version = "0.8", features = ["rustls"] }
+lavalink-rs = { version = "0.9", features = ["rustls"] }
 # or
 [dependencies.lavalink-rs]
-version = "0.8"
+version = "0.9"
 features = ["rustls"]
 ```
 
