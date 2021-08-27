@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.8.0"
+version = "0.9.0"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
@@ -26,7 +26,7 @@ serenity = ["serenity-dep"]
 twilight = ["twilight-model"]
 
 rustls = [
-    "async-tungstenite/tokio-rustls",
+    "async-tungstenite/tokio-rustls-webpki-roots",
     "songbird/gateway",
     "tokio",
     "tokio-rustls",
@@ -135,7 +135,7 @@ features = ["json"]
 optional = true
 
 [dependencies.async-tungstenite]
-version = "0.13"
+version = "0.14"
 default-features = false
 features = ["tokio-runtime"]
 optional = true
@@ -155,11 +155,11 @@ features=["model"]
 optional = true
 
 [dependencies.twilight-model]
-version = "0.3"
+version = "0.6"
 optional = true
 
 [dependencies.songbird]
-version = "0.1"
+version = "0.2"
 default-features = false
 
 [dev-dependencies.tokio]
