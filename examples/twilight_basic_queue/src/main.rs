@@ -7,12 +7,14 @@ extern crate tracing;
 use std::{env, error::Error, sync::Arc};
 
 use futures::StreamExt;
+use tokio::sync::Mutex;
 
 use lavalink_rs::{async_trait, gateway::*, model::*, LavalinkClient};
+
 use songbird::Songbird;
 
 use twilight_command_parser::{Arguments, Command, CommandParserConfig, Parser};
-use twilight_gateway::{Cluster, Event, Intents};
+use twilight_gateway::{Cluster, Event, Intents, cluster::Events};
 use twilight_http::Client as HttpClient;
 use twilight_model::channel::Message;
 
@@ -23,6 +25,7 @@ type ServiceResult = Result<(), Box<dyn Error + Send + Sync>>;
 #[derive(Clone)]
 struct Context {
     cluster: Cluster,
+    events: Arc<Mutex<Events>>,
     http: HttpClient,
     songbird: Arc<Songbird>,
     lavalink: LavalinkClient,
@@ -50,11 +53,11 @@ async fn main() -> ServiceResult {
     let context = {
         let token = env::var("DISCORD_TOKEN")?;
 
-        let http = HttpClient::new(&token);
-        let cluster =
+        let http = HttpClient::new(token.clone());
+        let (cluster, events) =
             Cluster::new(token, Intents::GUILD_MESSAGES | Intents::GUILD_VOICE_STATES).await?;
 
-        let bot_id = http.current_user().await?.id;
+        let bot_id = http.current_user().exec().await?.model().await?.id; // what is this mess
         let shard_count = cluster.shards().len();
 
         info!(
@@ -62,7 +65,7 @@ async fn main() -> ServiceResult {
             bot_id, shard_count
         );
 
-        let songbird = Songbird::twilight(cluster.clone(), shard_count as u64, bot_id);
+        let songbird = Arc::new(Songbird::twilight(cluster.clone(), bot_id));
 
         let lavalink = LavalinkClient::builder(bot_id)
             .set_host("127.0.0.1")
@@ -75,6 +78,7 @@ async fn main() -> ServiceResult {
 
         Context {
             cluster,
+            events: Arc::new(Mutex::new(events)),
             http,
             songbird,
             lavalink,
@@ -94,7 +98,8 @@ async fn main() -> ServiceResult {
 
     let parser = Parser::new(commands_config);
 
-    let mut events = context.cluster.events();
+    let events_temp = context.events.clone();
+    let mut events = events_temp.lock().await;
 
     while let Some(event) = events.next().await {
         context.songbird.process(&event.1).await;
@@ -167,6 +172,7 @@ async fn ping(ctx: Context, msg: &Message) -> ServiceResult {
     ctx.http
         .create_message(msg.channel_id)
         .content("Pong!")?
+        .exec()
         .await?;
 
     Ok(())
@@ -180,10 +186,11 @@ async fn join(ctx: Context, msg: &Message, args: Arguments<'_>) -> ServiceResult
         Err(why) => {
             ctx.http
                 .create_message(msg.channel_id)
-                .content(format!(
+                .content(&format!(
                     "Please provide a valid voice channel ID\n```{}```",
                     why
                 ))?
+                .exec()
                 .await?;
 
             return Ok(());
@@ -205,7 +212,8 @@ async fn join(ctx: Context, msg: &Message, args: Arguments<'_>) -> ServiceResult
 
     ctx.http
         .create_message(msg.channel_id)
-        .content(content)?
+        .content(&content)?
+        .exec()
         .await?;
 
     Ok(())
@@ -223,6 +231,7 @@ async fn leave(ctx: Context, msg: &Message) -> ServiceResult {
             ctx.http
                 .create_message(msg.channel_id)
                 .content("Failed to leave the channel.")?
+                .exec()
                 .await?;
         }
 
@@ -231,11 +240,13 @@ async fn leave(ctx: Context, msg: &Message) -> ServiceResult {
         ctx.http
             .create_message(msg.channel_id)
             .content("Left voice channel.")?
+            .exec()
             .await?;
     } else {
         ctx.http
             .create_message(msg.channel_id)
             .content("Not in a voice channel.")?
+            .exec()
             .await?;
     }
 
@@ -249,6 +260,7 @@ async fn play(ctx: Context, msg: &Message, args: Arguments<'_>) -> ServiceResult
         ctx.http
             .create_message(msg.channel_id)
             .content("Please, specify something to play.")?
+            .exec()
             .await?;
 
         return Ok(());
@@ -263,6 +275,7 @@ async fn play(ctx: Context, msg: &Message, args: Arguments<'_>) -> ServiceResult
             ctx.http
                 .create_message(msg.channel_id)
                 .content("Could not find any video of the search query.")?
+                .exec()
                 .await?;
 
             return Ok(());
@@ -280,6 +293,7 @@ async fn play(ctx: Context, msg: &Message, args: Arguments<'_>) -> ServiceResult
             ctx.http
                 .create_message(msg.channel_id)
                 .content("Could not play the track.")?
+                .exec()
                 .await?;
 
             return Ok(());
@@ -287,18 +301,20 @@ async fn play(ctx: Context, msg: &Message, args: Arguments<'_>) -> ServiceResult
 
         ctx.http
             .create_message(msg.channel_id)
-            .content(format!(
+            .content(&format!(
                 "Added to queue: {}",
                 query_information.tracks[0].info.as_ref().unwrap().title
             ))?
+            .exec()
             .await?;
     } else {
         ctx.http
             .create_message(msg.channel_id)
-            .content(format!(
+            .content(&format!(
                 "Make the bot join a voice channel first using `{}join <channel_id>` first",
                 COMMAND_PREFIX
             ))?
+            .exec()
             .await?;
     }
 
@@ -310,21 +326,24 @@ async fn now_playing(ctx: Context, msg: &Message) -> ServiceResult {
         if let Some(track) = &node.now_playing {
             ctx.http
                 .create_message(msg.channel_id)
-                .content(format!(
+                .content(&format!(
                     "Now Playing: {}",
                     track.track.info.as_ref().unwrap().title
                 ))?
+                .exec()
                 .await?;
         } else {
             ctx.http
                 .create_message(msg.channel_id)
                 .content("Nothing is playing at the moment.")?
+                .exec()
                 .await?;
         }
     } else {
         ctx.http
             .create_message(msg.channel_id)
             .content("Nothing is playing at the moment.")?
+            .exec()
             .await?;
     }
 
@@ -335,15 +354,17 @@ async fn skip(ctx: Context, msg: &Message) -> ServiceResult {
     if let Some(track) = ctx.lavalink.skip(msg.guild_id.unwrap()).await {
         ctx.http
             .create_message(msg.channel_id)
-            .content(format!(
+            .content(&format!(
                 "Skipped: {}",
                 track.track.info.as_ref().unwrap().title
             ))?
+            .exec()
             .await?;
     } else {
         ctx.http
             .create_message(msg.channel_id)
             .content("Nothing to skip.")?
+            .exec()
             .await?;
     }
 
