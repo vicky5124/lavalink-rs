@@ -14,7 +14,7 @@ use lavalink_rs::{async_trait, gateway::*, model::*, LavalinkClient};
 use songbird::Songbird;
 
 use twilight_command_parser::{Arguments, Command, CommandParserConfig, Parser};
-use twilight_gateway::{Cluster, Event, Intents, cluster::Events};
+use twilight_gateway::{cluster::Events, Cluster, Event, Intents};
 use twilight_http::Client as HttpClient;
 use twilight_model::channel::Message;
 
