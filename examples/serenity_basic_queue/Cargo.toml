@@ -19,10 +19,10 @@ version = "1"
 features = ["full"]
 
 [dependencies.serenity]
-version = "^0.10.2"
+version = "0.10"
 features = ["client", "cache", "standard_framework", "voice"]
 
 [dependencies.songbird]
-version = "^0.1.3"
+version = "0.2"
 default-features = false
 features = ["serenity-rustls", "gateway"]
