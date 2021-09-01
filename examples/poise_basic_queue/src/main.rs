@@ -273,8 +273,7 @@ async fn play(
 }
 
 /// Send the currently playing track
-#[poise::command(slash_command, track_edits)]
-//#[aliases(np)]
+#[poise::command(slash_command, track_edits, aliases("np"))]
 async fn now_playing(ctx: Context<'_>) -> CommandResult {
     let lava_client = ctx.data().lavalink.clone();
 
