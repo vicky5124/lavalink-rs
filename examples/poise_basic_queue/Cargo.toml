@@ -1,0 +1,37 @@
+[package]
+name = "poise_basic_queue"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tracing = "0.1"
+tracing-subscriber = "0.2"
+
+[dependencies.lavalink-rs]
+path = "../../"
+features = ["rustls", "serenity"]
+
+[dependencies.poise]
+git = "https://github.com/kangalioo/poise"
+
+[dependencies.serenity]
+#package = "serenity"
+git = "https://github.com/serenity-rs/serenity"
+branch = "next"
+default-features = false
+features = ["builder", "cache", "client", "gateway", "model", "utils", "rustls_backend", "unstable_discord_api", "collector"]
+
+[dependencies.songbird]
+version = "0.2"
+default-features = false
+features = ["serenity-rustls", "gateway"]
+
+[dependencies.tokio]
+version = "1"
+features = ["full"]
+
+[patch.crates-io.serenity]
+git = "https://github.com/serenity-rs/serenity"
+branch = "next"
