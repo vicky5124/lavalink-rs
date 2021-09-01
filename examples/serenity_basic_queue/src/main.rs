@@ -98,7 +98,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let lava_client = LavalinkClient::builder(bot_id)
         .set_host("127.0.0.1")
-        .set_password(env::var("LAVALINK_PASSWORD").unwrap_or("youshallnotpass".to_string()))
+        .set_password(
+            env::var("LAVALINK_PASSWORD").unwrap_or_else(|_| "youshallnotpass".to_string()),
+        )
         .build(LavalinkHandler)
         .await?;
 
@@ -128,7 +130,7 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     let connect_to = match channel_id {
         Some(channel) => channel,
         None => {
-            check_msg(msg.reply(ctx, "Join a voice channel.").await);
+            check_msg(msg.reply(&ctx.http, "Join a voice channel.").await);
 
             return Ok(());
         }
@@ -185,7 +187,7 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
 
         check_msg(msg.channel_id.say(&ctx.http, "Left voice channel").await);
     } else {
-        check_msg(msg.reply(ctx, "Not in a voice channel").await);
+        check_msg(msg.reply(&ctx.http, "Not in a voice channel").await);
     }
 
     Ok(())
@@ -233,11 +235,11 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             return Ok(());
         }
 
-        if let Err(why) =
-            &lava_client.play(guild_id, query_information.tracks[0].clone())
-                // Change this to play() if you want your own custom queue or no queue at all.
-                .queue()
-                .await
+        if let Err(why) = &lava_client
+            .play(guild_id, query_information.tracks[0].clone())
+            // Change this to play() if you want your own custom queue or no queue at all.
+            .queue()
+            .await
         {
             eprintln!("{}", why);
             return Ok(());
@@ -316,7 +318,7 @@ async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
                 .await,
         );
     } else {
-        check_msg(msg.channel_id.say(ctx, "Nothing to skip.").await);
+        check_msg(msg.channel_id.say(&ctx.http, "Nothing to skip.").await);
     }
 
     Ok(())
