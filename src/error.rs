@@ -3,13 +3,10 @@ use std::{
     fmt::{Display, Formatter, Result},
 };
 
-#[cfg(feature = "tokio-02-marker")]
-use async_tungstenite_compat as async_tungstenite;
-#[cfg(feature = "tokio-02-marker")]
-use reqwest_compat as reqwest;
-
 use async_tungstenite::tungstenite::error::Error as TungsteniteError;
 use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
+
+pub type LavalinkResult<T> = std::result::Result<T, LavalinkError>;
 
 #[derive(Debug)]
 pub enum LavalinkError {
@@ -23,6 +20,11 @@ pub enum LavalinkError {
     ///
     /// [`PlayParameters::queue`]: crate::builders::PlayParameters
     NoSessionPresent,
+    /// When joining a voice channel times out.
+    #[cfg(feature = "simple-gateway")]
+    Timeout,
+    #[cfg(feature = "simple-gateway")]
+    MissingConnectionField(&'static str),
 }
 
 impl Error for LavalinkError {}
@@ -44,7 +46,18 @@ impl Display for LavalinkError {
                 write!(f, "Reqwest Error => {:?}", why)
             }
             LavalinkError::NoSessionPresent => {
-                write!(f, "Please, call client.create_session() for this method to work correctly.")
+                write!(
+                    f,
+                    "Please, call client.create_session() for this method to work correctly."
+                )
+            }
+            #[cfg(feature = "simple-gateway")]
+            LavalinkError::Timeout => {
+                write!(f, "Joining the voice channel timed out.")
+            }
+            #[cfg(feature = "simple-gateway")]
+            &LavalinkError::MissingConnectionField(field) => {
+                write!(f, "Gateway connection is missing the field `{}`", field)
             }
         }
     }

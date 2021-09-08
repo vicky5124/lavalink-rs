@@ -203,7 +203,7 @@ async fn join(ctx: Context, msg: &Message, args: Arguments<'_>) -> ServiceResult
 
     let content = match handle {
         Ok(connection_info) => {
-            ctx.lavalink.create_session(&connection_info).await?;
+            ctx.lavalink.create_session_with_songbird(&connection_info).await?;
 
             format!("Joined <#{}>!", vc_id)
         }

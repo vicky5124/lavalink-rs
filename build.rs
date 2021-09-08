@@ -1,5 +1,8 @@
-#[cfg(all(not(feature = "rustls-marker"), not(feature = "native-marker")))]
-compile_error!("Please specify a feature, either `rustls` or `native`");
+#[cfg(all(not(feature = "rustls"), not(feature = "native")))]
+compile_error!("Please specify a feature, either `rustls` or `native`.");
+
+#[cfg(all(not(feature = "songbird"), not(feature = "simple-gateway")))]
+compile_error!("Set either `songbird` or `simple-gateway` as a feature to be able to connect to voicce channels.");
 
 use version_check::Version;
 

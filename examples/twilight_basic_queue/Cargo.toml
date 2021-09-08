@@ -18,7 +18,8 @@ tracing-subscriber = "0.2"
 
 [dependencies.lavalink-rs]
 path = "../../"
-features = ["rustls", "twilight"]
+default-features = false
+features = ["rustls", "twilight", "songbird"]
 
 [dependencies.tokio]
 version = "1"

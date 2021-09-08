@@ -23,7 +23,8 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 - [X] Support twilight.
 - [X] Support events.
 - [ ] Support raw events.
-- [ ] Implement my own event handler for voice connections.
+- [X] Implement my own event handler for voice connections.
+- [ ] Support Sharding for the discord gateway.
 - [X] Support easy queues natively.
 - [X] Optimize the codebase.
 - [X] Remove all the clones from examples.
@@ -40,22 +41,20 @@ The minimum required Rust version is 1.51 due to a dependency of Songbird.
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = { version = "0.9", features = ["rustls"] }
+lavalink-rs = "0.9-rc"
 # or
 [dependencies.lavalink-rs]
-version = "0.9"
-features = ["rustls"]
+version = "0.9-rc"
 ```
 
 Or the development release:
 
 ```toml
-lavalink-rs = { git = "https://gitlab.com/vicky5124/lavalink-rs/", branch = "master", features = ["rustls"] }
+lavalink-rs = { git = "https://gitlab.com/vicky5124/lavalink-rs/", branch = "master"}
 # or
 [dependencies.lavalink-rs]
 git = "https://gitlab.com/vicky5124/lavalink-rs/"
 branch = "master"
-features = ["rustls"]
 ```
 
 If you wish to use a development version of serenity, add the following to the Cargo.toml:
@@ -68,13 +67,13 @@ branch = "next"
 
 ### Features
 
-No default features are set, so you will need to specify them yourself.
+Default features are: `rustls` and `songbird`
 These are the available ones:
 
 - `rustls`: Use the rustls TLS backend.
 - `native`: Uses the system native TLS backend (OpenSSL on linux).
-- `rustls-tokio-02`: rustls, but uses tokio 0.2 instead of 1.x
-- `native-tokio-02`: native, but uses tokio 0.2 instead of 1.x
+- `songbird`: Use songbird to connect to handle voice connections.
+- `simple-gateway`: Use lavalink-rs to handle the voice connections (note, this is a very basic implementation, without sharding support, while also creating a second gateway rather than using the existing one).
 - `serenity`: Add support for serenity's models.
 - `twilight`: Add support for twilight-model.
 - `andesite`: Add andesite exclusive features.

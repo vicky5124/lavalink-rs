@@ -6,13 +6,6 @@ use crate::LavalinkClient;
 use std::{net::SocketAddr, time::Duration};
 //use serenity::model::guild::Region;
 
-#[cfg(feature = "tokio-02-marker")]
-use tokio_compat as tokio;
-
-#[cfg(feature = "tokio-02-marker")]
-use tokio::time::delay_for as sleep;
-
-#[cfg(not(feature = "tokio-02-marker"))]
 use tokio::time::sleep;
 
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -23,6 +16,8 @@ pub struct LavalinkClientBuilder {
     pub shard_count: u64,
     pub bot_id: UserId,
     pub is_ssl: bool,
+    #[cfg(feature = "simple-gateway")]
+    pub bot_token: String,
 }
 
 impl LavalinkClientBuilder {
@@ -35,6 +30,19 @@ impl LavalinkClientBuilder {
     ///   - shard_count: 1
     ///   - is_ssl: false
     ///   - bot_id: <required parameter>
+    #[cfg(feature = "simple-gateway")]
+    pub fn new(bot_id: impl Into<UserId>, bot_token: impl Into<String>) -> Self {
+        Self {
+            host: "localhost".to_string(),
+            port: 2333,
+            password: "youshallnotpass".to_string(),
+            shard_count: 1,
+            bot_id: bot_id.into(),
+            bot_token: bot_token.into(),
+            ..Default::default()
+        }
+    }
+    #[cfg(not(feature = "simple-gateway"))]
     pub fn new(bot_id: impl Into<UserId>) -> Self {
         Self {
             host: "localhost".to_string(),
@@ -77,6 +85,13 @@ impl LavalinkClientBuilder {
     /// Sets the ID of the bot.
     pub fn set_bot_id<U: Into<UserId>>(mut self, bot_id: U) -> Self {
         self.bot_id = bot_id.into();
+        self
+    }
+
+    /// Sets the token of the bot.
+    #[cfg(feature = "simple-gateway")]
+    pub fn set_bot_token<U: Into<String>>(mut self, bot_token: U) -> Self {
+        self.bot_token = bot_token.into();
         self
     }
 
@@ -162,7 +177,7 @@ impl PlayParameters {
 
         if !client_lock.loops.contains(&self.guild_id) {
             let guild_id = self.guild_id;
-            
+
             if let Some(mut node) = client_lock.nodes.get_mut(&guild_id) {
                 if !node.is_on_loops {
                     node.is_on_loops = true;
@@ -173,7 +188,7 @@ impl PlayParameters {
                     return Ok(());
                 }
             } else {
-                return Err(LavalinkError::NoSessionPresent)
+                return Err(LavalinkError::NoSessionPresent);
             }
 
             client_lock.loops.insert(guild_id);

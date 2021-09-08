@@ -1,20 +1,29 @@
 // oh god, this module looks terrible
 
-use crate::error::LavalinkError;
+use crate::error::LavalinkResult;
 use crate::WsStream;
 
 use std::fmt;
+use std::num::ParseIntError;
+use std::str::FromStr;
 use std::sync::Arc;
 
 use typemap_rev::TypeMap;
 
 #[cfg(feature = "serenity")]
-use serenity_dep::model::id::{GuildId as SerenityGuildId, UserId as SerenityUserId};
+use serenity_dep::model::id::{
+    ChannelId as SerenityChannelId, GuildId as SerenityGuildId, UserId as SerenityUserId,
+};
 
 #[cfg(feature = "twilight")]
-use twilight_model::id::{GuildId as TwilightGuildId, UserId as TwilightUserId};
+use twilight_model::id::{
+    ChannelId as TwilightChannelId, GuildId as TwilightGuildId, UserId as TwilightUserId,
+};
 
-use songbird::id::{GuildId as SongbirdGuildId, UserId as SongbirdUserId};
+#[cfg(feature = "songbird")]
+use songbird_dep::id::{
+    ChannelId as SongbirdChannelId, GuildId as SongbirdGuildId, UserId as SongbirdUserId,
+};
 
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
@@ -22,16 +31,8 @@ use serde_json::{json, Value};
 
 use futures::{sink::SinkExt, stream::SplitSink};
 
-#[cfg(feature = "tokio-02-marker")]
-use tokio_compat as tokio;
-
-#[cfg(feature = "tokio-02-marker")]
-use async_tungstenite_compat as async_tungstenite;
-
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
 use tokio::sync::RwLock;
-
-pub type LavalinkResult<T> = Result<T, LavalinkError>;
 
 fn merge(a: &mut Value, b: Value) {
     match (a, b) {
@@ -132,6 +133,9 @@ pub struct GuildId(pub u64);
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Serialize, Deserialize)]
 pub struct UserId(pub u64);
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Serialize, Deserialize)]
+pub struct ChannelId(pub u64);
+
 #[cfg(feature = "serenity")]
 impl From<SerenityGuildId> for GuildId {
     fn from(guild_id: SerenityGuildId) -> GuildId {
@@ -146,6 +150,7 @@ impl From<TwilightGuildId> for GuildId {
     }
 }
 
+#[cfg(feature = "songbird")]
 impl From<SongbirdGuildId> for GuildId {
     fn from(guild_id: SongbirdGuildId) -> GuildId {
         GuildId(guild_id.0)
@@ -178,6 +183,7 @@ impl From<TwilightUserId> for UserId {
     }
 }
 
+#[cfg(feature = "songbird")]
 impl From<SongbirdUserId> for UserId {
     fn from(user_id: SongbirdUserId) -> UserId {
         UserId(user_id.0)
@@ -196,15 +202,77 @@ impl From<i64> for UserId {
     }
 }
 
-impl fmt::Display for UserId {
+#[cfg(feature = "serenity")]
+impl From<SerenityChannelId> for ChannelId {
+    fn from(user_id: SerenityChannelId) -> ChannelId {
+        ChannelId(user_id.0)
+    }
+}
+
+#[cfg(feature = "twilight")]
+impl From<TwilightChannelId> for ChannelId {
+    fn from(user_id: TwilightChannelId) -> ChannelId {
+        ChannelId(user_id.0)
+    }
+}
+
+#[cfg(feature = "songbird")]
+impl From<SongbirdChannelId> for ChannelId {
+    fn from(user_id: SongbirdChannelId) -> ChannelId {
+        ChannelId(user_id.0)
+    }
+}
+
+impl From<u64> for ChannelId {
+    fn from(user_id: u64) -> ChannelId {
+        ChannelId(user_id)
+    }
+}
+
+impl From<i64> for ChannelId {
+    fn from(user_id: i64) -> ChannelId {
+        ChannelId(user_id as u64)
+    }
+}
+
+impl fmt::Display for ChannelId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
+impl fmt::Display for UserId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 impl fmt::Display for GuildId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
+    }
+}
+
+impl FromStr for ChannelId {
+    type Err = ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self(u64::from_str(s)?))
+    }
+}
+
+impl FromStr for UserId {
+    type Err = ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self(u64::from_str(s)?))
+    }
+}
+
+impl FromStr for GuildId {
+    type Err = ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self(u64::from_str(s)?))
     }
 }
 
@@ -243,6 +311,30 @@ impl UserId {
     #[cfg(feature = "twilight")]
     pub fn to_twilight(&self) -> TwilightUserId {
         TwilightUserId(self.0)
+    }
+
+    #[inline]
+    pub fn as_u64(&self) -> &u64 {
+        &self.0
+    }
+
+    #[inline]
+    pub fn as_mut_u64(&mut self) -> &mut u64 {
+        &mut self.0
+    }
+}
+
+impl ChannelId {
+    #[inline]
+    #[cfg(feature = "serenity")]
+    pub fn to_serenity(&self) -> SerenityChannelId {
+        SerenityChannelId(self.0)
+    }
+
+    #[inline]
+    #[cfg(feature = "twilight")]
+    pub fn to_twilight(&self) -> TwilightChannelId {
+        TwilightChannelId(self.0)
     }
 
     #[inline]
@@ -494,7 +586,7 @@ pub struct PlayerUpdate {
     pub state: State,
     #[serde(rename = "guildId")]
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub guild_id: u64,
+    pub guild_id: GuildId,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -505,7 +597,7 @@ pub struct TrackStart {
     pub track: String,
     #[serde(rename = "guildId")]
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub guild_id: u64,
+    pub guild_id: GuildId,
 }
 
 #[cfg(feature = "andesite")]
@@ -517,10 +609,10 @@ pub struct WebSocketClosed {
     pub websocket_closed_type: String,
     #[serde(rename = "userId")]
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub user_id: u64,
+    pub user_id: UserId,
     #[serde(rename = "guildId")]
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub guild_id: u64,
+    pub guild_id: GuildId,
     pub code: u64,
     #[serde(rename = "byRemote")]
     pub by_remote: bool,
@@ -536,10 +628,10 @@ pub struct PlayerDestroyed {
     pub cleanup: bool,
     #[serde(rename = "guildId")]
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub guild_id: u64,
+    pub guild_id: GuildId,
     #[serde(rename = "userId")]
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub user_id: u64,
+    pub user_id: UserId,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -551,5 +643,42 @@ pub struct TrackFinish {
     pub track: String,
     #[serde(rename = "guildId")]
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub guild_id: u64,
+    pub guild_id: GuildId,
+}
+
+#[cfg(feature = "simple-gateway")]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct ConnectionInfo {
+    pub guild_id: Option<GuildId>,
+    pub channel_id: Option<ChannelId>,
+    pub endpoint: Option<String>,
+    pub token: Option<String>,
+    pub session_id: Option<String>,
+}
+
+#[cfg(feature = "simple-gateway")]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct EventVoiceServerUpdate {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: GuildId,
+    pub endpoint: String,
+    pub token: String,
+}
+
+#[cfg(feature = "simple-gateway")]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct EventVoiceStateUpdate {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: GuildId,
+    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    pub channel_id: Option<ChannelId>,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub user_id: UserId,
+    pub session_id: String,
+}
+
+#[cfg(feature = "simple-gateway")]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct EventReady {
+    pub session_id: String,
 }

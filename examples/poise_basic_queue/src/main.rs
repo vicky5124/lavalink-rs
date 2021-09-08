@@ -182,7 +182,7 @@ async fn join(ctx: Context<'_>) -> CommandResult {
     match handler {
         Ok(connection_info) => {
             let lava_client = ctx.data().lavalink.clone();
-            lava_client.create_session(&connection_info).await?;
+            lava_client.create_session_with_songbird(&connection_info).await?;
 
             say_reply(ctx, format!("Joined {}", connect_to.mention())).await?;
         }

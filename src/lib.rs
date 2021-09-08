@@ -7,15 +7,27 @@ extern crate tracing;
 pub mod builders;
 /// Library's errors
 pub mod error;
+mod event_loops;
 /// Gateway events
 pub mod gateway;
 /// Library models
 pub mod model;
+#[cfg(feature = "simple-gateway")]
+/// Voice connection handling
+pub mod voice;
 
 /// Re-export to be used with the event handler.
 pub use async_trait::async_trait;
 
 use builders::*;
+#[cfg(feature = "simple-gateway")]
+use error::LavalinkError;
+use error::LavalinkResult;
+
+#[cfg(feature = "simple-gateway")]
+use event_loops::discord_event_loop;
+use event_loops::lavalink_event_loop;
+
 use gateway::LavalinkEventHandler;
 use model::*;
 
@@ -25,36 +37,23 @@ use std::{
     time::Duration,
 };
 
-#[cfg(feature = "tokio-02-marker")]
-use async_tungstenite_compat as async_tungstenite;
-#[cfg(feature = "tokio-02-marker")]
-use reqwest_compat as reqwest;
-#[cfg(feature = "tokio-02-marker")]
-use tokio_compat as tokio;
-
-use songbird::ConnectionInfo;
+#[cfg(feature = "songbird")]
+use songbird_dep::ConnectionInfo as SongbirdConnectionInfo;
 
 use http::Request;
 
 use reqwest::{header::*, Client as ReqwestClient, Url};
 
-#[cfg(all(feature = "native-marker", not(feature = "tokio-02-marker")))]
+#[cfg(feature = "native")]
 use tokio_native_tls::TlsStream;
-
-#[cfg(all(feature = "rustls-marker", not(feature = "tokio-02-marker")))]
+#[cfg(feature = "rustls")]
 use tokio_rustls::client::TlsStream;
-
-#[cfg(all(feature = "native-marker", feature = "tokio-02-marker"))]
-use tokio_native_tls_compat::TlsStream;
-
-#[cfg(all(feature = "rustls-marker", feature = "tokio-02-marker"))]
-use tokio_rustls_compat::client::TlsStream;
 
 use tokio::{net::TcpStream, sync::Mutex};
 
 use regex::Regex;
 
-use futures::stream::{SplitSink, SplitStream, StreamExt};
+use futures::stream::{SplitSink, StreamExt};
 
 use async_tungstenite::{
     stream::Stream,
@@ -62,6 +61,9 @@ use async_tungstenite::{
     tungstenite::Message as TungsteniteMessage,
     WebSocketStream,
 };
+
+#[cfg(feature = "simple-gateway")]
+use tokio::sync::mpsc;
 
 use dashmap::{DashMap, DashSet};
 
@@ -103,9 +105,21 @@ pub struct LavalinkClientInner {
     pub nodes: Arc<DashMap<u64, Node>>,
     pub loops: Arc<DashSet<u64>>,
 
+    #[cfg(feature = "simple-gateway")]
+    pub discord_gateway_data: Arc<Mutex<DiscordGatewayData>>,
     // Unused
     //_region: Option<Region>,
     //_identifier: Option<String>,
+}
+
+#[cfg(feature = "simple-gateway")]
+pub struct DiscordGatewayData {
+    pub shard_count: u64,
+    pub bot_id: UserId,
+    pub headers: HeaderMap,
+    pub sender: mpsc::UnboundedSender<String>,
+    pub connections: Arc<DashMap<GuildId, ConnectionInfo>>,
+    pub socket_uri: &'static str,
 }
 
 /// A Client for Lavalink.
@@ -119,125 +133,79 @@ pub struct LavalinkClient {
     pub inner: Arc<Mutex<LavalinkClientInner>>,
 }
 
-async fn event_loop(
-    mut read: SplitStream<WsStream>,
-    handler: impl LavalinkEventHandler + Send + Sync + 'static,
-    client: LavalinkClient,
-) {
-    while let Some(Ok(resp)) = read.next().await {
-        if let TungsteniteMessage::Text(x) = &resp {
-            if let Ok(base_event) = serde_json::from_str::<GatewayEvent>(&x) {
-                match base_event.op.as_str() {
-                    "stats" => {
-                        if let Ok(stats) = serde_json::from_str::<Stats>(&x) {
-                            handler.stats(client.clone(), stats).await;
-                        }
-                    }
-                    "playerUpdate" => {
-                        if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(&x) {
-                            {
-                                let client_clone = client.clone();
-                                let client_lock = client_clone.inner.lock().await;
-
-                                if let Some(mut node) =
-                                    client_lock.nodes.get_mut(&player_update.guild_id)
-                                {
-                                    if let Some(mut current_track) = node.now_playing.as_mut() {
-                                        let mut info =
-                                            current_track.track.info.as_mut().unwrap().clone();
-                                        info.position = player_update.state.position as u64;
-                                        current_track.track.info = Some(info);
-                                        trace!("Updated track {:?} with position {}", current_track.track.info.as_ref().unwrap(), player_update.state.position);
-                                    }
-                                };
-                            }
-
-                            handler.player_update(client.clone(), player_update).await;
-                        }
-                    }
-                    "event" => match base_event.event_type.unwrap().as_str() {
-                        #[cfg(feature = "andesite")]
-                        "WebSocketClosedEvent" => {
-                            if let Ok(websocket_closed) = serde_json::from_str::<WebSocketClosed>(&x) {
-                                handler.websocket_closed(client.clone(), websocket_closed).await;
-                            }
-                        }
-                        #[cfg(feature = "andesite")]
-                        "PlayerDestroyedEvent" => {
-                            if let Ok(player_destroyed) = serde_json::from_str::<PlayerDestroyed>(&x) {
-                                handler.player_destroyed(client.clone(), player_destroyed).await;
-                            }
-                        }
-                        "TrackStartEvent" => {
-                            if let Ok(track_start) = serde_json::from_str::<TrackStart>(&x) {
-                                handler.track_start(client.clone(), track_start).await;
-                            }
-                        }
-                        "TrackEndEvent" => {
-                            if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(&x) {
-                                if track_finish.reason == "FINISHED" {
-                                    let client_lock = client.inner.lock().await;
-
-                                    if let Some(mut node) =
-                                        client_lock.nodes.get_mut(&track_finish.guild_id)
-                                    {
-                                        node.queue.remove(0);
-                                        node.now_playing = None;
-                                    };
-                                }
-
-                                handler.track_finish(client.clone(), track_finish).await;
-                            }
-                        }
-                        _ => warn!("Unknown event: {}", &x),
-                    },
-                    _ => warn!("Unknown socket response: {}", &x),
-                }
-            }
-        }
-    }
-}
-
 impl LavalinkClient {
     /// Builds the Client connection.
     pub async fn new(
         builder: &LavalinkClientBuilder,
         handler: impl LavalinkEventHandler + Send + Sync + 'static,
     ) -> LavalinkResult<Self> {
-        let socket_uri;
-        let rest_uri;
+        let (lavalink_socket_write, lavalink_socket_read, lavalink_headers, lavalink_rest_uri) = {
+            let socket_uri;
+            let rest_uri;
 
-        if builder.is_ssl {
-            socket_uri = format!("wss://{}:{}", &builder.host, builder.port);
-            rest_uri = format!("https://{}:{}", &builder.host, builder.port);
-        } else {
-            socket_uri = format!("ws://{}:{}", &builder.host, builder.port);
-            rest_uri = format!("http://{}:{}", &builder.host, builder.port);
-        }
+            if builder.is_ssl {
+                socket_uri = format!("wss://{}:{}", &builder.host, builder.port);
+                rest_uri = format!("https://{}:{}", &builder.host, builder.port);
+            } else {
+                socket_uri = format!("ws://{}:{}", &builder.host, builder.port);
+                rest_uri = format!("http://{}:{}", &builder.host, builder.port);
+            }
 
-        let mut headers = HeaderMap::new();
-        headers.insert("Authorization", builder.password.parse()?);
-        headers.insert("Num-Shards", builder.shard_count.to_string().parse()?);
-        headers.insert("User-Id", builder.bot_id.to_string().parse()?);
+            let mut headers = HeaderMap::new();
+            headers.insert("Authorization", builder.password.parse()?);
+            headers.insert("Num-Shards", builder.shard_count.to_string().parse()?);
+            headers.insert("User-Id", builder.bot_id.to_string().parse()?);
 
-        let mut url_builder = Request::builder();
+            let mut url_builder = Request::builder();
 
-        {
-            let ref_headers = url_builder.headers_mut().unwrap();
-            *ref_headers = headers.clone();
-        }
+            {
+                let ref_headers = url_builder.headers_mut().unwrap();
+                *ref_headers = headers.clone();
+            }
 
-        let url = url_builder.uri(&socket_uri).body(()).unwrap();
+            let url = url_builder.uri(&socket_uri).body(()).unwrap();
 
-        let (ws_stream, _) = connect_async(url).await?;
-        let (socket_write, socket_read) = ws_stream.split();
+            let (ws_stream, _) = connect_async(url).await?;
+            let split = ws_stream.split();
+
+            (split.0, split.1, headers, rest_uri)
+        };
+
+        #[cfg(feature = "simple-gateway")]
+        let (discord_socket_uri, discord_headers) = {
+            let socket_uri = "wss://gateway.discord.gg/?v=9&encoding=json";
+
+            let mut headers = HeaderMap::new();
+            headers.insert(
+                "Authorization",
+                format!("Bot {}", builder.bot_token).parse()?,
+            );
+            headers.insert("bot", "True".to_string().parse()?);
+            headers.insert("Content-type", "application/json".to_string().parse()?);
+
+            (socket_uri, headers)
+        };
+
+        #[cfg(feature = "simple-gateway")]
+        let discord_gateway_data = {
+            Arc::new(Mutex::new(DiscordGatewayData {
+                shard_count: builder.shard_count,
+                bot_id: builder.bot_id,
+                headers: discord_headers,
+                sender: mpsc::unbounded_channel().0,
+                connections: Arc::new(DashMap::new()),
+                socket_uri: discord_socket_uri,
+            }))
+        };
 
         let client_inner = LavalinkClientInner {
-            headers,
-            socket_write,
-            rest_uri,
+            headers: lavalink_headers,
+            socket_write: lavalink_socket_write,
+            rest_uri: lavalink_rest_uri,
             nodes: Arc::new(DashMap::new()),
             loops: Arc::new(DashSet::new()),
+            #[cfg(feature = "simple-gateway")]
+            discord_gateway_data,
         };
 
         let client = Self {
@@ -247,8 +215,20 @@ impl LavalinkClient {
         let client_clone = client.clone();
 
         tokio::spawn(async move {
-            debug!("Starting event loop.");
-            event_loop(socket_read, handler, client_clone).await;
+            debug!("Starting lavalink event loop.");
+            lavalink_event_loop(lavalink_socket_read, handler, client_clone).await;
+            error!("Event loop ended unexpectedly.");
+        });
+
+        #[cfg(feature = "simple-gateway")]
+        let client_clone = client.clone();
+        #[cfg(feature = "simple-gateway")]
+        let token = builder.bot_token.clone();
+
+        #[cfg(feature = "simple-gateway")]
+        tokio::spawn(async move {
+            debug!("Starting discord event loop.");
+            discord_event_loop(client_clone, &token).await;
             error!("Event loop ended unexpectedly.");
         });
 
@@ -276,6 +256,14 @@ impl LavalinkClient {
     ///     .build(LavalinkHandler)
     ///     .await?;
     /// ```
+    #[cfg(feature = "simple-gateway")]
+    pub fn builder(
+        user_id: impl Into<UserId>,
+        bot_token: impl Into<String>,
+    ) -> LavalinkClientBuilder {
+        LavalinkClientBuilder::new(user_id, bot_token)
+    }
+    #[cfg(not(feature = "simple-gateway"))]
     pub fn builder(user_id: impl Into<UserId>) -> LavalinkClientBuilder {
         LavalinkClientBuilder::new(user_id)
     }
@@ -324,7 +312,11 @@ impl LavalinkClient {
     ///
     /// This also creates a Node and inserts it. The node is not added on loops unless
     /// Play::queue() is ran.
-    pub async fn create_session(&self, connection_info: &ConnectionInfo) -> LavalinkResult<()> {
+    #[cfg(feature = "songbird")]
+    pub async fn create_session_with_songbird(
+        &self,
+        connection_info: &SongbirdConnectionInfo,
+    ) -> LavalinkResult<()> {
         let event = crate::model::Event {
             token: connection_info.token.to_string(),
             endpoint: connection_info.endpoint.to_string(),
@@ -342,7 +334,52 @@ impl LavalinkClient {
             .send(connection_info.guild_id, &mut client.socket_write)
             .await?;
 
-        client.nodes.insert(connection_info.guild_id.0, Node::default());
+        client
+            .nodes
+            .insert(connection_info.guild_id.0, Node::default());
+
+        Ok(())
+    }
+    #[cfg(feature = "simple-gateway")]
+    pub async fn create_session(&self, connection_info: &ConnectionInfo) -> LavalinkResult<()> {
+        let token = connection_info
+            .token
+            .as_ref()
+            .ok_or(LavalinkError::MissingConnectionField("token"))?
+            .to_string();
+        let endpoint = connection_info
+            .endpoint
+            .as_ref()
+            .ok_or(LavalinkError::MissingConnectionField("endpoint"))?
+            .to_string();
+        let guild_id = connection_info
+            .guild_id
+            .as_ref()
+            .ok_or(LavalinkError::MissingConnectionField("guild_id"))?
+            .to_string();
+        let session_id = connection_info
+            .session_id
+            .as_ref()
+            .ok_or(LavalinkError::MissingConnectionField("session_id"))?
+            .to_string();
+
+        let event = crate::model::Event {
+            token,
+            endpoint,
+            guild_id,
+        };
+
+        let payload = crate::model::VoiceUpdate { session_id, event };
+
+        let mut client = self.inner.lock().await;
+
+        crate::model::SendOpcode::VoiceUpdate(payload)
+            .send(connection_info.guild_id.unwrap(), &mut client.socket_write)
+            .await?;
+
+        client
+            .nodes
+            .insert(connection_info.guild_id.unwrap().0, Node::default());
 
         Ok(())
     }
@@ -374,7 +411,7 @@ impl LavalinkClient {
     /// ```rust,untested
     /// lavalink_client.destroy(guild_id).await?;
     ///
-    /// { 
+    /// {
     ///     let nodes = lavalink_client.nodes().await;
     ///     nodes.remove(&guild_id.0);
     ///     
@@ -603,5 +640,36 @@ impl LavalinkClient {
     pub async fn loops(&self) -> Arc<DashSet<u64>> {
         let client = self.inner.lock().await;
         client.loops.clone()
+    }
+
+    #[cfg(feature = "simple-gateway")]
+    pub async fn discord_gateway_data(&self) -> Arc<Mutex<DiscordGatewayData>> {
+        self.inner.lock().await.discord_gateway_data.clone()
+    }
+
+    #[cfg(feature = "simple-gateway")]
+    pub async fn discord_gateway_connections(&self) -> Arc<DashMap<GuildId, ConnectionInfo>> {
+        self.inner
+            .lock()
+            .await
+            .discord_gateway_data
+            .lock()
+            .await
+            .connections
+            .clone()
+    }
+
+    #[cfg(feature = "simple-gateway")]
+    pub async fn join(
+        &self,
+        guild_id: impl Into<GuildId>,
+        channel_id: impl Into<ChannelId>,
+    ) -> LavalinkResult<ConnectionInfo> {
+        crate::voice::join(self, guild_id, channel_id).await
+    }
+
+    #[cfg(feature = "simple-gateway")]
+    pub async fn leave(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
+        crate::voice::leave(self, guild_id).await
     }
 }

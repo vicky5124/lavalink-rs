@@ -12,7 +12,8 @@ tracing-subscriber = "0.2"
 
 [dependencies.lavalink-rs]
 path = "../../"
-features = ["rustls", "serenity"]
+default-features = false
+features = ["rustls", "serenity", "simple-gateway"]
 
 [dependencies.tokio]
 version = "1"

@@ -96,7 +96,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .expect("Err creating client");
 
-    let lava_client = LavalinkClient::builder(bot_id)
+    //let lava_client = LavalinkClient::builder(bot_id)
+    let lava_client = LavalinkClient::builder(bot_id, &token)
         .set_host("127.0.0.1")
         .set_password(
             env::var("LAVALINK_PASSWORD").unwrap_or_else(|_| "youshallnotpass".to_string()),
@@ -130,20 +131,21 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     let connect_to = match channel_id {
         Some(channel) => channel,
         None => {
-            check_msg(msg.reply(&ctx.http, "Join a voice channel.").await);
+            check_msg(msg.reply(&ctx.http, "Join a voice channel first.").await);
 
             return Ok(());
         }
     };
 
-    let manager = songbird::get(ctx).await.unwrap().clone();
+    let lava_client = {
+        let data = ctx.data.read().await;
+        data.get::<Lavalink>().unwrap().clone()
+    };
 
-    let (_, handler) = manager.join_gateway(guild_id, connect_to).await;
+    let raw_connection_info = lava_client.join(guild_id, connect_to).await;
 
-    match handler {
+    match raw_connection_info {
         Ok(connection_info) => {
-            let data = ctx.data.read().await;
-            let lava_client = data.get::<Lavalink>().unwrap().clone();
             lava_client.create_session(&connection_info).await?;
 
             check_msg(
@@ -159,6 +161,29 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
         ),
     }
 
+    //let manager = songbird::get(ctx).await.unwrap().clone();
+
+    //let (_, handler) = manager.join_gateway(guild_id, connect_to).await;
+
+    //match handler {
+    //    Ok(connection_info) => {
+    //        let data = ctx.data.read().await;
+    //        let lava_client = data.get::<Lavalink>().unwrap().clone();
+    //        lava_client.create_session(&connection_info).await?;
+
+    //        check_msg(
+    //            msg.channel_id
+    //                .say(&ctx.http, &format!("Joined {}", connect_to.mention()))
+    //                .await,
+    //        );
+    //    }
+    //    Err(why) => check_msg(
+    //        msg.channel_id
+    //            .say(&ctx.http, format!("Error joining the channel: {}", why))
+    //            .await,
+    //    ),
+    //}
+
     Ok(())
 }
 
@@ -167,28 +192,36 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
     let guild = msg.guild(&ctx.cache).await.unwrap();
     let guild_id = guild.id;
 
-    let manager = songbird::get(ctx).await.unwrap().clone();
-    let has_handler = manager.get(guild_id).is_some();
+    let lava_client = {
+        let data = ctx.data.read().await;
+        data.get::<Lavalink>().unwrap().clone()
+    };
 
-    if has_handler {
-        if let Err(e) = manager.remove(guild_id).await {
-            check_msg(
-                msg.channel_id
-                    .say(&ctx.http, format!("Failed: {:?}", e))
-                    .await,
-            );
-        }
+    lava_client.destroy(guild_id).await?;
+    lava_client.leave(guild_id).await?;
 
-        {
-            let data = ctx.data.read().await;
-            let lava_client = data.get::<Lavalink>().unwrap().clone();
-            lava_client.destroy(guild_id).await?;
-        }
+    //let manager = songbird::get(ctx).await.unwrap().clone();
+    //let has_handler = manager.get(guild_id).is_some();
 
-        check_msg(msg.channel_id.say(&ctx.http, "Left voice channel").await);
-    } else {
-        check_msg(msg.reply(&ctx.http, "Not in a voice channel").await);
-    }
+    //if has_handler {
+    //    if let Err(e) = manager.remove(guild_id).await {
+    //        check_msg(
+    //            msg.channel_id
+    //                .say(&ctx.http, format!("Failed: {:?}", e))
+    //                .await,
+    //        );
+    //    }
+
+    //    {
+    //        let data = ctx.data.read().await;
+    //        let lava_client = data.get::<Lavalink>().unwrap().clone();
+    //        lava_client.destroy(guild_id).await?;
+    //    }
+
+    //    check_msg(msg.channel_id.say(&ctx.http, "Left voice channel").await);
+    //} else {
+    //    check_msg(msg.reply(&ctx.http, "Not in a voice channel").await);
+    //}
 
     Ok(())
 }
@@ -218,12 +251,17 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    let manager = songbird::get(ctx).await.unwrap().clone();
-
-    if let Some(_handler) = manager.get(guild_id) {
+    let lava_client = {
         let data = ctx.data.read().await;
-        let lava_client = data.get::<Lavalink>().unwrap().clone();
+        data.get::<Lavalink>().unwrap().clone()
+    };
 
+    //let manager = songbird::get(ctx).await.unwrap().clone();
+
+    //if let Some(_handler) = manager.get(guild_id) {
+
+    let connections = lava_client.discord_gateway_connections().await;
+    if connections.contains_key(&guild_id.into()) {
         let query_information = lava_client.auto_search_tracks(&query).await?;
 
         if query_information.tracks.is_empty() {

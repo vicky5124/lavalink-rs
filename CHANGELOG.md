@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.9.0
+## 0.9.0-rc.1
+
+- Feature gated songbird.
+- Added a simple voice connection handler.
+- Removed tokio 0.2 support.
+
+## 0.9.0-rc.0
 
 - Updated Songbird.
 - Updated Twilight.
