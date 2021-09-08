@@ -1,3 +1,5 @@
+///! Commented lines of code use songbird instead of the built-in gateway.
+
 #[macro_use]
 extern crate tracing;
 
