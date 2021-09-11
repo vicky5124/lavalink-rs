@@ -1,7 +1,12 @@
 //! A Lavalink and Andesite API wrapper library for every tokio based discord bot library.
 
+#[cfg(feature = "tracing-log")]
 #[macro_use]
 extern crate tracing;
+
+#[cfg(feature = "normal-log")]
+#[macro_use]
+extern crate log;
 
 /// Builder structures
 pub mod builders;
