@@ -67,11 +67,11 @@ async fn main() -> ServiceResult {
 
         let songbird = Arc::new(Songbird::twilight(cluster.clone(), bot_id));
 
-        let lavalink = LavalinkClient::builder(bot_id)
-            .set_host("127.0.0.1")
-            .set_password("youshallnotpass")
-            .set_shard_count(shard_count as u64)
-            .build(LavalinkHandler)
+        let lavalink = LavalinkClient::builder(bot_id) // _ -> LavalinkClientBuilder
+            .set_host("127.0.0.1") // &mut self -> &mut LavalinkClientBuilder
+            .set_password("youshallnotpass") // &mut self -> &mut LavalinkClientBuilder
+            .set_shard_count(shard_count as u64) // &mut self -> &mut LavalinkClientBuilder
+            .build(LavalinkHandler) // self -> LavalinkClient
             .await?;
 
         cluster.up().await;

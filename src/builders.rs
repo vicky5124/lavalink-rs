@@ -55,19 +55,19 @@ impl LavalinkClientBuilder {
     }
 
     /// Sets the host.
-    pub fn set_host(mut self, host: impl ToString) -> Self {
+    pub fn set_host(&mut self, host: impl ToString) -> &mut Self {
         self.host = host.to_string();
         self
     }
 
     /// Sets the port.
-    pub fn set_port(mut self, port: u16) -> Self {
+    pub fn set_port(&mut self, port: u16) -> &mut Self {
         self.port = port;
         self
     }
 
     /// Sets the host and port from an address.
-    pub fn set_addr(mut self, addr: impl Into<SocketAddr>) -> Self {
+    pub fn set_addr(&mut self, addr: impl Into<SocketAddr>) -> &mut Self {
         let addr = addr.into();
 
         self.host = addr.ip().to_string();
@@ -77,32 +77,32 @@ impl LavalinkClientBuilder {
     }
 
     /// Sets the number of shards.
-    pub fn set_shard_count(mut self, shard_count: u64) -> Self {
+    pub fn set_shard_count(&mut self, shard_count: u64) -> &mut Self {
         self.shard_count = shard_count;
         self
     }
 
     /// Sets the ID of the bot.
-    pub fn set_bot_id<U: Into<UserId>>(mut self, bot_id: U) -> Self {
+    pub fn set_bot_id<U: Into<UserId>>(&mut self, bot_id: U) -> &mut Self {
         self.bot_id = bot_id.into();
         self
     }
 
     /// Sets the token of the bot.
     #[cfg(feature = "simple-gateway")]
-    pub fn set_bot_token<U: Into<String>>(mut self, bot_token: U) -> Self {
+    pub fn set_bot_token<U: Into<String>>(&mut self, bot_token: U) -> &mut Self {
         self.bot_token = bot_token.into();
         self
     }
 
     /// Sets if the lavalink server is behind SSL
-    pub fn set_is_ssl(mut self, is_ssl: bool) -> Self {
+    pub fn set_is_ssl(&mut self, is_ssl: bool) -> &mut Self {
         self.is_ssl = is_ssl;
         self
     }
 
     /// Sets the lavalink password.
-    pub fn set_password(mut self, password: impl ToString) -> Self {
+    pub fn set_password(&mut self, password: impl ToString) -> &mut Self {
         self.password = password.to_string();
         self
     }
@@ -129,9 +129,9 @@ pub struct PlayParameters {
 
 impl PlayParameters {
     /// Starts playing the track.
-    pub async fn start(self) -> LavalinkResult<()> {
+    pub async fn start(&self) -> LavalinkResult<()> {
         let payload = crate::model::Play {
-            track: self.track.track,
+            track: self.track.track.clone(),
             no_replace: !self.replace,
             start_time: self.start,
             end_time: if self.finish == 0 {
@@ -159,9 +159,9 @@ impl PlayParameters {
     ///
     /// [`LavalinkClient.loops`]: crate::LavalinkClientInner::loops
     /// [`LavalinkClient::create_session`]: crate::LavalinkClient::create_session
-    pub async fn queue(self) -> LavalinkResult<()> {
+    pub async fn queue(&self) -> LavalinkResult<()> {
         let track = crate::model::TrackQueue {
-            track: self.track,
+            track: self.track.clone(),
             start_time: self.start,
             end_time: if self.finish == 0 {
                 None
@@ -247,25 +247,25 @@ impl PlayParameters {
     }
 
     /// Sets the person that requested the song
-    pub fn requester(mut self, requester: impl Into<UserId>) -> Self {
+    pub fn requester(&mut self, requester: impl Into<UserId>) -> &mut Self {
         self.requester = Some(requester.into());
         self
     }
 
     /// Sets if the current playing track should be replaced with this new one.
-    pub fn replace(mut self, replace: bool) -> Self {
+    pub fn replace(&mut self, replace: bool) -> &mut Self {
         self.replace = replace;
         self
     }
 
     /// Sets the time the track will start at.
-    pub fn start_time(mut self, start: Duration) -> Self {
+    pub fn start_time(&mut self, start: Duration) -> &mut Self {
         self.start = start.as_millis() as u64;
         self
     }
 
     /// Sets the time the track will finish at.
-    pub fn finish_time(mut self, finish: Duration) -> Self {
+    pub fn finish_time(&mut self, finish: Duration) -> &mut Self {
         self.finish = finish.as_millis() as u64;
         self
     }
