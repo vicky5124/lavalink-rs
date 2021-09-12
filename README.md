@@ -1,11 +1,10 @@
 # Lavalink-rs
 
-A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate.
+A `lavalink` API wrapping library for every `tokio` discord crate.
 
 ## Links to download stuff you will need
 
 - [Lavalink repository](https://github.com/freyacodes/Lavalink)
-- [Andesite Repository](https://github.com/natanbc/andesite)
 - [Java download](https://adoptopenjdk.net/) (11 or newer, 15 recommended, OpenJ9 works)
 
 ## TODO
@@ -14,7 +13,6 @@ A `lavalink` and `andesite` API wrapping library for every `tokio` discord crate
 - [X] Support nodes.
 - [ ] Support actual nodes.
 - [X] Switch to internal lock handles.
-- [ ] Support all andesite features.
 - [ ] Support identifiers.
 - [X] Support pause, resume, skip to time.
 - [X] Support starting at specific times and configurable replace current stream.
@@ -76,4 +74,3 @@ These are the available ones:
 - `simple-gateway`: Use lavalink-rs to handle the voice connections (note, this is a very basic implementation, without sharding support, while also creating a second gateway rather than using the existing one).
 - `serenity`: Add support for serenity's models.
 - `twilight`: Add support for twilight-model.
-- `andesite`: Add andesite exclusive features.

@@ -4,7 +4,7 @@ version = "0.9.0-rc.1"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
-description = "Lavalink (and andesite) bindings for discord bot crates"
+description = "Lavalink bindings for async discord api crates"
 readme = "README.md"
 homepage = "https://gitlab.com/vicky5124/lavalink-rs/"
 repository =  "https://gitlab.com/vicky5124/lavalink-rs/"
@@ -18,7 +18,6 @@ documentation = "https://docs.rs/lavalink-rs"
 default = ["rustls", "songbird", "tracing-log"]
 
 tokio-02-marker = []
-andesite = []
 simple-gateway = []
 
 tracing-log = ["tracing"]
@@ -41,7 +40,7 @@ native = [
 ]
 
 [package.metadata.docs.rs]
-features = ["rustls", "twilight", "serenity", "andesite", "songbird", "simple-gateway"]
+features = ["rustls", "twilight", "serenity", "songbird", "simple-gateway"]
 
 [dependencies]
 regex = "1.3"

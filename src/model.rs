@@ -600,8 +600,6 @@ pub struct TrackStart {
     pub guild_id: GuildId,
 }
 
-#[cfg(feature = "andesite")]
-#[cfg_attr(docsrs, doc(cfg(feature = "andesite")))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct WebSocketClosed {
     pub op: String,
@@ -618,8 +616,6 @@ pub struct WebSocketClosed {
     pub by_remote: bool,
 }
 
-#[cfg(feature = "andesite")]
-#[cfg_attr(docsrs, doc(cfg(feature = "andesite")))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PlayerDestroyed {
     pub op: String,

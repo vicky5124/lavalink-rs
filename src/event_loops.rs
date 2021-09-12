@@ -314,7 +314,6 @@ pub async fn lavalink_event_loop(
                         }
                     }
                     "event" => match base_event.event_type.unwrap().as_str() {
-                        #[cfg(feature = "andesite")]
                         "WebSocketClosedEvent" => {
                             if let Ok(websocket_closed) =
                                 serde_json::from_str::<WebSocketClosed>(&x)
@@ -324,7 +323,6 @@ pub async fn lavalink_event_loop(
                                     .await;
                             }
                         }
-                        #[cfg(feature = "andesite")]
                         "PlayerDestroyedEvent" => {
                             if let Ok(player_destroyed) =
                                 serde_json::from_str::<PlayerDestroyed>(&x)

@@ -13,19 +13,9 @@ pub trait LavalinkEventHandler {
     async fn track_start(&self, _client: LavalinkClient, _event: TrackStart) {}
     /// Event that triggers when a track finishes playing.
     async fn track_finish(&self, _client: LavalinkClient, _event: TrackFinish) {}
-
-    /// Event that triggers when the andesite websocket connection to the voice channel closes.
-    ///
-    /// Needs the `andesite` feature.
-    #[cfg(feature = "andesite")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "andesite")))]
+    /// Event that triggers when the websocket connection to the voice channel closes.
     async fn websocket_closed(&self, _client: LavalinkClient, _event: WebSocketClosed) {}
-
-    /// Event that triggers when the andesite player gets destroyed on a guild.
-    ///
-    /// Needs the `andesite` feature.
-    #[cfg(feature = "andesite")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "andesite")))]
+    /// Event that triggers when the player gets destroyed on a guild.
     async fn player_destroyed(&self, _client: LavalinkClient, _event: PlayerDestroyed) {}
 }
 
