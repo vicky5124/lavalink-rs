@@ -35,7 +35,7 @@ pub async fn join(
 
     while check_count < 10 {
         if let Some(d) = connections.get(&guild_id) {
-            if d.session_id.is_some() {
+            if d.token.is_some() && d.endpoint.is_some() && d.session_id.is_some() {
                 return Ok(d.clone());
             }
         }
