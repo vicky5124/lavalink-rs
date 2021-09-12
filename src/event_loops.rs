@@ -71,8 +71,11 @@ pub async fn discord_event_loop(
         let (mut write, mut read) = ws_stream.split();
 
         debug!("Waiting before connecting to the discord websocket.");
-        // sleep 5 seconds to let the main library connect first and not get rate limited
+
+        // sleep 6 seconds to let the main library connect first and not get rate limited
+        #[cfg(feature = "wait-before-connect")]
         tokio::time::sleep(tokio::time::Duration::from_secs(6)).await;
+
         debug!("Connecting to the discord websocket.");
 
         let discord_ws = client.discord_gateway_data().await;
