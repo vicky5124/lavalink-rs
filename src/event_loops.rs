@@ -105,7 +105,10 @@ pub async fn discord_event_loop(
                             *was_reconnected_clone.write().await = false;
                             break;
                         } else {
-                            tx_hb.send(format!(r#"{{"op":1,"d":{}}}"#, val)).unwrap();
+                            // thread 'tokio-runtime-worker' panicked at 'called `Result::unwrap()` on an `Err` value: SendError("{\"op\":1,\"d\":64}")', /home/nitsuga/.cargo/git/checkouts/lavalink-rs-38e41c1b59bb345b/0900b34/src/event_loops.rs:108:78
+                            // note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+                            let _ = tx_hb.send(format!(r#"{{"op":1,"d":{}}}"#, val));
                             val += 1;
                         }
                     }
@@ -165,19 +168,22 @@ pub async fn discord_event_loop(
         tokio::spawn(async move {
             'events: while let Some(Ok(resp)) = read.next().await {
                 if *reconnect_clone.read().await == true {
-                    break
+                    break 'events
                 }
                 debug!("event: {:#?}", resp);
 
                 let text_resp = if resp.is_close() { 
+                    warn!("Close event obtained: {}", resp);
                     *reconnect_clone.write().await = true;
                     tx_hb.send("reconnect".to_string()).unwrap();
                     continue 'events;
-                } else if let Ok(x) = resp.into_text() {
+                } else if let Ok(x) = resp.clone().into_text() {
                     x
                 } else {
+                    warn!("Other event type obtained: {}", resp);
                     continue 'events;
                 };
+
                 //let event: BaseEvent<String> = serde_json::from_str(&text_resp).unwrap();
                 let event_name: BaseEventNoData = serde_json::from_str(&text_resp).unwrap();
                 
@@ -255,9 +261,14 @@ pub async fn discord_event_loop(
                     }
                     "RESUMED" => info!("Resumed the discord websocket."),
                     "" => (),
-                    _ => debug!("Unknown event"),
+                    _ => debug!("Unknown event: {}", &text_resp),
                 }
             }
+
+            // Guarentee reconnect
+            *reconnect_clone.write().await = true;
+            tx_hb.send("reconnect".to_string()).unwrap();
+
             warn!("Stopped getting events.");
         });
 

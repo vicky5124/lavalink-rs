@@ -429,7 +429,7 @@ impl SendOpcode {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Node {
     pub guild: GuildId,
 
@@ -441,6 +441,7 @@ pub struct Node {
     pub is_on_loops: bool,
     /// Use this to store whatever information you wish that's guild specific, such as invocation
     /// channel id's, for example.
+    #[serde(skip)]
     pub data: Arc<RwLock<TypeMap>>,
 }
 
@@ -458,7 +459,7 @@ impl Default for Node {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct TrackQueue {
     pub track: Track,
     pub start_time: u64,
