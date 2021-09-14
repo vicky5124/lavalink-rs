@@ -267,7 +267,7 @@ pub async fn discord_event_loop(
 
             // Guarentee reconnect
             *reconnect_clone.write().await = true;
-            tx_hb.send("reconnect".to_string()).unwrap();
+            let _ = tx_hb.send("reconnect".to_string());
 
             warn!("Stopped getting events.");
         });
