@@ -56,7 +56,7 @@ pub async fn leave(lavalink: &LavalinkClient, guild_id: impl Into<GuildId>) -> L
     wait_for_connection_info_remove(lavalink, guild_id, None).await
 }
 
-async fn wait_for_full_connection_info_insert(
+pub async fn wait_for_full_connection_info_insert(
     lavalink: &LavalinkClient,
     guild_id: impl Into<GuildId>,
     event_count: Option<usize>,
@@ -81,7 +81,7 @@ async fn wait_for_full_connection_info_insert(
     return Err(LavalinkError::Timeout);
 }
 
-async fn wait_for_connection_info_remove(
+pub async fn wait_for_connection_info_remove(
     lavalink: &LavalinkClient,
     guild_id: impl Into<GuildId>,
     event_count: Option<usize>,
