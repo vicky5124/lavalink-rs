@@ -30,23 +30,7 @@ pub async fn join(
     )
     .await;
 
-    let connections = lavalink.discord_gateway_connections().await;
-
-    let mut check_count = 0;
-
-    while check_count < 10 {
-        if let Some(d) = connections.get(&guild_id) {
-            if d.token.is_some() && d.endpoint.is_some() && d.session_id.is_some() {
-                return Ok(d.clone());
-            }
-        }
-
-        sleep(Duration::from_millis(500)).await;
-
-        check_count += 1;
-    }
-
-    return Err(LavalinkError::Timeout);
+    wait_for_full_connection_info_insert(lavalink, guild_id, None).await
 }
 
 pub async fn leave(lavalink: &LavalinkClient, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
@@ -69,11 +53,45 @@ pub async fn leave(lavalink: &LavalinkClient, guild_id: impl Into<GuildId>) -> L
     )
     .await;
 
+    wait_for_connection_info_remove(lavalink, guild_id, None).await
+}
+
+async fn wait_for_full_connection_info_insert(
+    lavalink: &LavalinkClient,
+    guild_id: impl Into<GuildId>,
+    event_count: Option<usize>,
+) -> LavalinkResult<ConnectionInfo> {
+    let guild_id = guild_id.into();
     let connections = lavalink.discord_gateway_connections().await;
 
     let mut check_count = 0;
 
-    while check_count < 10 {
+    while check_count <= event_count.unwrap_or(10) {
+        if let Some(d) = connections.get(&guild_id) {
+            if d.token.is_some() && d.endpoint.is_some() && d.session_id.is_some() {
+                return Ok(d.clone());
+            }
+        }
+
+        sleep(Duration::from_millis(500)).await;
+
+        check_count += 1;
+    }
+
+    return Err(LavalinkError::Timeout);
+}
+
+async fn wait_for_connection_info_remove(
+    lavalink: &LavalinkClient,
+    guild_id: impl Into<GuildId>,
+    event_count: Option<usize>,
+) -> LavalinkResult<()> {
+    let guild_id = guild_id.into();
+    let connections = lavalink.discord_gateway_connections().await;
+
+    let mut check_count = 0;
+
+    while check_count <= event_count.unwrap_or(10) {
         if connections.get(&guild_id).is_none() {
             return Ok(());
         }
@@ -93,7 +111,13 @@ pub async fn raw_handle_event_voice_server_update(
     token: String,
 ) {
     let guild_id = guild_id.into();
-    let connections = lavalink.discord_gateway_data().await.lock().await.connections.clone();
+    let connections = lavalink
+        .discord_gateway_data()
+        .await
+        .lock()
+        .await
+        .connections
+        .clone();
 
     if let Some(mut connection) = connections.get_mut(&guild_id) {
         connection.guild_id = Some(guild_id);
