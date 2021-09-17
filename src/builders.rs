@@ -20,6 +20,8 @@ pub struct LavalinkClientBuilder {
     pub bot_token: String,
     #[cfg(feature = "simple-gateway")]
     pub start_gateway: bool,
+    #[cfg(feature = "simple-gateway")]
+    pub gateway_start_wait_time: Duration,
 }
 
 impl LavalinkClientBuilder {
@@ -35,6 +37,7 @@ impl LavalinkClientBuilder {
     ///   - bot_id: <required parameter>
     ///   - bot_token: <required parameter>
     ///   - start_gateway: true
+    ///   - gateway_start_wait_time: 6 seconds
     pub fn new(bot_id: impl Into<UserId>, bot_token: impl Into<String>) -> Self {
         Self {
             host: "localhost".to_string(),
@@ -44,6 +47,7 @@ impl LavalinkClientBuilder {
             bot_id: bot_id.into(),
             bot_token: bot_token.into(),
             start_gateway: true,
+            gateway_start_wait_time: Duration::from_secs(6),
             ..Default::default()
         }
     }
@@ -127,6 +131,13 @@ impl LavalinkClientBuilder {
     #[cfg(feature = "simple-gateway")]
     pub fn set_start_gateway(&mut self, start_gateway: bool) -> &mut Self {
         self.start_gateway = start_gateway;
+        self
+    }
+
+    /// Sets the time to wait before starting the first discord gateway connection.
+    #[cfg(feature = "simple-gateway")]
+    pub fn set_gateway_start_wait_time(&mut self, time: Duration) -> &mut Self {
+        self.gateway_start_wait_time = time;
         self
     }
 

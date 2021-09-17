@@ -122,6 +122,7 @@ pub struct DiscordGatewayData {
     pub shard_count: u64,
     pub bot_id: UserId,
     pub bot_token: String,
+    pub wait_time: Duration,
     pub headers: HeaderMap,
     pub sender: mpsc::UnboundedSender<String>,
     pub connections: Arc<DashMap<GuildId, ConnectionInfo>>,
@@ -198,6 +199,7 @@ impl LavalinkClient {
                 shard_count: builder.shard_count,
                 bot_id: builder.bot_id,
                 bot_token: builder.bot_token.to_string(),
+                wait_time: builder.gateway_start_wait_time,
                 headers: discord_headers,
                 sender: mpsc::unbounded_channel().0,
                 connections: Arc::new(DashMap::new()),
@@ -231,10 +233,11 @@ impl LavalinkClient {
         if builder.start_gateway {
             let client_clone = client.clone();
             let token = builder.bot_token.clone();
+            let wait_time = builder.gateway_start_wait_time.clone();
 
             tokio::spawn(async move {
                 debug!("Starting discord event loop.");
-                discord_event_loop(client_clone, &token).await;
+                discord_event_loop(client_clone, &token, wait_time).await;
                 error!("Event loop ended unexpectedly.");
             });
         }
@@ -277,14 +280,19 @@ impl LavalinkClient {
 
     /// Start the discord gateway, if it has stopped, or it never started because the client builder was
     /// configured that way.
+    ///
+    /// If wait_time is passed, it will override the previosuly configured wait time.
     #[cfg(feature = "simple-gateway")]
-    pub async fn start_discord_gateway(&self) {
+    pub async fn start_discord_gateway(&self, wait_time: Option<Duration>) {
         let client_clone = self.clone();
         let token = self.discord_gateway_data().await.lock().await.bot_token.clone();
+        let wait_time = if let Some(t) = wait_time { t } else {
+            self.discord_gateway_data().await.lock().await.wait_time.clone()
+        };
 
         tokio::spawn(async move {
             debug!("Starting discord event loop.");
-            discord_event_loop(client_clone, &token).await;
+            discord_event_loop(client_clone, &token, wait_time).await;
             error!("Event loop ended unexpectedly.");
         });
     }

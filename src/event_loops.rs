@@ -5,6 +5,8 @@ use crate::WsStream;
 
 #[cfg(feature = "simple-gateway")]
 use std::sync::Arc;
+#[cfg(feature = "simple-gateway")]
+use std::time::Duration;
 use futures::stream::{SplitStream, StreamExt};
 #[cfg(feature = "simple-gateway")]
 use futures::SinkExt;
@@ -47,7 +49,9 @@ struct BaseEventNoData {
 pub async fn discord_event_loop(
     client: LavalinkClient,
     token: &str,
+    mut wait_time: Duration,
 ) {
+
     let reconnect = Arc::new(RwLock::new(false));
     let was_reconnected = Arc::new(RwLock::new(false));
     let session_id = Arc::new(RwLock::new(String::new()));
@@ -72,9 +76,9 @@ pub async fn discord_event_loop(
 
         debug!("Waiting before connecting to the discord websocket.");
 
-        // sleep 6 seconds to let the main library connect first and not get rate limited
-        #[cfg(feature = "wait-before-connect")]
-        tokio::time::sleep(tokio::time::Duration::from_secs(6)).await;
+        // wait before starting to not get rate limited.
+        tokio::time::sleep(wait_time).await;
+        wait_time = Duration::from_secs(0);
 
         debug!("Connecting to the discord websocket.");
 
@@ -96,7 +100,7 @@ pub async fn discord_event_loop(
                 tokio::spawn(async move {
                     let mut val = 1_usize;
                     loop {
-                        tokio::time::sleep(tokio::time::Duration::from_millis(
+                        tokio::time::sleep(Duration::from_millis(
                             heartbeat.d.heartbeat_interval,
                         ))
                         .await;

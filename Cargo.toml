@@ -19,7 +19,6 @@ default = ["rustls", "songbird", "tracing-log"]
 
 tokio-02-marker = []
 simple-gateway = []
-wait-before-connect = ["simple-gateway"]
 
 tracing-log = ["tracing"]
 normal-log = ["log"]
