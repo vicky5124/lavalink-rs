@@ -392,6 +392,12 @@ impl LavalinkClient {
             .ok_or(LavalinkError::MissingConnectionField("session_id"))?
             .to_string();
 
+        let endpoint = if endpoint.starts_with("wss://") {
+            endpoint.strip_prefix("wss://").unwrap().to_string()
+        } else {
+            endpoint
+        };
+
         let event = crate::model::Event {
             token,
             endpoint,

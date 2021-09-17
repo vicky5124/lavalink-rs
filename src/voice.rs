@@ -111,6 +111,13 @@ pub async fn raw_handle_event_voice_server_update(
     token: String,
 ) {
     let guild_id = guild_id.into();
+
+    let endpoint = if endpoint.starts_with("wss://") {
+        endpoint.strip_prefix("wss://").unwrap().to_string()
+    } else {
+        endpoint
+    };
+
     let connections = lavalink
         .discord_gateway_data()
         .await
