@@ -18,9 +18,12 @@ pub struct LavalinkClientBuilder {
     pub is_ssl: bool,
     #[cfg(feature = "simple-gateway")]
     pub bot_token: String,
+    #[cfg(feature = "simple-gateway")]
+    pub start_gateway: bool,
 }
 
 impl LavalinkClientBuilder {
+    #[cfg(feature = "simple-gateway")]
     /// Builds the LavalinkClient.
     ///
     /// Default values:
@@ -30,7 +33,8 @@ impl LavalinkClientBuilder {
     ///   - shard_count: 1
     ///   - is_ssl: false
     ///   - bot_id: <required parameter>
-    #[cfg(feature = "simple-gateway")]
+    ///   - bot_token: <required parameter>
+    ///   - start_gateway: true
     pub fn new(bot_id: impl Into<UserId>, bot_token: impl Into<String>) -> Self {
         Self {
             host: "localhost".to_string(),
@@ -39,10 +43,22 @@ impl LavalinkClientBuilder {
             shard_count: 1,
             bot_id: bot_id.into(),
             bot_token: bot_token.into(),
+            start_gateway: true,
             ..Default::default()
         }
     }
+
     #[cfg(not(feature = "simple-gateway"))]
+    ///
+    /// Builds the LavalinkClient.
+    ///
+    /// Default values:
+    ///   - host: localhost
+    ///   - port: 2333
+    ///   - password: youshallnotpass
+    ///   - shard_count: 1
+    ///   - is_ssl: false
+    ///   - bot_id: <required parameter>
     pub fn new(bot_id: impl Into<UserId>) -> Self {
         Self {
             host: "localhost".to_string(),
@@ -104,6 +120,13 @@ impl LavalinkClientBuilder {
     /// Sets the lavalink password.
     pub fn set_password(&mut self, password: impl ToString) -> &mut Self {
         self.password = password.to_string();
+        self
+    }
+
+    /// Sets if the discord gateway for voice connections should start or not.
+    #[cfg(feature = "simple-gateway")]
+    pub fn set_start_gateway(&mut self, start_gateway: bool) -> &mut Self {
+        self.start_gateway = start_gateway;
         self
     }
 

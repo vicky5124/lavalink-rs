@@ -121,6 +121,7 @@ pub struct LavalinkClientInner {
 pub struct DiscordGatewayData {
     pub shard_count: u64,
     pub bot_id: UserId,
+    pub bot_token: String,
     pub headers: HeaderMap,
     pub sender: mpsc::UnboundedSender<String>,
     pub connections: Arc<DashMap<GuildId, ConnectionInfo>>,
@@ -196,6 +197,7 @@ impl LavalinkClient {
             Arc::new(Mutex::new(DiscordGatewayData {
                 shard_count: builder.shard_count,
                 bot_id: builder.bot_id,
+                bot_token: builder.bot_token.to_string(),
                 headers: discord_headers,
                 sender: mpsc::unbounded_channel().0,
                 connections: Arc::new(DashMap::new()),
@@ -226,16 +228,16 @@ impl LavalinkClient {
         });
 
         #[cfg(feature = "simple-gateway")]
-        let client_clone = client.clone();
-        #[cfg(feature = "simple-gateway")]
-        let token = builder.bot_token.clone();
+        if builder.start_gateway {
+            let client_clone = client.clone();
+            let token = builder.bot_token.clone();
 
-        #[cfg(feature = "simple-gateway")]
-        tokio::spawn(async move {
-            debug!("Starting discord event loop.");
-            discord_event_loop(client_clone, &token).await;
-            error!("Event loop ended unexpectedly.");
-        });
+            tokio::spawn(async move {
+                debug!("Starting discord event loop.");
+                discord_event_loop(client_clone, &token).await;
+                error!("Event loop ended unexpectedly.");
+            });
+        }
 
         Ok(client)
     }
@@ -271,6 +273,20 @@ impl LavalinkClient {
     #[cfg(not(feature = "simple-gateway"))]
     pub fn builder(user_id: impl Into<UserId>) -> LavalinkClientBuilder {
         LavalinkClientBuilder::new(user_id)
+    }
+
+    /// Start the discord gateway, if it has stopped, or it never started because the client builder was
+    /// configured that way.
+    #[cfg(feature = "simple-gateway")]
+    pub async fn start_discord_gateway(&self) {
+        let client_clone = self.clone();
+        let token = self.discord_gateway_data().await.lock().await.bot_token.clone();
+
+        tokio::spawn(async move {
+            debug!("Starting discord event loop.");
+            discord_event_loop(client_clone, &token).await;
+            error!("Event loop ended unexpectedly.");
+        });
     }
 
     /// Returns the tracks from the URL or query provided.
