@@ -1,5 +1,6 @@
 use crate::error::{LavalinkError, LavalinkResult};
-use crate::model::{ChannelId, ConnectionInfo, GuildId};
+use crate::gateway::call_discord_gateway;
+use crate::model::{ChannelId, ConnectionInfo, GuildId, UserId};
 use crate::LavalinkClient;
 
 use tokio::time::{sleep, Duration};
@@ -12,7 +13,7 @@ pub async fn join(
     let guild_id = guild_id.into();
     let channel_id = channel_id.into();
 
-    call(
+    call_discord_gateway(
         lavalink,
         format!(
             r#"{{
@@ -51,7 +52,7 @@ pub async fn join(
 pub async fn leave(lavalink: &LavalinkClient, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
     let guild_id = guild_id.into();
 
-    call(
+    call_discord_gateway(
         lavalink,
         format!(
             r#"{{
@@ -85,41 +86,71 @@ pub async fn leave(lavalink: &LavalinkClient, guild_id: impl Into<GuildId>) -> L
     return Err(LavalinkError::Timeout);
 }
 
-pub async fn call(lavalink: &LavalinkClient, message: String) {
-    lavalink
-        .discord_gateway_data()
-        .await
-        .lock()
-        .await
-        .sender
-        .send(message)
-        .unwrap();
+pub async fn raw_handle_event_voice_server_update(
+    lavalink: &LavalinkClient,
+    guild_id: impl Into<GuildId>,
+    endpoint: String,
+    token: String,
+) {
+    let guild_id = guild_id.into();
+    let connections = lavalink.discord_gateway_data().await.lock().await.connections.clone();
+
+    if let Some(mut connection) = connections.get_mut(&guild_id) {
+        connection.guild_id = Some(guild_id);
+        connection.endpoint = Some(endpoint);
+        connection.token = Some(token);
+    } else {
+        connections.insert(
+            guild_id,
+            ConnectionInfo {
+                guild_id: Some(guild_id),
+                endpoint: Some(endpoint),
+                token: Some(token),
+                ..Default::default()
+            },
+        );
+    };
 }
 
-// pub async fn raw_handle_event_voice_server_update(
-//     lavalink: LavalinkClient,
-//     guild_id: Option<GuildId>,
-//     channel_id: Option<ChannelId>,
-//     endpoint: Option<String>,
-//     token: String,
-// ) {
-//     // ...
-// }
-//
-// pub async fn raw_handle_event_voice_state_update(
-//     lavalink: LavalinkClient,
-//     guild_id: Option<impl Into<GuildId>>,
-//     channel_id: Option<impl Into<ChannelId>>,
-//     user_id: impl Into<UserId>,
-//     session_id: String,
-//     //token: Option<String>,
-// ) {
-//     let gateway_lock = {
-//         let client = lavalink.inner.lock().await;
-//         client.discord_gateway.clone()
-//     };
-//
-//     if user_id.into() != gateway_lock.lock().await.bot_id {
-//         return;
-//     }
-// }
+pub async fn raw_handle_event_voice_state_update(
+    lavalink: &LavalinkClient,
+    guild_id: impl Into<GuildId>,
+    channel_id: Option<impl Into<ChannelId>>,
+    user_id: impl Into<UserId>,
+    session_id: String,
+) {
+    let guild_id = guild_id.into();
+    let user_id = user_id.into();
+    let channel_id = channel_id.map(|c| c.into());
+
+    let gateway_data = lavalink.discord_gateway_data().await;
+    let ws_data = gateway_data.lock().await;
+
+    if user_id != ws_data.bot_id {
+        return;
+    }
+
+    let connections = ws_data.connections.clone();
+
+    drop(ws_data);
+
+    if channel_id.is_none() {
+        connections.remove(&guild_id);
+        return;
+    }
+
+    if let Some(mut connection) = connections.get_mut(&guild_id) {
+        connection.session_id = Some(session_id);
+        connection.channel_id = channel_id;
+    } else {
+        connections.insert(
+            guild_id,
+            ConnectionInfo {
+                guild_id: Some(guild_id),
+                session_id: Some(session_id),
+                channel_id: channel_id,
+                ..Default::default()
+            },
+        );
+    };
+}

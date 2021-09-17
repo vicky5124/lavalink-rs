@@ -2,6 +2,10 @@ use crate::gateway::LavalinkEventHandler;
 use crate::model::*;
 use crate::LavalinkClient;
 use crate::WsStream;
+#[cfg(feature = "simple-gateway")]
+use crate::voice::{
+    raw_handle_event_voice_state_update, raw_handle_event_voice_server_update
+};
 
 #[cfg(feature = "simple-gateway")]
 use std::sync::Arc;
@@ -164,7 +168,7 @@ pub async fn discord_event_loop(
         debug!("identify_request: {:#?}", identify_request);
 
         let tx_hb = tx.clone();
-        let discord_ws_clone = discord_ws.clone();
+        let client_clone = client.clone();
         let session_id_clone = session_id.clone();
         let seq_clone = seq.clone();
         let reconnect_clone = reconnect.clone();
@@ -209,35 +213,7 @@ pub async fn discord_event_loop(
                         info!("Voice State Update");
                         warn!("{:#?}", event);
 
-                        let ws_data = discord_ws_clone.lock().await;
-
-                        if event.d.user_id != ws_data.bot_id {
-                            continue;
-                        }
-
-                        let connections = ws_data.connections.clone();
-
-                        drop(ws_data);
-
-                        if event.d.channel_id.is_none() {
-                            connections.remove(&event.d.guild_id);
-                            continue;
-                        }
-
-                        if let Some(mut connection) = connections.get_mut(&event.d.guild_id) {
-                            connection.session_id = Some(event.d.session_id);
-                            connection.channel_id = event.d.channel_id;
-                        } else {
-                            connections.insert(
-                                event.d.guild_id,
-                                ConnectionInfo {
-                                    guild_id: Some(event.d.guild_id),
-                                    session_id: Some(event.d.session_id),
-                                    channel_id: event.d.channel_id,
-                                    ..Default::default()
-                                },
-                            );
-                        };
+                        raw_handle_event_voice_state_update(&client_clone, event.d.guild_id, event.d.channel_id, event.d.user_id, event.d.session_id).await;
                     }
                     "VOICE_SERVER_UPDATE" => {
                         let event: BaseEvent<EventVoiceServerUpdate> =
@@ -245,23 +221,7 @@ pub async fn discord_event_loop(
                         info!("Voice Server Update");
                         warn!("{:#?}", event);
 
-                        let connections = discord_ws_clone.lock().await.connections.clone();
-
-                        if let Some(mut connection) = connections.get_mut(&event.d.guild_id) {
-                            connection.guild_id = Some(event.d.guild_id);
-                            connection.endpoint = Some(event.d.endpoint);
-                            connection.token = Some(event.d.token);
-                        } else {
-                            connections.insert(
-                                event.d.guild_id,
-                                ConnectionInfo {
-                                    guild_id: Some(event.d.guild_id),
-                                    endpoint: Some(event.d.endpoint),
-                                    token: Some(event.d.token),
-                                    ..Default::default()
-                                },
-                            );
-                        };
+                        raw_handle_event_voice_server_update(&client_clone, event.d.guild_id, event.d.endpoint, event.d.token).await;
                     }
                     "RESUMED" => info!("Resumed the discord websocket."),
                     "" => (),
