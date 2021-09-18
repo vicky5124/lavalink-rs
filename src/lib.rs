@@ -23,6 +23,8 @@ pub mod voice;
 
 /// Re-export to be used with the event handler.
 pub use async_trait::async_trait;
+/// Re-export to be used with the Node data.
+pub use typemap_rev;
 
 use builders::*;
 #[cfg(feature = "simple-gateway")]
