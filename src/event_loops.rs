@@ -181,7 +181,7 @@ pub async fn discord_event_loop(
                 debug!("event: {:#?}", resp);
 
                 let text_resp = if resp.is_close() { 
-                    warn!("Close event obtained: {}", resp);
+                    info!("Close event obtained: {}", resp);
                     *reconnect_clone.write().await = true;
                     tx_hb.send("reconnect".to_string()).unwrap();
                     continue 'events;
@@ -210,16 +210,16 @@ pub async fn discord_event_loop(
                     "VOICE_STATE_UPDATE" => {
                         let event: BaseEvent<EventVoiceStateUpdate> =
                             serde_json::from_str(&text_resp).unwrap();
-                        info!("Voice State Update");
-                        warn!("{:#?}", event);
+                        debug!("Voice State Update");
+                        debug!("{:#?}", event);
 
                         raw_handle_event_voice_state_update(&client_clone, event.d.guild_id, event.d.channel_id, event.d.user_id, event.d.session_id).await;
                     }
                     "VOICE_SERVER_UPDATE" => {
                         let event: BaseEvent<EventVoiceServerUpdate> =
                             serde_json::from_str(&text_resp).unwrap();
-                        info!("Voice Server Update");
-                        warn!("{:#?}", event);
+                        debug!("Voice Server Update");
+                        debug!("{:#?}", event);
 
                         raw_handle_event_voice_server_update(&client_clone, event.d.guild_id, event.d.endpoint, event.d.token).await;
                     }
