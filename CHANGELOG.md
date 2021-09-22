@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.9.0-rc.2
+
+- typemap_rev is now re-exported.
+- Automatically remove Removed wss:// from endpoint if present.
+- Add functions to wait for ConnectionInfo insert and delete.
+- Implemented public raw event handlers.
+- Make the wait time before connecting customizable.
+- Allow to configure the discord gateway auto-start.
+- Fix reconnect unwrap if the previous reconnect worked.
+- Some structs now support Serde.
+- Check for both Server and State events in join()
+- Remove andesite support due to it getting archived.
+- Switched serenity example back to songbird.
+- Builders now take and return &mut.
+- Feature gate tracing, and add log as a possible logger.
+- Updated async_tungstenite.
+- Switched log levels in some messages.
+
 ## 0.9.0-rc.1
 
 - Feature gated songbird.
