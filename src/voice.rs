@@ -179,9 +179,16 @@ pub async fn raw_handle_event_voice_state_update(
             ConnectionInfo {
                 guild_id: Some(guild_id),
                 session_id: Some(session_id),
-                channel_id: channel_id,
+                channel_id,
                 ..Default::default()
             },
         );
     };
+    
+    
+    let connection = connections.get(&guild_id).unwrap();
+
+    if connection.endpoint.is_some() && connection.session_id.is_some() {
+        let _ = lavalink.create_session(&connection).await;
+    }
 }
