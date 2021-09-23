@@ -643,7 +643,7 @@ pub struct TrackFinish {
     pub guild_id: GuildId,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TrackException {
     pub exception: Exception,
     pub op: String,
@@ -656,7 +656,7 @@ pub struct TrackException {
     pub guild_id: GuildId,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Exception {
     pub severity: String,
     pub cause: String,
