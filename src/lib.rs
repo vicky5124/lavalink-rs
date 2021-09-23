@@ -365,9 +365,11 @@ impl LavalinkClient {
             .send(connection_info.guild_id, &mut client.socket_write)
             .await?;
 
-        client
-            .nodes
-            .insert(connection_info.guild_id.0, Node::default());
+        if !client.nodes.contains_key(&connection_info.guild_id.0) {
+            client
+                .nodes
+                .insert(connection_info.guild_id.0, Node::default());
+        }
 
         Ok(())
     }
@@ -414,9 +416,11 @@ impl LavalinkClient {
             .send(connection_info.guild_id.unwrap(), &mut client.socket_write)
             .await?;
 
-        client
-            .nodes
-            .insert(connection_info.guild_id.unwrap().0, Node::default());
+        if !client.nodes.contains_key(&connection_info.guild_id.unwrap().0) {
+            client
+                .nodes
+                .insert(connection_info.guild_id.unwrap().0, Node::default());
+        }
 
         Ok(())
     }

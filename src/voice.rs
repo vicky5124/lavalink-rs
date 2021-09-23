@@ -141,6 +141,14 @@ pub async fn raw_handle_event_voice_server_update(
             },
         );
     };
+
+    let connection = connections.get(&guild_id).unwrap();
+
+    if connection.endpoint.is_some() && connection.session_id.is_some() {
+        if let Err(why) = lavalink.create_session(&connection).await {
+            error!("Error when creating a session on voice_server_update: {}", why);
+        }
+    }
 }
 
 pub async fn raw_handle_event_voice_state_update(
@@ -184,11 +192,4 @@ pub async fn raw_handle_event_voice_state_update(
             },
         );
     };
-    
-    
-    let connection = connections.get(&guild_id).unwrap();
-
-    if connection.endpoint.is_some() && connection.session_id.is_some() {
-        let _ = lavalink.create_session(&connection).await;
-    }
 }
