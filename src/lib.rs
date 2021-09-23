@@ -287,9 +287,22 @@ impl LavalinkClient {
     #[cfg(feature = "simple-gateway")]
     pub async fn start_discord_gateway(&self, wait_time: Option<Duration>) {
         let client_clone = self.clone();
-        let token = self.discord_gateway_data().await.lock().await.bot_token.clone();
-        let wait_time = if let Some(t) = wait_time { t } else {
-            self.discord_gateway_data().await.lock().await.wait_time.clone()
+        let token = self
+            .discord_gateway_data()
+            .await
+            .lock()
+            .await
+            .bot_token
+            .clone();
+        let wait_time = if let Some(t) = wait_time {
+            t
+        } else {
+            self.discord_gateway_data()
+                .await
+                .lock()
+                .await
+                .wait_time
+                .clone()
         };
 
         tokio::spawn(async move {
@@ -416,7 +429,10 @@ impl LavalinkClient {
             .send(connection_info.guild_id.unwrap(), &mut client.socket_write)
             .await?;
 
-        if !client.nodes.contains_key(&connection_info.guild_id.unwrap().0) {
+        if !client
+            .nodes
+            .contains_key(&connection_info.guild_id.unwrap().0)
+        {
             client
                 .nodes
                 .insert(connection_info.guild_id.unwrap().0, Node::default());

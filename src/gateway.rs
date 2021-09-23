@@ -31,7 +31,6 @@ pub async fn call_discord_gateway(lavalink: &LavalinkClient, message: String) {
         .unwrap();
 }
 
-
 /*
 
 {"playingPlayers":1,"op":"stats","memory":{"reservable":4294967296,"used":513694368,"free":262251872,"allocated":775946240},"frameStats":{"sent":3000,"deficit":0,"nulled":0},"players":2,"cpu":{"cores":8,"systemLoad":0.12922594961493278,"lavalinkLoad":0.0020833333333333333},"uptime":732761629}
