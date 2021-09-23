@@ -648,7 +648,7 @@ pub struct TrackException {
     pub exception: Exception,
     pub op: String,
     #[serde(rename = "type")]
-    pub track_exception_event_type: String,
+    pub track_exception_type: String,
     pub track: String,
     pub error: String,
     #[serde(rename = "guildId")]
