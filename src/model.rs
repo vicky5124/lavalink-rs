@@ -643,6 +643,26 @@ pub struct TrackFinish {
     pub guild_id: GuildId,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TrackException {
+    pub exception: Exception,
+    pub op: String,
+    #[serde(rename = "type")]
+    pub track_exception_event_type: String,
+    pub track: String,
+    pub error: String,
+    #[serde(rename = "guildId")]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: GuildId,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Exception {
+    pub severity: String,
+    pub cause: String,
+    pub message: String,
+}
+
 #[cfg(feature = "simple-gateway")]
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ConnectionInfo {

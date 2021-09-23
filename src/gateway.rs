@@ -13,6 +13,8 @@ pub trait LavalinkEventHandler {
     async fn track_start(&self, _client: LavalinkClient, _event: TrackStart) {}
     /// Event that triggers when a track finishes playing.
     async fn track_finish(&self, _client: LavalinkClient, _event: TrackFinish) {}
+    /// Event that triggers when an exception happens with a track.
+    async fn track_exception(&self, _client: LavalinkClient, _event: TrackException) {}
     /// Event that triggers when the websocket connection to the voice channel closes.
     async fn websocket_closed(&self, _client: LavalinkClient, _event: WebSocketClosed) {}
     /// Event that triggers when the player gets destroyed on a guild.
@@ -48,5 +50,7 @@ pub async fn call_discord_gateway(lavalink: &LavalinkClient, message: String) {
 {"op":"event","type":"WebSocketClosedEvent","userId":"601749512456896522","guildId":"182892283111276544","reason":"","code":1000,"byRemote":false}
 
 {"op":"event","type":"PlayerDestroyedEvent","cleanup":false,"guildId":"182892283111276544","userId":"601749512456896522"}
+
+{"exception":{"severity":"FAULT","cause":"java.lang.RuntimeException: Not success status code: 403","message":"Something broke when playing the track."},"op":"event","type":"TrackExceptionEvent","track":"QAAAjAIAJFdpbnRlcnN1biAtIFdoZW4gVGltZSBGYWRlcyBBd2F5IDEuNQAOV2ludGVyc3VuIEphcmkAAAAAAAPv0AALbXpFdi00eGNZaWcAAQAraHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1tekV2LTR4Y1lpZwAHeW91dHViZQAAAAAAAAAA","error":"Something broke when playing the track.","guildId":"574921006817476608"}
 
 */
