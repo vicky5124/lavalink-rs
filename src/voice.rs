@@ -147,7 +147,7 @@ pub async fn raw_handle_event_voice_server_update(
 
     tokio::spawn(async move {
         if connection.endpoint.is_some() && connection.session_id.is_some() {
-            warn!("Call pause");
+            debug!("(Voice Server Update) Call pause");
             if let Err(why) = lavalink.pause(guild_id).await {
                 error!(
                     "Error when pausing on voice_server_update: {}",
@@ -157,7 +157,7 @@ pub async fn raw_handle_event_voice_server_update(
 
             sleep(Duration::from_millis(100)).await;
 
-            warn!("Call create_session");
+            debug!("(Voice Server Update) Call create_session");
             if let Err(why) = lavalink.create_session(&connection).await {
                 error!(
                     "Error when creating a session on voice_server_update: {}",
@@ -167,7 +167,7 @@ pub async fn raw_handle_event_voice_server_update(
 
             sleep(Duration::from_millis(1000)).await;
 
-            warn!("Call resume");
+            debug!("(Voice Server Update) Call resume");
             if let Err(why) = lavalink.resume(guild_id).await {
                 error!(
                     "Error when resuming on voice_server_update: {}",
