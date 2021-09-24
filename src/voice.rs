@@ -142,30 +142,40 @@ pub async fn raw_handle_event_voice_server_update(
         );
     };
 
-    let connection = connections.get(&guild_id).unwrap();
+    let connection = connections.get(&guild_id).unwrap().clone();
+    let lavalink = lavalink.clone();
 
-    if connection.endpoint.is_some() && connection.session_id.is_some() {
-        if let Err(why) = lavalink.create_session(&connection).await {
-            error!(
-                "Error when creating a session on voice_server_update: {}",
-                why
-            );
-        }
+    tokio::spawn(async move {
+        if connection.endpoint.is_some() && connection.session_id.is_some() {
+            warn!("Call pause");
+            if let Err(why) = lavalink.pause(guild_id).await {
+                error!(
+                    "Error when pausing on voice_server_update: {}",
+                    why
+                );
+            }
 
-        if let Err(why) = lavalink.pause(guild_id).await {
-            error!(
-                "Error when pausing on voice_server_update: {}",
-                why
-            );
-        }
+            sleep(Duration::from_millis(100)).await;
 
-        if let Err(why) = lavalink.resume(guild_id).await {
-            error!(
-                "Error when resuming on voice_server_update: {}",
-                why
-            );
+            warn!("Call create_session");
+            if let Err(why) = lavalink.create_session(&connection).await {
+                error!(
+                    "Error when creating a session on voice_server_update: {}",
+                    why
+                );
+            }
+
+            sleep(Duration::from_millis(1000)).await;
+
+            warn!("Call resume");
+            if let Err(why) = lavalink.resume(guild_id).await {
+                error!(
+                    "Error when resuming on voice_server_update: {}",
+                    why
+                );
+            }
         }
-    }
+    });
 }
 
 pub async fn raw_handle_event_voice_state_update(
