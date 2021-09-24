@@ -183,9 +183,15 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
 
                 let text_resp = if resp.is_close() {
                     info!("Close event obtained: {}", resp);
-                    *reconnect_clone.write().await = true;
-                    tx_hb.send("reconnect".to_string()).unwrap();
-                    continue 'events;
+                    let resp_text = resp.to_string();
+                    if resp_text.starts_with("Discord") {
+                        *reconnect_clone.write().await = true;
+                        tx_hb.send("reconnect".to_string()).unwrap();
+                        continue 'events;
+                    } else {
+                        tx_hb.send("reconnect".to_string()).unwrap();
+                        break 'events;
+                    }
                 } else if let Ok(x) = resp.clone().into_text() {
                     x
                 } else {
