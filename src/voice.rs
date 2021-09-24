@@ -152,14 +152,14 @@ pub async fn raw_handle_event_voice_server_update(
             );
         }
 
-        if let Err(why) = lavalink.pause(&guild_id).await {
+        if let Err(why) = lavalink.pause(guild_id).await {
             error!(
                 "Error when pausing on voice_server_update: {}",
                 why
             );
         }
 
-        if let Err(why) = lavalink.resume(&guild_id).await {
+        if let Err(why) = lavalink.resume(guild_id).await {
             error!(
                 "Error when resuming on voice_server_update: {}",
                 why
