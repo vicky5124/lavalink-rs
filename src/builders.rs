@@ -281,7 +281,7 @@ impl PlayParameters {
     }
 
     /// Generates a TrackQueue from the builder.
-    pub async fn to_track_queue(&self) -> TrackQueue {
+    pub fn to_track_queue(&self) -> TrackQueue {
         crate::model::TrackQueue {
             track: self.track.clone(),
             start_time: self.start,
