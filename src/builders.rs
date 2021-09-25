@@ -280,6 +280,20 @@ impl PlayParameters {
         Ok(())
     }
 
+    /// Generates a TrackQueue from the builder.
+    pub async fn to_track_queue(&self) -> TrackQueue {
+        crate::model::TrackQueue {
+            track: self.track.clone(),
+            start_time: self.start,
+            end_time: if self.finish == 0 {
+                None
+            } else {
+                Some(self.finish)
+            },
+            requester: self.requester,
+        }
+    }
+
     /// Sets the person that requested the song
     pub fn requester(&mut self, requester: impl Into<UserId>) -> &mut Self {
         self.requester = Some(requester.into());
