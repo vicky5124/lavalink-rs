@@ -340,7 +340,9 @@ pub async fn lavalink_event_loop(
                                     if let Some(mut node) =
                                         client_lock.nodes.get_mut(&track_finish.guild_id.0)
                                     {
-                                        node.queue.remove(0);
+                                        if !node.queue.is_empty() {
+                                            node.queue.remove(0);
+                                        }
                                         node.now_playing = None;
                                     };
                                 }
