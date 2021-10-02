@@ -17,7 +17,7 @@ mod event_loops;
 pub mod gateway;
 /// Library models
 pub mod model;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 /// Voice connection handling
 pub mod voice;
 
@@ -27,11 +27,11 @@ pub use async_trait::async_trait;
 pub use typemap_rev;
 
 use builders::*;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use error::LavalinkError;
 use error::LavalinkResult;
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use event_loops::discord_event_loop;
 use event_loops::lavalink_event_loop;
 
@@ -69,7 +69,7 @@ use async_tungstenite::{
     WebSocketStream,
 };
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use tokio::sync::mpsc;
 
 use dashmap::{DashMap, DashSet};
@@ -112,14 +112,14 @@ pub struct LavalinkClientInner {
     pub nodes: Arc<DashMap<u64, Node>>,
     pub loops: Arc<DashSet<u64>>,
 
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub discord_gateway_data: Arc<Mutex<DiscordGatewayData>>,
     // Unused
     //_region: Option<Region>,
     //_identifier: Option<String>,
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 pub struct DiscordGatewayData {
     pub shard_count: u64,
     pub bot_id: UserId,
@@ -180,7 +180,7 @@ impl LavalinkClient {
             (split.0, split.1, headers, rest_uri)
         };
 
-        #[cfg(feature = "simple-gateway")]
+        #[cfg(feature = "discord-gateway")]
         let (discord_socket_uri, discord_headers) = {
             let socket_uri = "wss://gateway.discord.gg/?v=9&encoding=json";
 
@@ -195,7 +195,7 @@ impl LavalinkClient {
             (socket_uri, headers)
         };
 
-        #[cfg(feature = "simple-gateway")]
+        #[cfg(feature = "discord-gateway")]
         let discord_gateway_data = {
             Arc::new(Mutex::new(DiscordGatewayData {
                 shard_count: builder.shard_count,
@@ -215,7 +215,7 @@ impl LavalinkClient {
             rest_uri: lavalink_rest_uri,
             nodes: Arc::new(DashMap::new()),
             loops: Arc::new(DashSet::new()),
-            #[cfg(feature = "simple-gateway")]
+            #[cfg(feature = "discord-gateway")]
             discord_gateway_data,
         };
 
@@ -231,7 +231,7 @@ impl LavalinkClient {
             error!("Event loop ended unexpectedly.");
         });
 
-        #[cfg(feature = "simple-gateway")]
+        #[cfg(feature = "discord-gateway")]
         if builder.start_gateway {
             let client_clone = client.clone();
             let token = builder.bot_token.clone();
@@ -268,14 +268,14 @@ impl LavalinkClient {
     ///     .build(LavalinkHandler)
     ///     .await?;
     /// ```
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub fn builder(
         user_id: impl Into<UserId>,
         bot_token: impl Into<String>,
     ) -> LavalinkClientBuilder {
         LavalinkClientBuilder::new(user_id, bot_token)
     }
-    #[cfg(not(feature = "simple-gateway"))]
+    #[cfg(not(feature = "discord-gateway"))]
     pub fn builder(user_id: impl Into<UserId>) -> LavalinkClientBuilder {
         LavalinkClientBuilder::new(user_id)
     }
@@ -284,7 +284,7 @@ impl LavalinkClient {
     /// configured that way.
     ///
     /// If wait_time is passed, it will override the previosuly configured wait time.
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub async fn start_discord_gateway(&self, wait_time: Option<Duration>) {
         let client_clone = self.clone();
         let token = self
@@ -386,7 +386,7 @@ impl LavalinkClient {
 
         Ok(())
     }
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub async fn create_session(&self, connection_info: &ConnectionInfo) -> LavalinkResult<()> {
         let token = connection_info
             .token
@@ -699,12 +699,12 @@ impl LavalinkClient {
         client.loops.clone()
     }
 
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub async fn discord_gateway_data(&self) -> Arc<Mutex<DiscordGatewayData>> {
         self.inner.lock().await.discord_gateway_data.clone()
     }
 
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub async fn discord_gateway_connections(&self) -> Arc<DashMap<GuildId, ConnectionInfo>> {
         self.inner
             .lock()
@@ -716,7 +716,7 @@ impl LavalinkClient {
             .clone()
     }
 
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub async fn join(
         &self,
         guild_id: impl Into<GuildId>,
@@ -725,7 +725,7 @@ impl LavalinkClient {
         crate::voice::join(self, guild_id, channel_id).await
     }
 
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub async fn leave(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         crate::voice::leave(self, guild_id).await
     }

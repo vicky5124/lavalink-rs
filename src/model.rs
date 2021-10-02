@@ -663,7 +663,7 @@ pub struct Exception {
     pub message: String,
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ConnectionInfo {
     pub guild_id: Option<GuildId>,
@@ -673,7 +673,7 @@ pub struct ConnectionInfo {
     pub session_id: Option<String>,
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EventVoiceServerUpdate {
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -682,7 +682,7 @@ pub struct EventVoiceServerUpdate {
     pub token: String,
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EventVoiceStateUpdate {
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -694,7 +694,7 @@ pub struct EventVoiceStateUpdate {
     pub session_id: String,
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EventReady {
     pub session_id: String,

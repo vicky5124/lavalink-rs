@@ -18,7 +18,7 @@ documentation = "https://docs.rs/lavalink-rs"
 default = ["rustls", "songbird", "tracing-log"]
 
 tokio-02-marker = []
-simple-gateway = []
+discord-gateway = []
 
 tracing-log = ["tracing"]
 normal-log = ["log"]
@@ -40,7 +40,7 @@ native = [
 ]
 
 [package.metadata.docs.rs]
-features = ["rustls", "twilight", "serenity", "songbird", "simple-gateway"]
+features = ["rustls", "twilight", "serenity", "songbird", "discord-gateway"]
 
 [dependencies]
 regex = "1.3"

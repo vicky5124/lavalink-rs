@@ -1,4 +1,4 @@
-///! Commented lines of code use the built-in simple-gateway instead of songbird.
+///! Commented lines of code use the built-in discord-gateway instead of songbird.
 
 #[macro_use]
 extern crate tracing;

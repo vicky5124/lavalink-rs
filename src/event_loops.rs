@@ -1,53 +1,53 @@
 use crate::gateway::LavalinkEventHandler;
 use crate::model::*;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use crate::voice::{raw_handle_event_voice_server_update, raw_handle_event_voice_state_update};
 use crate::LavalinkClient;
 use crate::WsStream;
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use async_tungstenite::tokio::connect_async;
 use futures::stream::{SplitStream, StreamExt};
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use futures::SinkExt;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use http::Request;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use serde::Deserialize;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use serde_json::json;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use std::sync::Arc;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use std::time::Duration;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use tokio::sync::mpsc;
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 use tokio::sync::RwLock;
 
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 #[derive(Deserialize)]
 struct HeartBeatInner {
     heartbeat_interval: u64,
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 #[derive(Debug, Deserialize)]
 struct BaseEvent<T> {
     d: T,
     //t: Option<String>,
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 #[derive(Debug, Deserialize)]
 struct BaseEventNoData {
     t: Option<String>,
     s: Option<usize>,
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_time: Duration) {
     let reconnect = Arc::new(RwLock::new(false));
     let was_reconnected = Arc::new(RwLock::new(false));

@@ -21,9 +21,9 @@ pub enum LavalinkError {
     /// [`PlayParameters::queue`]: crate::builders::PlayParameters
     NoSessionPresent,
     /// When joining a voice channel times out.
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     Timeout,
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     MissingConnectionField(&'static str),
 }
 
@@ -51,11 +51,11 @@ impl Display for LavalinkError {
                     "Please, call client.create_session() for this method to work correctly."
                 )
             }
-            #[cfg(feature = "simple-gateway")]
+            #[cfg(feature = "discord-gateway")]
             LavalinkError::Timeout => {
                 write!(f, "Joining the voice channel timed out.")
             }
-            #[cfg(feature = "simple-gateway")]
+            #[cfg(feature = "discord-gateway")]
             &LavalinkError::MissingConnectionField(field) => {
                 write!(f, "Gateway connection is missing the field `{}`", field)
             }

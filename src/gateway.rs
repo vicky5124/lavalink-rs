@@ -21,7 +21,7 @@ pub trait LavalinkEventHandler {
     async fn player_destroyed(&self, _client: LavalinkClient, _event: PlayerDestroyed) {}
 }
 
-#[cfg(feature = "simple-gateway")]
+#[cfg(feature = "discord-gateway")]
 pub async fn call_discord_gateway(lavalink: &LavalinkClient, message: String) {
     lavalink
         .discord_gateway_data()

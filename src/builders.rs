@@ -16,16 +16,16 @@ pub struct LavalinkClientBuilder {
     pub shard_count: u64,
     pub bot_id: UserId,
     pub is_ssl: bool,
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub bot_token: String,
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub start_gateway: bool,
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub gateway_start_wait_time: Duration,
 }
 
 impl LavalinkClientBuilder {
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     /// Builds the LavalinkClient.
     ///
     /// Default values:
@@ -52,7 +52,7 @@ impl LavalinkClientBuilder {
         }
     }
 
-    #[cfg(not(feature = "simple-gateway"))]
+    #[cfg(not(feature = "discord-gateway"))]
     ///
     /// Builds the LavalinkClient.
     ///
@@ -109,7 +109,7 @@ impl LavalinkClientBuilder {
     }
 
     /// Sets the token of the bot.
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub fn set_bot_token<U: Into<String>>(&mut self, bot_token: U) -> &mut Self {
         self.bot_token = bot_token.into();
         self
@@ -128,14 +128,14 @@ impl LavalinkClientBuilder {
     }
 
     /// Sets if the discord gateway for voice connections should start or not.
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub fn set_start_gateway(&mut self, start_gateway: bool) -> &mut Self {
         self.start_gateway = start_gateway;
         self
     }
 
     /// Sets the time to wait before starting the first discord gateway connection.
-    #[cfg(feature = "simple-gateway")]
+    #[cfg(feature = "discord-gateway")]
     pub fn set_gateway_start_wait_time(&mut self, time: Duration) -> &mut Self {
         self.gateway_start_wait_time = time;
         self

@@ -1,8 +1,8 @@
 #[cfg(all(not(feature = "rustls"), not(feature = "native")))]
 compile_error!("Please specify a feature, either `rustls` or `native`.");
 
-#[cfg(all(not(feature = "songbird"), not(feature = "simple-gateway")))]
-compile_error!("Set either `songbird` or `simple-gateway` as a feature to be able to connect to voicce channels.");
+#[cfg(all(not(feature = "songbird"), not(feature = "discord-gateway")))]
+compile_error!("Set either `songbird` or `discord-gateway` as a feature to be able to connect to voicce channels.");
 
 #[cfg(all(not(feature = "tracing-log"), not(feature = "normal-log")))]
 compile_error!("Set either `tracing-log` or `normal-log` as your logging crate.");

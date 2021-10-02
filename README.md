@@ -71,6 +71,6 @@ These are the available ones:
 - `rustls`: Use the rustls TLS backend.
 - `native`: Uses the system native TLS backend (OpenSSL on linux).
 - `songbird`: Use songbird to connect to handle voice connections.
-- `simple-gateway`: Use lavalink-rs to handle the voice connections (note, this is a very basic implementation, without sharding support, while also creating a second gateway rather than using the existing one).
+- `discord-gateway`: Use lavalink-rs to handle the voice connections (note, this is a very basic implementation, without sharding support, while also creating a second gateway rather than using the existing one).
 - `serenity`: Add support for serenity's models.
 - `twilight`: Add support for twilight-model.
