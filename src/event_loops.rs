@@ -53,6 +53,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
     let was_reconnected = Arc::new(RwLock::new(false));
     let session_id = Arc::new(RwLock::new(String::new()));
     let seq = Arc::new(RwLock::new(0_usize));
+    let rec_seq = Arc::new(RwLock::new(0_usize));
 
     loop {
         let headers = client
@@ -150,7 +151,14 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
             *was_reconnected.write().await = true;
             let session_id = session_id.read().await.clone();
             let seq = seq.read().await.clone();
-            warn!("{} {}", session_id, seq);
+            let rec_seq = rec_seq.read().await.clone();
+            warn!("Session: {}, Seq: {}, Last recon Seq: {}", session_id, seq, rec_seq);
+
+            if seq == rec_seq {
+                let tx_hb = tx.clone();
+                let _ = tx_hb.send("reconnect".to_string());
+                break;
+            }
 
             json!({
                 "op": 6,
