@@ -12,7 +12,7 @@ build:
     - rustc --version
   stage: build
   script:
-    - cargo build --features rustls,twilight,serenity,songbird,simple-gateway
+    - cargo build --features rustls,twilight,serenity,songbird,discord-gateway
   cache:
     untracked: true
     paths:
