@@ -527,7 +527,16 @@ impl LavalinkClient {
 
     /// Sets the pause status.
     pub async fn set_pause(&self, guild_id: impl Into<GuildId>, pause: bool) -> LavalinkResult<()> {
+        let guild_id = guild_id.into().0;
         let payload = crate::model::Pause { pause };
+
+        {
+            let nodes = self.nodes().await;
+            let node = nodes.get_mut(&guild_id);
+            if let Some(mut n) = node {
+                n.is_paused = pause;
+            }
+        }
 
         let mut client = self.inner.lock().await;
 
