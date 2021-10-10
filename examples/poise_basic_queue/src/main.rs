@@ -11,14 +11,13 @@ use poise::{
 };
 
 use serenity::http::Http;
-use serenity::model::prelude::{misc::Mentionable, ApplicationId, Event, Ready, UserId};
+use serenity::model::prelude::{misc::Mentionable, Event, Ready, UserId};
 use serenity::prelude::{Context as SerenityContext, RawEventHandler};
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type CommandResult = Result<(), Error>;
 
 type Context<'a> = poise::Context<'a, Data, Error>;
-type PrefixContext<'a> = poise::PrefixContext<'a, Data, Error>;
 
 struct Data {
     lavalink: LavalinkClient,
@@ -54,7 +53,7 @@ impl LavalinkEventHandler for LavalinkHandler {
 }
 
 /// Pong
-#[poise::command(slash_command, track_edits)]
+#[poise::command(prefix_command, slash_command, track_edits)]
 async fn ping(ctx: Context<'_>) -> CommandResult {
     say_reply(ctx, "Pong!".to_string()).await?;
 
@@ -64,15 +63,15 @@ async fn ping(ctx: Context<'_>) -> CommandResult {
 /// Register slash commands in this guild or globally
 ///
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
-#[poise::command(check = "is_owner", hide_in_help)]
-async fn register(ctx: PrefixContext<'_>, #[flag] global: bool) -> CommandResult {
-    poise::defaults::register_slash_commands(ctx, global).await?;
+#[poise::command(prefix_command, check = "is_owner", hide_in_help)]
+async fn register(ctx: Context<'_>, #[flag] global: bool) -> CommandResult {
+    poise::samples::register_application_commands(ctx, global).await?;
 
     Ok(())
 }
 
-async fn is_owner(ctx: PrefixContext<'_>) -> Result<bool, Error> {
-    Ok(ctx.msg.author.id == ctx.data.owner_id)
+async fn is_owner(ctx: Context<'_>) -> Result<bool, Error> {
+    Ok(ctx.author().id == ctx.data().owner_id)
 }
 
 async fn on_error(error: Error, ctx: ErrorContext<'_, Data, Error>) {
@@ -111,8 +110,8 @@ async fn main() -> Result<(), Error> {
     options.command(skip(), |f| f);
     options.command(now_playing(), |f| f);
 
-    //let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let token = env::var("SLASH_RASH").expect("Expected a token in the environment");
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    //let token = env::var("SLASH_RASH").expect("Expected a token in the environment");
 
     let http = Http::new_with_token(&token);
 
@@ -121,7 +120,7 @@ async fn main() -> Result<(), Error> {
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
-    let lava_client = LavalinkClient::builder(bot_id)
+    let lava_client = LavalinkClient::builder(bot_id.0)
         .set_host("127.0.0.1")
         .set_password(
             env::var("LAVALINK_PASSWORD").unwrap_or_else(|_| "youshallnotpass".to_string()),
@@ -129,34 +128,28 @@ async fn main() -> Result<(), Error> {
         .build(LavalinkHandler)
         .await?;
 
-    let framework = poise::Framework::new(
-        ",".to_owned(),          // prefix
-        ApplicationId(bot_id.0), // Note that the bot ID is not the same as the application ID in older apps.
-        move |_ctx, _ready, _framework| {
+    let framework = poise::Framework::build()
+        .prefix(",".to_owned())
+        .token(&env::var("SLASH_RASH")?)
+        .options(options)
+        .client_settings(|c| c.register_songbird())
+        .user_data_setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 Ok(Data {
                     lavalink: lava_client,
                     owner_id: UserId(182891574139682816),
                 })
             })
-        },
-        options,
-    );
+        });
 
-    framework
-        .start(
-            serenity::client::ClientBuilder::new_with_http(http)
-                .token(token)
-                .raw_event_handler(Handler)
-                .register_songbird(),
-        )
-        .await?;
+
+    framework.run().await?;
 
     Ok(())
 }
 
 /// Join the voice channel you are on.
-#[poise::command(slash_command, track_edits)]
+#[poise::command(prefix_command, slash_command, track_edits)]
 async fn join(ctx: Context<'_>) -> CommandResult {
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
@@ -186,14 +179,16 @@ async fn join(ctx: Context<'_>) -> CommandResult {
 
             say_reply(ctx, format!("Joined {}", connect_to.mention())).await?;
         }
-        Err(why) => say_reply(ctx, format!("Error joining the channel: {}", why)).await?,
+        Err(why) => {
+            say_reply(ctx, format!("Error joining the channel: {}", why)).await?;
+        }
     }
 
     Ok(())
 }
 
 /// Leave from a voice channel if connected.
-#[poise::command(slash_command, track_edits)]
+#[poise::command(prefix_command, slash_command, track_edits)]
 async fn leave(ctx: Context<'_>) -> CommandResult {
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
@@ -220,7 +215,7 @@ async fn leave(ctx: Context<'_>) -> CommandResult {
 }
 
 /// Play a song from a URL or a search query.
-#[poise::command(slash_command, track_edits)]
+#[poise::command(prefix_command, slash_command, track_edits)]
 async fn play(
     ctx: Context<'_>,
     #[description = "A song URL or YouTube search query"] query: String,
@@ -273,7 +268,7 @@ async fn play(
 }
 
 /// Send the currently playing track
-#[poise::command(slash_command, track_edits, aliases("np"))]
+#[poise::command(prefix_command, slash_command, track_edits, aliases("np"))]
 async fn now_playing(ctx: Context<'_>) -> CommandResult {
     let lava_client = ctx.data().lavalink.clone();
 
@@ -295,7 +290,7 @@ async fn now_playing(ctx: Context<'_>) -> CommandResult {
 }
 
 /// Skip current track
-#[poise::command(slash_command, track_edits)]
+#[poise::command(prefix_command, slash_command, track_edits)]
 async fn skip(ctx: Context<'_>) -> CommandResult {
     let lava_client = ctx.data().lavalink.clone();
 
