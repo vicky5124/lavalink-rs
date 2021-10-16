@@ -365,6 +365,11 @@ pub async fn lavalink_event_loop(
                                 handler.track_exception(client.clone(), track_exception).await;
                             }
                         }
+                        "TrackStuckEvent" => {
+                            if let Ok(track_stuck) = serde_json::from_str::<TrackStuck>(x) {
+                                handler.track_stuck(client.clone(), track_stuck).await;
+                            }
+                        }
                         _ => warn!("Unknown event: {}", &x),
                     },
                     _ => warn!("Unknown socket response: {}", &x),

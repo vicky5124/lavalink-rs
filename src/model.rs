@@ -663,6 +663,19 @@ pub struct Exception {
     pub message: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct TrackStuck {
+    pub op: String,
+    #[serde(rename = "thresholdMs")]
+    pub threshold_ms: u64,
+    #[serde(rename = "type")]
+    pub track_stuck_type: String,
+    pub track: String,
+    #[serde(rename = "guildId")]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub guild_id: GuildId,
+}
+
 #[cfg(feature = "discord-gateway")]
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ConnectionInfo {
