@@ -352,6 +352,29 @@ impl LavalinkClient {
             .await
     }
 
+    /// Decodes a track to it's information
+    pub async fn decode_track(&self, track: impl ToString) -> LavalinkResult<TrackDecode> {
+        let client = self.inner.lock().await;
+
+        let reqwest = ReqwestClient::new();
+        let url = Url::parse_with_params(
+            &format!("{}/loadtracks", &client.rest_uri),
+            &[("track", &track.to_string())],
+        )
+        .expect("The query cannot be formatted to a url.");
+
+        let resp = reqwest
+            .get(url)
+            .headers(client.headers.clone())
+            .send()
+            .await?
+            .json::<TrackDecode>()
+            .await?;
+
+        Ok(resp)
+    }
+
+
     /// Creates a lavalink session on the specified guild.
     ///
     /// This also creates a Node and inserts it. The node is not added on loops unless
