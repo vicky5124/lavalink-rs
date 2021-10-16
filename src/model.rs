@@ -489,20 +489,6 @@ pub struct PlaylistInfo {
     pub name: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct TrackDecode {
-    pub identifier: String,
-    #[serde(rename = "isSeekable")]
-    pub is_seekable: bool,
-    pub author: String,
-    pub length: u64,
-    #[serde(rename = "isStream")]
-    pub is_stream: bool,
-    pub position: u64,
-    pub title: String,
-    pub uri: String,
-}
-
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Track {
     pub track: String,

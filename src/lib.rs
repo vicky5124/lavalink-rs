@@ -353,7 +353,7 @@ impl LavalinkClient {
     }
 
     /// Decodes a track to it's information
-    pub async fn decode_track(&self, track: impl ToString) -> LavalinkResult<TrackDecode> {
+    pub async fn decode_track(&self, track: impl ToString) -> LavalinkResult<Info> {
         let client = self.inner.lock().await;
 
         let reqwest = ReqwestClient::new();
@@ -368,12 +368,11 @@ impl LavalinkClient {
             .headers(client.headers.clone())
             .send()
             .await?
-            .json::<TrackDecode>()
+            .json::<Info>()
             .await?;
 
         Ok(resp)
     }
-
 
     /// Creates a lavalink session on the specified guild.
     ///

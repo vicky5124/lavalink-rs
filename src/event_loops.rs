@@ -152,7 +152,10 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
             let session_id = session_id.read().await.clone();
             let seq = seq.read().await.clone();
             let rec_seq_inner = rec_seq.read().await.clone();
-            warn!("Session: {}, Seq: {}, Last recon Seq: {}", session_id, seq, rec_seq_inner);
+            warn!(
+                "Session: {}, Seq: {}, Last recon Seq: {}",
+                session_id, seq, rec_seq_inner
+            );
 
             if seq == rec_seq_inner {
                 let tx_hb = tx.clone();
@@ -320,8 +323,7 @@ pub async fn lavalink_event_loop(
                     }
                     "event" => match base_event.event_type.unwrap().as_str() {
                         "WebSocketClosedEvent" => {
-                            if let Ok(websocket_closed) =
-                                serde_json::from_str::<WebSocketClosed>(x)
+                            if let Ok(websocket_closed) = serde_json::from_str::<WebSocketClosed>(x)
                             {
                                 handler
                                     .websocket_closed(client.clone(), websocket_closed)
@@ -329,8 +331,7 @@ pub async fn lavalink_event_loop(
                             }
                         }
                         "PlayerDestroyedEvent" => {
-                            if let Ok(player_destroyed) =
-                                serde_json::from_str::<PlayerDestroyed>(x)
+                            if let Ok(player_destroyed) = serde_json::from_str::<PlayerDestroyed>(x)
                             {
                                 handler
                                     .player_destroyed(client.clone(), player_destroyed)
@@ -362,7 +363,9 @@ pub async fn lavalink_event_loop(
                         }
                         "TrackExceptionEvent" => {
                             if let Ok(track_exception) = serde_json::from_str::<TrackException>(x) {
-                                handler.track_exception(client.clone(), track_exception).await;
+                                handler
+                                    .track_exception(client.clone(), track_exception)
+                                    .await;
                             }
                         }
                         "TrackStuckEvent" => {
