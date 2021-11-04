@@ -34,12 +34,14 @@ rustls = [
     "async-tungstenite/tokio-rustls-webpki-roots",
     "tokio-rustls",
     "reqwest/rustls-tls",
+    "serenity-dep/rustls_backend",
 ]
 
 native = [
     "async-tungstenite/tokio-native-tls",
     "tokio-native-tls",
     "reqwest/native-tls",
+    "serenity-dep/native_tls_backend",
 ]
 
 [package.metadata.docs.rs]
@@ -87,7 +89,7 @@ optional = true
 package = "serenity"
 version = "0.10"
 default-features = false
-features=["model"]
+features = ["model"]
 optional = true
 
 [dependencies.twilight-model]
