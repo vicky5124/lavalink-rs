@@ -24,7 +24,6 @@ type ServiceResult = Result<(), Box<dyn Error + Send + Sync>>;
 
 #[derive(Clone)]
 struct Context {
-    cluster: Cluster,
     events: Arc<Mutex<Events>>,
     http: HttpClient,
     songbird: Arc<Songbird>,
@@ -77,7 +76,6 @@ async fn main() -> ServiceResult {
         cluster.up().await;
 
         Context {
-            cluster,
             events: Arc::new(Mutex::new(events)),
             http,
             songbird,
