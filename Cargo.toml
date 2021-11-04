@@ -15,6 +15,7 @@ documentation = "https://docs.rs/lavalink-rs"
 [workspace]
 #members = ["examples/serenity_basic_queue", "examples/twilight_basic_queue"]
 members = ["examples/twilight_basic_queue"]
+exclude = ["examples/serenity_basic_queue", "examples/poise_basic_queue"]
 
 [features]
 default = ["rustls", "songbird", "tracing-log"]
