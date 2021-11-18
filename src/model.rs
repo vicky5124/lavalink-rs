@@ -498,6 +498,7 @@ pub struct Track {
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Info {
     #[serde(rename = "isSeekable")]
+    #[serde(default)]
     pub is_seekable: bool,
 
     #[serde(rename = "isStream")]
