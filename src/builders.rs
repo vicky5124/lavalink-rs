@@ -313,6 +313,11 @@ impl PlayParameters {
     }
 
     /// Sets the time the track will finish at.
+    ///
+    /// NOTE: Setting this value will cause the `track_finish` to receive "STOPPED" as the reason,
+    /// as if `LavalinkClient::stop()` was called. The default queue behaviour for this is to not
+    /// skip the current track automatically. If you use this field, consider skipping manually on
+    /// the `track_finish` event.
     pub fn finish_time(&mut self, finish: Duration) -> &mut Self {
         self.finish = finish.as_millis() as u64;
         self
