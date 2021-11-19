@@ -502,6 +502,7 @@ pub struct Info {
     pub is_seekable: bool,
 
     #[serde(rename = "isStream")]
+    #[serde(default)]
     pub is_stream: bool,
 
     pub identifier: String,
