@@ -164,6 +164,12 @@ impl LavalinkClient {
             headers.insert("Authorization", builder.password.parse()?);
             headers.insert("Num-Shards", builder.shard_count.to_string().parse()?);
             headers.insert("User-Id", builder.bot_id.to_string().parse()?);
+            headers.insert(
+                "Client-Name",
+                concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"))
+                    .to_owned()
+                    .parse()?,
+            );
 
             let mut url_builder = Request::builder();
 
