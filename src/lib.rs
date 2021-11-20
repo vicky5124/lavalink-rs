@@ -364,7 +364,7 @@ impl LavalinkClient {
 
         let reqwest = ReqwestClient::new();
         let url = Url::parse_with_params(
-            &format!("{}/loadtracks", &client.rest_uri),
+            &format!("{}/decodetrack", &client.rest_uri),
             &[("track", &track.to_string())],
         )
         .expect("The query cannot be formatted to a url.");
