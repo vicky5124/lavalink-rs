@@ -163,6 +163,12 @@ impl LavalinkClient {
             headers.insert("Authorization", builder.password.parse()?);
             headers.insert("Num-Shards", builder.shard_count.to_string().parse()?);
             headers.insert("User-Id", builder.bot_id.to_string().parse()?);
+            headers.insert(
+                "Client-Name",
+                concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"))
+                    .to_owned()
+                    .parse()?,
+            );
 
             (headers, rest_uri, socket_uri)
         };
@@ -344,7 +350,7 @@ impl LavalinkClient {
 
         let reqwest = ReqwestClient::new();
         let url = Url::parse_with_params(
-            &format!("{}/loadtracks", &client.rest_uri),
+            &format!("{}/decodetrack", &client.rest_uri),
             &[("track", &track.to_string())],
         )
         .expect("The query cannot be formatted to a url.");
