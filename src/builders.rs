@@ -175,10 +175,10 @@ impl PlayParameters {
             },
         };
 
-        let mut client = self.client.inner.lock().await;
+        let client = self.client.inner.lock().await;
 
         SendOpcode::Play(payload)
-            .send(self.guild_id, &mut client.socket_write)
+            .send(self.guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -238,7 +238,7 @@ impl PlayParameters {
 
             tokio::spawn(async move {
                 loop {
-                    let mut client_lock = client_clone.inner.lock().await;
+                    let client_lock = client_clone.inner.lock().await;
 
                     if let Some(mut node) = client_lock.nodes.clone().get_mut(&guild_id) {
                         if !node.queue.is_empty() && node.now_playing.is_none() {
@@ -254,7 +254,7 @@ impl PlayParameters {
                             };
 
                             if let Err(why) = crate::model::SendOpcode::Play(payload)
-                                .send(guild_id, &mut client_lock.socket_write)
+                                .send(guild_id, &mut client_lock.socket_write.lock().await.as_mut().unwrap())
                                 .await
                             {
                                 eprintln!("Error playing queue on guild {} -> {}", guild_id, why);

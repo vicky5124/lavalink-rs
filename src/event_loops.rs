@@ -3,14 +3,11 @@ use crate::model::*;
 #[cfg(feature = "discord-gateway")]
 use crate::voice::{raw_handle_event_voice_server_update, raw_handle_event_voice_state_update};
 use crate::LavalinkClient;
-use crate::WsStream;
 
-#[cfg(feature = "discord-gateway")]
 use async_tungstenite::tokio::connect_async;
-use futures::stream::{SplitStream, StreamExt};
+use futures::stream::StreamExt;
 #[cfg(feature = "discord-gateway")]
 use futures::SinkExt;
-#[cfg(feature = "discord-gateway")]
 use http::Request;
 #[cfg(feature = "discord-gateway")]
 use serde::Deserialize;
@@ -18,7 +15,6 @@ use serde::Deserialize;
 use serde_json::json;
 #[cfg(feature = "discord-gateway")]
 use std::sync::Arc;
-#[cfg(feature = "discord-gateway")]
 use std::time::Duration;
 #[cfg(feature = "discord-gateway")]
 use tokio::sync::mpsc;
@@ -282,102 +278,133 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
 }
 
 pub async fn lavalink_event_loop(
-    mut read: SplitStream<WsStream>,
     handler: impl LavalinkEventHandler + Send + Sync + 'static,
     client: LavalinkClient,
 ) {
-    while let Some(Ok(resp)) = read.next().await {
-        if let TungsteniteMessage::Text(x) = &resp {
-            if let Ok(base_event) = serde_json::from_str::<GatewayEvent>(x) {
-                match base_event.op.as_str() {
-                    "stats" => {
-                        if let Ok(stats) = serde_json::from_str::<Stats>(x) {
-                            handler.stats(client.clone(), stats).await;
-                        }
-                    }
-                    "playerUpdate" => {
-                        if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(x) {
-                            {
-                                let client_clone = client.clone();
-                                let client_lock = client_clone.inner.lock().await;
+    loop {
+        debug!("Starting lavalink event loop.");
 
-                                if let Some(mut node) =
-                                    client_lock.nodes.get_mut(&player_update.guild_id.0)
+        let mut url_builder = Request::builder();
+
+        {
+            let ref_headers = url_builder.headers_mut().unwrap();
+            let headers = client.inner.lock().await.headers.clone();
+            *ref_headers = headers.clone();
+        }
+
+        let url = url_builder.uri(client.inner.lock().await.socket_uri.clone()).body(()).unwrap();
+
+        let (ws_stream, _) = match connect_async(url).await {
+            Err(why) => {
+                error!("Failed to connect to lavalink gateway: {}", why);
+
+                debug!("Waiting 15 seconds before reconnecting.");
+                tokio::time::sleep(Duration::from_secs(15)).await;
+
+                continue;
+            }
+            Ok(x) => x,
+        };
+
+        let (write, mut read) = ws_stream.split();
+
+        *client.inner.lock().await.socket_write.lock().await = Some(write);
+
+        while let Some(Ok(resp)) = read.next().await {
+            if let TungsteniteMessage::Text(x) = &resp {
+                if let Ok(base_event) = serde_json::from_str::<GatewayEvent>(x) {
+                    match base_event.op.as_str() {
+                        "stats" => {
+                            if let Ok(stats) = serde_json::from_str::<Stats>(x) {
+                                handler.stats(client.clone(), stats).await;
+                            }
+                        }
+                        "playerUpdate" => {
+                            if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(x) {
                                 {
-                                    if let Some(mut current_track) = node.now_playing.as_mut() {
-                                        let mut info =
-                                            current_track.track.info.as_mut().unwrap().clone();
-                                        info.position = player_update.state.position as u64;
-                                        current_track.track.info = Some(info);
-                                        trace!(
-                                            "Updated track {:?} with position {}",
-                                            current_track.track.info.as_ref().unwrap(),
-                                            player_update.state.position
-                                        );
-                                    }
-                                };
-                            }
-
-                            handler.player_update(client.clone(), player_update).await;
-                        }
-                    }
-                    "event" => match base_event.event_type.unwrap().as_str() {
-                        "WebSocketClosedEvent" => {
-                            if let Ok(websocket_closed) = serde_json::from_str::<WebSocketClosed>(x)
-                            {
-                                handler
-                                    .websocket_closed(client.clone(), websocket_closed)
-                                    .await;
-                            }
-                        }
-                        "PlayerDestroyedEvent" => {
-                            if let Ok(player_destroyed) = serde_json::from_str::<PlayerDestroyed>(x)
-                            {
-                                handler
-                                    .player_destroyed(client.clone(), player_destroyed)
-                                    .await;
-                            }
-                        }
-                        "TrackStartEvent" => {
-                            if let Ok(track_start) = serde_json::from_str::<TrackStart>(x) {
-                                handler.track_start(client.clone(), track_start).await;
-                            }
-                        }
-                        "TrackEndEvent" => {
-                            if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(x) {
-                                if track_finish.reason == "FINISHED" {
-                                    let client_lock = client.inner.lock().await;
+                                    let client_clone = client.clone();
+                                    let client_lock = client_clone.inner.lock().await;
 
                                     if let Some(mut node) =
-                                        client_lock.nodes.get_mut(&track_finish.guild_id.0)
+                                        client_lock.nodes.get_mut(&player_update.guild_id.0)
                                     {
-                                        if !node.queue.is_empty() {
-                                            node.queue.remove(0);
+                                        if let Some(mut current_track) = node.now_playing.as_mut() {
+                                            let mut info =
+                                                current_track.track.info.as_mut().unwrap().clone();
+                                            info.position = player_update.state.position as u64;
+                                            current_track.track.info = Some(info);
+                                            trace!(
+                                                "Updated track {:?} with position {}",
+                                                current_track.track.info.as_ref().unwrap(),
+                                                player_update.state.position
+                                            );
                                         }
-                                        node.now_playing = None;
                                     };
                                 }
 
-                                handler.track_finish(client.clone(), track_finish).await;
+                                handler.player_update(client.clone(), player_update).await;
                             }
                         }
-                        "TrackExceptionEvent" => {
-                            if let Ok(track_exception) = serde_json::from_str::<TrackException>(x) {
-                                handler
-                                    .track_exception(client.clone(), track_exception)
-                                    .await;
+                        "event" => match base_event.event_type.unwrap().as_str() {
+                            "WebSocketClosedEvent" => {
+                                if let Ok(websocket_closed) = serde_json::from_str::<WebSocketClosed>(x)
+                                {
+                                    handler
+                                        .websocket_closed(client.clone(), websocket_closed)
+                                        .await;
+                                }
                             }
-                        }
-                        "TrackStuckEvent" => {
-                            if let Ok(track_stuck) = serde_json::from_str::<TrackStuck>(x) {
-                                handler.track_stuck(client.clone(), track_stuck).await;
+                            "PlayerDestroyedEvent" => {
+                                if let Ok(player_destroyed) = serde_json::from_str::<PlayerDestroyed>(x)
+                                {
+                                    handler
+                                        .player_destroyed(client.clone(), player_destroyed)
+                                        .await;
+                                }
                             }
-                        }
-                        _ => warn!("Unknown event: {}", &x),
-                    },
-                    _ => warn!("Unknown socket response: {}", &x),
+                            "TrackStartEvent" => {
+                                if let Ok(track_start) = serde_json::from_str::<TrackStart>(x) {
+                                    handler.track_start(client.clone(), track_start).await;
+                                }
+                            }
+                            "TrackEndEvent" => {
+                                if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(x) {
+                                    if track_finish.reason == "FINISHED" {
+                                        let client_lock = client.inner.lock().await;
+
+                                        if let Some(mut node) =
+                                            client_lock.nodes.get_mut(&track_finish.guild_id.0)
+                                        {
+                                            if !node.queue.is_empty() {
+                                                node.queue.remove(0);
+                                            }
+                                            node.now_playing = None;
+                                        };
+                                    }
+
+                                    handler.track_finish(client.clone(), track_finish).await;
+                                }
+                            }
+                            "TrackExceptionEvent" => {
+                                if let Ok(track_exception) = serde_json::from_str::<TrackException>(x) {
+                                    handler
+                                        .track_exception(client.clone(), track_exception)
+                                        .await;
+                                }
+                            }
+                            "TrackStuckEvent" => {
+                                if let Ok(track_stuck) = serde_json::from_str::<TrackStuck>(x) {
+                                    handler.track_stuck(client.clone(), track_stuck).await;
+                                }
+                            }
+                            _ => warn!("Unknown event: {}", &x),
+                        },
+                        _ => warn!("Unknown socket response: {}", &x),
+                    }
                 }
             }
         }
+
+        error!("Event loop ended unexpectedly.");
     }
 }

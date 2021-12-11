@@ -39,8 +39,8 @@ impl EventHandler for Handler {
         info!("{} is connected!", ready.user.name);
     }
 
-    async fn cache_ready(&self, _: Context, guilds: Vec<GuildId>) {
-        info!("cache is ready!\n{:#?}", guilds);
+    async fn cache_ready(&self, _: Context, _guilds: Vec<GuildId>) {
+        info!("cache is ready!");
     }
 }
 
@@ -57,7 +57,7 @@ impl LavalinkEventHandler for LavalinkHandler {
 #[hook]
 async fn after(_ctx: &Context, _msg: &Message, command_name: &str, command_result: CommandResult) {
     match command_result {
-        Err(why) => println!(
+        Err(why) => info!(
             "Command '{}' returned error {:?} => {}",
             command_name, why, why
         ),
@@ -115,7 +115,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _ = client
         .start()
         .await
-        .map_err(|why| println!("Client ended: {:?}", why));
+        .map_err(|why| warn!("Client ended: {:?}", why));
 
     Ok(())
 }
@@ -281,7 +281,7 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             .queue()
             .await
         {
-            eprintln!("{}", why);
+            error!("{}", why);
             return Ok(());
         };
         check_msg(
@@ -366,6 +366,6 @@ async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
 
 fn check_msg(result: SerenityResult<Message>) {
     if let Err(why) = result {
-        println!("Error sending message: {:?}", why);
+        error!("Error sending message: {:?}", why);
     }
 }

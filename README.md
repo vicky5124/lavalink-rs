@@ -5,7 +5,7 @@ A `lavalink` API wrapping library for every `tokio` discord crate.
 ## Links to download stuff you will need
 
 - [Lavalink repository](https://github.com/freyacodes/Lavalink)
-- [Java download](https://adoptopenjdk.net/) (11 or newer, 15 recommended, OpenJ9 works)
+- [Java download](https://adoptopenjdk.net/) (11 or newer, 13 recommended, OpenJ9 sometimes works)
 
 ## TODO
 
@@ -29,7 +29,7 @@ A `lavalink` API wrapping library for every `tokio` discord crate.
 - [X] Improve error handling.
 - [X] Add tracing and logging.
 - [X] Add documentation.
-- [ ] Implement automatic reconnecting.
+- [X] Implement automatic reconnecting.
 - [X] Make a ClientBuilder
 
 ## How to use
@@ -39,10 +39,10 @@ The minimum required Rust version is 1.51 due to a dependency of Songbird.
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = "0.9-rc"
+lavalink-rs = "0.9.0-rc"
 # or
 [dependencies.lavalink-rs]
-version = "0.9-rc"
+version = "0.9.0-rc"
 ```
 
 Or the development release:

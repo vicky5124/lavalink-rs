@@ -47,8 +47,6 @@ use std::{
 #[cfg(feature = "songbird")]
 use songbird_dep::ConnectionInfo as SongbirdConnectionInfo;
 
-use http::Request;
-
 use reqwest::{header::*, Client as ReqwestClient, Url};
 
 #[cfg(feature = "native")]
@@ -60,11 +58,11 @@ use tokio::{net::TcpStream, sync::Mutex};
 
 use regex::Regex;
 
-use futures::stream::{SplitSink, StreamExt};
+use futures::stream::SplitSink;
 
 use async_tungstenite::{
     stream::Stream,
-    tokio::{connect_async, TokioAdapter},
+    tokio::TokioAdapter,
     tungstenite::Message as TungsteniteMessage,
     WebSocketStream,
 };
@@ -103,10 +101,11 @@ pub struct LavalinkClientInner {
     pub headers: HeaderMap,
 
     /// The sender websocket split.
-    pub socket_write: SplitSink<WsStream, TungsteniteMessage>,
+    pub socket_write: Mutex<Option<SplitSink<WsStream, TungsteniteMessage>>>,
     // cannot be cloned, and cannot be behind a lock
     // because it would always be open by the event loop.
     //pub socket_read: SplitStream<WsStream>,
+    pub socket_uri: String,
 
     //_shard_id: Option<ShardId>,
     pub nodes: Arc<DashMap<u64, Node>>,
@@ -148,7 +147,7 @@ impl LavalinkClient {
         builder: &LavalinkClientBuilder,
         handler: impl LavalinkEventHandler + Send + Sync + 'static,
     ) -> LavalinkResult<Self> {
-        let (lavalink_socket_write, lavalink_socket_read, lavalink_headers, lavalink_rest_uri) = {
+        let (lavalink_headers, lavalink_rest_uri, lavalink_socket_uri) = {
             let socket_uri;
             let rest_uri;
 
@@ -165,19 +164,7 @@ impl LavalinkClient {
             headers.insert("Num-Shards", builder.shard_count.to_string().parse()?);
             headers.insert("User-Id", builder.bot_id.to_string().parse()?);
 
-            let mut url_builder = Request::builder();
-
-            {
-                let ref_headers = url_builder.headers_mut().unwrap();
-                *ref_headers = headers.clone();
-            }
-
-            let url = url_builder.uri(&socket_uri).body(()).unwrap();
-
-            let (ws_stream, _) = connect_async(url).await?;
-            let split = ws_stream.split();
-
-            (split.0, split.1, headers, rest_uri)
+            (headers, rest_uri, socket_uri)
         };
 
         #[cfg(feature = "discord-gateway")]
@@ -211,10 +198,11 @@ impl LavalinkClient {
 
         let client_inner = LavalinkClientInner {
             headers: lavalink_headers,
-            socket_write: lavalink_socket_write,
+            socket_write: Mutex::new(None),
             rest_uri: lavalink_rest_uri,
             nodes: Arc::new(DashMap::new()),
             loops: Arc::new(DashSet::new()),
+            socket_uri: lavalink_socket_uri,
             #[cfg(feature = "discord-gateway")]
             discord_gateway_data,
         };
@@ -226,9 +214,7 @@ impl LavalinkClient {
         let client_clone = client.clone();
 
         tokio::spawn(async move {
-            debug!("Starting lavalink event loop.");
-            lavalink_event_loop(lavalink_socket_read, handler, client_clone).await;
-            error!("Event loop ended unexpectedly.");
+            lavalink_event_loop(handler, client_clone).await;
         });
 
         #[cfg(feature = "discord-gateway")]
@@ -394,10 +380,10 @@ impl LavalinkClient {
             event,
         };
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::VoiceUpdate(payload)
-            .send(connection_info.guild_id, &mut client.socket_write)
+            .send(connection_info.guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         if !client.nodes.contains_key(&connection_info.guild_id.0) {
@@ -445,10 +431,10 @@ impl LavalinkClient {
 
         let payload = crate::model::VoiceUpdate { session_id, event };
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::VoiceUpdate(payload)
-            .send(connection_info.guild_id.unwrap(), &mut client.socket_write)
+            .send(connection_info.guild_id.unwrap(), &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         if !client
@@ -501,7 +487,7 @@ impl LavalinkClient {
     pub async fn destroy(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         if let Some(mut node) = client.nodes.get_mut(&guild_id.0) {
             node.now_playing = None;
@@ -512,7 +498,7 @@ impl LavalinkClient {
         }
 
         crate::model::SendOpcode::Destroy
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -520,10 +506,10 @@ impl LavalinkClient {
 
     /// Stops the current player.
     pub async fn stop(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::Stop
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -560,10 +546,10 @@ impl LavalinkClient {
             }
         }
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::Pause(payload)
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -585,10 +571,10 @@ impl LavalinkClient {
             position: time.as_millis() as u64,
         };
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::Seek(payload)
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -616,10 +602,10 @@ impl LavalinkClient {
             volume: good_volume,
         };
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::Volume(payload)
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -648,10 +634,10 @@ impl LavalinkClient {
 
         let payload = crate::model::Equalizer { bands };
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -667,10 +653,10 @@ impl LavalinkClient {
     ) -> LavalinkResult<()> {
         let payload = crate::model::Equalizer { bands };
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -684,10 +670,10 @@ impl LavalinkClient {
     ) -> LavalinkResult<()> {
         let payload = crate::model::Equalizer { bands: vec![band] };
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
@@ -704,10 +690,10 @@ impl LavalinkClient {
 
         let payload = crate::model::Equalizer { bands };
 
-        let mut client = self.inner.lock().await;
+        let client = self.inner.lock().await;
 
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, &mut client.socket_write)
+            .send(guild_id, &mut client.socket_write.lock().await.as_mut().unwrap())
             .await?;
 
         Ok(())
