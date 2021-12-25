@@ -24,12 +24,10 @@ pub trait LavalinkEventHandler {
 }
 
 #[cfg(feature = "discord-gateway")]
-pub async fn call_discord_gateway(lavalink: &LavalinkClient, message: String) {
+pub fn call_discord_gateway(lavalink: &LavalinkClient, message: String) {
     lavalink
         .discord_gateway_data()
-        .await
         .lock()
-        .await
         .sender
         .send(message)
         .unwrap();

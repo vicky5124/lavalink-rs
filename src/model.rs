@@ -32,7 +32,7 @@ use serde_json::{json, Value};
 use futures::{sink::SinkExt, stream::SplitSink};
 
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
-use tokio::sync::RwLock;
+use parking_lot::RwLock;
 
 fn merge(a: &mut Value, b: Value) {
     match (a, b) {

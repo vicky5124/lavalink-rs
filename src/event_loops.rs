@@ -10,6 +10,8 @@ use futures::stream::StreamExt;
 use futures::SinkExt;
 use http::Request;
 #[cfg(feature = "discord-gateway")]
+use parking_lot::RwLock;
+#[cfg(feature = "discord-gateway")]
 use serde::Deserialize;
 #[cfg(feature = "discord-gateway")]
 use serde_json::json;
@@ -18,8 +20,6 @@ use std::sync::Arc;
 use std::time::Duration;
 #[cfg(feature = "discord-gateway")]
 use tokio::sync::mpsc;
-#[cfg(feature = "discord-gateway")]
-use tokio::sync::RwLock;
 
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
 
@@ -52,20 +52,8 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
     let rec_seq = Arc::new(RwLock::new(0_usize));
 
     loop {
-        let headers = client
-            .discord_gateway_data()
-            .await
-            .lock()
-            .await
-            .headers
-            .clone();
-        let socket_uri = client
-            .discord_gateway_data()
-            .await
-            .lock()
-            .await
-            .socket_uri
-            .clone();
+        let headers = client.discord_gateway_data().lock().headers.clone();
+        let socket_uri = client.discord_gateway_data().lock().socket_uri;
 
         let mut url_builder = Request::builder();
 
@@ -88,10 +76,10 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
 
         debug!("Connecting to the discord websocket.");
 
-        let discord_ws = client.discord_gateway_data().await;
+        let discord_ws = client.discord_gateway_data();
         let (tx, mut rx) = mpsc::unbounded_channel();
 
-        discord_ws.lock().await.sender = tx.clone();
+        discord_ws.lock().sender = tx.clone();
 
         let first = read.next().await;
 
@@ -109,8 +97,8 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                         tokio::time::sleep(Duration::from_millis(heartbeat.d.heartbeat_interval))
                             .await;
 
-                        if *was_reconnected_clone.read().await {
-                            *was_reconnected_clone.write().await = false;
+                        if *was_reconnected_clone.read() {
+                            *was_reconnected_clone.write() = false;
                             break;
                         } else {
                             // thread 'tokio-runtime-worker' panicked at 'called `Result::unwrap()` on an `Err` value: SendError("{\"op\":1,\"d\":64}")', /home/nitsuga/.cargo/git/checkouts/lavalink-rs-38e41c1b59bb345b/0900b34/src/event_loops.rs:108:78
@@ -126,7 +114,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
             None => panic!("Failed to connect to the discord gateway: No Reason Provided"),
         }
 
-        let identify = if !*reconnect.read().await {
+        let identify = if !*reconnect.read() {
             json!({
                 "op": 2,
                 "d": {
@@ -143,11 +131,12 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                 },
             })
         } else {
-            *reconnect.write().await = false;
-            *was_reconnected.write().await = true;
-            let session_id = session_id.read().await.clone();
-            let seq = seq.read().await.clone();
-            let rec_seq_inner = rec_seq.read().await.clone();
+            *reconnect.write() = false;
+            *was_reconnected.write() = true;
+            let session_id = session_id.read().clone();
+            let seq = *seq.read();
+            let rec_seq_inner = *rec_seq.read();
+
             warn!(
                 "Session: {}, Seq: {}, Last recon Seq: {}",
                 session_id, seq, rec_seq_inner
@@ -159,7 +148,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                 break;
             }
 
-            *rec_seq.write().await = seq;
+            *rec_seq.write() = seq;
 
             json!({
                 "op": 6,
@@ -185,7 +174,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
 
         tokio::spawn(async move {
             'events: while let Some(Ok(resp)) = read.next().await {
-                if *reconnect_clone.read().await == true {
+                if *reconnect_clone.read() {
                     break 'events;
                 }
                 debug!("event: {:#?}", resp);
@@ -194,7 +183,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                     info!("Close event obtained: {}", resp);
                     let resp_text = resp.to_string();
                     if resp_text.starts_with("Discord") {
-                        *reconnect_clone.write().await = true;
+                        *reconnect_clone.write() = true;
                         tx_hb.send("reconnect".to_string()).unwrap();
                         continue 'events;
                     } else {
@@ -212,7 +201,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                 let event_name: BaseEventNoData = serde_json::from_str(&text_resp).unwrap();
 
                 if let Some(s) = event_name.s {
-                    *seq_clone.write().await = s;
+                    *seq_clone.write() = s;
                 }
 
                 match event_name.t.unwrap_or_default().as_str() {
@@ -220,7 +209,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                         let event: BaseEvent<EventReady> =
                             serde_json::from_str(&text_resp).unwrap();
 
-                        *session_id_clone.write().await = event.d.session_id;
+                        *session_id_clone.write() = event.d.session_id;
                         info!("Lavalink discord gateway ready event received.");
                     }
                     "VOICE_STATE_UPDATE" => {
@@ -235,8 +224,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                             event.d.channel_id,
                             event.d.user_id,
                             event.d.session_id,
-                        )
-                        .await;
+                        );
                     }
                     "VOICE_SERVER_UPDATE" => {
                         let event: BaseEvent<EventVoiceServerUpdate> =
@@ -259,7 +247,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
             }
 
             // Guarentee reconnect
-            *reconnect_clone.write().await = true;
+            *reconnect_clone.write() = true;
             let _ = tx_hb.send("reconnect".to_string());
 
             warn!("Stopped getting events.");
@@ -288,11 +276,14 @@ pub async fn lavalink_event_loop(
 
         {
             let ref_headers = url_builder.headers_mut().unwrap();
-            let headers = client.inner.lock().await.headers.clone();
+            let headers = client.inner.lock().headers.clone();
             *ref_headers = headers.clone();
         }
 
-        let url = url_builder.uri(client.inner.lock().await.socket_uri.clone()).body(()).unwrap();
+        let url = url_builder
+            .uri(client.inner.lock().socket_uri.clone())
+            .body(())
+            .unwrap();
 
         let (ws_stream, _) = match connect_async(url).await {
             Err(why) => {
@@ -308,7 +299,7 @@ pub async fn lavalink_event_loop(
 
         let (write, mut read) = ws_stream.split();
 
-        *client.inner.lock().await.socket_write.lock().await = Some(write);
+        *client.inner.lock().socket_write.lock() = Some(write);
 
         while let Some(Ok(resp)) = read.next().await {
             if let TungsteniteMessage::Text(x) = &resp {
@@ -323,7 +314,7 @@ pub async fn lavalink_event_loop(
                             if let Ok(player_update) = serde_json::from_str::<PlayerUpdate>(x) {
                                 {
                                     let client_clone = client.clone();
-                                    let client_lock = client_clone.inner.lock().await;
+                                    let client_lock = client_clone.inner.lock();
 
                                     if let Some(mut node) =
                                         client_lock.nodes.get_mut(&player_update.guild_id.0)
@@ -347,7 +338,8 @@ pub async fn lavalink_event_loop(
                         }
                         "event" => match base_event.event_type.unwrap().as_str() {
                             "WebSocketClosedEvent" => {
-                                if let Ok(websocket_closed) = serde_json::from_str::<WebSocketClosed>(x)
+                                if let Ok(websocket_closed) =
+                                    serde_json::from_str::<WebSocketClosed>(x)
                                 {
                                     handler
                                         .websocket_closed(client.clone(), websocket_closed)
@@ -355,7 +347,8 @@ pub async fn lavalink_event_loop(
                                 }
                             }
                             "PlayerDestroyedEvent" => {
-                                if let Ok(player_destroyed) = serde_json::from_str::<PlayerDestroyed>(x)
+                                if let Ok(player_destroyed) =
+                                    serde_json::from_str::<PlayerDestroyed>(x)
                                 {
                                     handler
                                         .player_destroyed(client.clone(), player_destroyed)
@@ -370,7 +363,7 @@ pub async fn lavalink_event_loop(
                             "TrackEndEvent" => {
                                 if let Ok(track_finish) = serde_json::from_str::<TrackFinish>(x) {
                                     if track_finish.reason == "FINISHED" {
-                                        let client_lock = client.inner.lock().await;
+                                        let client_lock = client.inner.lock();
 
                                         if let Some(mut node) =
                                             client_lock.nodes.get_mut(&track_finish.guild_id.0)
@@ -386,7 +379,9 @@ pub async fn lavalink_event_loop(
                                 }
                             }
                             "TrackExceptionEvent" => {
-                                if let Ok(track_exception) = serde_json::from_str::<TrackException>(x) {
+                                if let Ok(track_exception) =
+                                    serde_json::from_str::<TrackException>(x)
+                                {
                                     handler
                                         .track_exception(client.clone(), track_exception)
                                         .await;

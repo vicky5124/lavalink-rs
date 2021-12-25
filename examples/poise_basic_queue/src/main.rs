@@ -94,6 +94,7 @@ async fn main() -> Result<(), Error> {
 
     let mut options = FrameworkOptions {
         prefix_options: PrefixFrameworkOptions {
+            prefix: Some(",".into()),
             edit_tracker: Some(EditTracker::for_timespan(Duration::from_secs(500))),
             ..Default::default()
         },
@@ -129,7 +130,6 @@ async fn main() -> Result<(), Error> {
         .await?;
 
     let framework = poise::Framework::build()
-        .prefix(",".to_owned())
         .token(&env::var("SLASH_RASH")?)
         .options(options)
         .client_settings(|c| c.register_songbird())

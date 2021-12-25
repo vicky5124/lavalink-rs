@@ -20,7 +20,6 @@ exclude = ["examples/serenity_basic_queue", "examples/poise_basic_queue"]
 [features]
 default = ["rustls", "songbird", "tracing-log"]
 
-tokio-02-marker = []
 discord-gateway = []
 
 tracing-log = ["tracing"]
@@ -54,8 +53,9 @@ serde-aux = "3"
 futures = "0.3"
 http = "0.2"
 typemap_rev = "0.1"
-dashmap = "4"
+dashmap = "5"
 async-trait = "0.1"
+parking_lot = "0.11"
 
 [dependencies.tokio]
 version = "1"
@@ -67,7 +67,7 @@ version = "0.3"
 optional = true
 
 [dependencies.tokio-rustls]
-version = "0.22"
+version = "0.23"
 optional = true
 
 [dependencies.serde]
@@ -80,7 +80,7 @@ default-features = false
 features = ["json"]
 
 [dependencies.async-tungstenite]
-version = "0.15"
+version = "0.16"
 default-features = false
 features = ["tokio-runtime"]
 optional = true

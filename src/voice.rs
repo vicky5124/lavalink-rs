@@ -27,8 +27,7 @@ pub async fn join(
             }}"#,
             guild_id.0, channel_id.0
         ),
-    )
-    .await;
+    );
 
     wait_for_full_connection_info_insert(lavalink, guild_id, None).await
 }
@@ -50,8 +49,7 @@ pub async fn leave(lavalink: &LavalinkClient, guild_id: impl Into<GuildId>) -> L
             }}"#,
             guild_id.0,
         ),
-    )
-    .await;
+    );
 
     wait_for_connection_info_remove(lavalink, guild_id, None).await
 }
@@ -62,7 +60,7 @@ pub async fn wait_for_full_connection_info_insert(
     event_count: Option<usize>,
 ) -> LavalinkResult<ConnectionInfo> {
     let guild_id = guild_id.into();
-    let connections = lavalink.discord_gateway_connections().await;
+    let connections = lavalink.discord_gateway_connections();
 
     let mut check_count = 0;
 
@@ -78,7 +76,7 @@ pub async fn wait_for_full_connection_info_insert(
         check_count += 1;
     }
 
-    return Err(LavalinkError::Timeout);
+    Err(LavalinkError::Timeout)
 }
 
 pub async fn wait_for_connection_info_remove(
@@ -87,7 +85,7 @@ pub async fn wait_for_connection_info_remove(
     event_count: Option<usize>,
 ) -> LavalinkResult<()> {
     let guild_id = guild_id.into();
-    let connections = lavalink.discord_gateway_connections().await;
+    let connections = lavalink.discord_gateway_connections();
 
     let mut check_count = 0;
 
@@ -101,7 +99,7 @@ pub async fn wait_for_connection_info_remove(
         check_count += 1;
     }
 
-    return Err(LavalinkError::Timeout);
+    Err(LavalinkError::Timeout)
 }
 
 pub async fn raw_handle_event_voice_server_update(
@@ -120,9 +118,7 @@ pub async fn raw_handle_event_voice_server_update(
 
     let connections = lavalink
         .discord_gateway_data()
-        .await
         .lock()
-        .await
         .connections
         .clone();
 
@@ -172,7 +168,7 @@ pub async fn raw_handle_event_voice_server_update(
     });
 }
 
-pub async fn raw_handle_event_voice_state_update(
+pub fn raw_handle_event_voice_state_update(
     lavalink: &LavalinkClient,
     guild_id: impl Into<GuildId>,
     channel_id: Option<impl Into<ChannelId>>,
@@ -183,8 +179,8 @@ pub async fn raw_handle_event_voice_state_update(
     let user_id = user_id.into();
     let channel_id = channel_id.map(|c| c.into());
 
-    let gateway_data = lavalink.discord_gateway_data().await;
-    let ws_data = gateway_data.lock().await;
+    let gateway_data = lavalink.discord_gateway_data();
+    let ws_data = gateway_data.lock();
 
     if user_id != ws_data.bot_id {
         return;

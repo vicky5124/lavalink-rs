@@ -24,7 +24,9 @@ default-features = false
 features = ["builder", "cache", "client", "gateway", "model", "utils", "rustls_backend", "unstable_discord_api", "collector"]
 
 [dependencies.songbird]
-version = "0.2"
+#version = "0.2"
+git = "https://github.com/serenity-rs/songbird"
+branch = "next"
 default-features = false
 features = ["serenity-rustls", "gateway"]
 
@@ -34,4 +36,8 @@ features = ["full"]
 
 [patch.crates-io.serenity]
 git = "https://github.com/serenity-rs/serenity"
+branch = "next"
+
+[patch.crates-io.songbird]
+git = "https://github.com/serenity-rs/songbird"
 branch = "next"

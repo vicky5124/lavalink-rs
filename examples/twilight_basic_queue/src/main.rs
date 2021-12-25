@@ -1,5 +1,5 @@
 #![allow(stable_features)]
-#![feature(or_patterns)] // stable on 1.53.0
+//#![feature(or_patterns)] // stable on 1.53.0
 
 #[macro_use]
 extern crate tracing;
