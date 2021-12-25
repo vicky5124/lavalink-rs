@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.9.0-rc.3
+
+- Replace all tokio locks with parking_lot.
+- Create session on voice_server_update.
+- create_session() no longer creates a node if there's an existing one.
+- Added track_exception and track_stuck events.
+- Implement Clone for the track exception event.
+- Fully reconnect if session became invalid.
+- Pause and resume after creating a session on voice server update.
+- Fix log levels.
+- Add a way to be able to generate a TrackQueue from the PlayParameters builder.
+- Fixed Panic on TrackEndEvent.
+- Try to stop holding dead connections.
+- Renamed simple-gateway feature with discord-gateway.
+- Actually toggle is_paused on the node if available.
+- Add a way to decode information from a Track BASE64.
+- Added the Client-Name header that Lavalink asks for. (@zedseven)
+- Implement lavalink reconnecting.
+
 ## 0.9.0-rc.2
 
 - typemap_rev is now re-exported.

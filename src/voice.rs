@@ -116,11 +116,7 @@ pub async fn raw_handle_event_voice_server_update(
         endpoint
     };
 
-    let connections = lavalink
-        .discord_gateway_data()
-        .lock()
-        .connections
-        .clone();
+    let connections = lavalink.discord_gateway_data().lock().connections.clone();
 
     if let Some(mut connection) = connections.get_mut(&guild_id) {
         connection.guild_id = Some(guild_id);

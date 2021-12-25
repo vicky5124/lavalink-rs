@@ -55,17 +55,15 @@ use tokio_native_tls::TlsStream;
 #[cfg(feature = "rustls")]
 use tokio_rustls::client::TlsStream;
 
-use tokio::net::TcpStream;
 use parking_lot::Mutex;
+use tokio::net::TcpStream;
 
 use regex::Regex;
 
 use futures::stream::SplitSink;
 
 use async_tungstenite::{
-    stream::Stream,
-    tokio::TokioAdapter,
-    tungstenite::Message as TungsteniteMessage,
+    stream::Stream, tokio::TokioAdapter, tungstenite::Message as TungsteniteMessage,
     WebSocketStream,
 };
 
@@ -281,17 +279,11 @@ impl LavalinkClient {
     #[cfg(feature = "discord-gateway")]
     pub async fn start_discord_gateway(&self, wait_time: Option<Duration>) {
         let client_clone = self.clone();
-        let token = self
-            .discord_gateway_data()
-            .lock()
-            .bot_token
-            .clone();
+        let token = self.discord_gateway_data().lock().bot_token.clone();
         let wait_time = if let Some(t) = wait_time {
             t
         } else {
-            self.discord_gateway_data()
-                .lock()
-                .wait_time
+            self.discord_gateway_data().lock().wait_time
         };
 
         tokio::spawn(async move {
@@ -386,7 +378,10 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::VoiceUpdate(payload)
-            .send(connection_info.guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                connection_info.guild_id,
+                client.socket_write.lock().as_mut().unwrap(),
+            )
             .await?;
 
         if !client.nodes.contains_key(&connection_info.guild_id.0) {
@@ -437,7 +432,10 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::VoiceUpdate(payload)
-            .send(connection_info.guild_id.unwrap(), client.socket_write.lock().as_mut().unwrap())
+            .send(
+                connection_info.guild_id.unwrap(),
+                client.socket_write.lock().as_mut().unwrap(),
+            )
             .await?;
 
         if !client
