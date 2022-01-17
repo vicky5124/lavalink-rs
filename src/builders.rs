@@ -75,7 +75,7 @@ impl LavalinkClientBuilder {
     }
 
     /// Sets the host.
-    pub fn set_host(&mut self, host: &impl ToString) -> &mut Self {
+    pub fn set_host(&mut self, host: impl ToString) -> &mut Self {
         self.host = host.to_string();
         self
     }
@@ -122,7 +122,7 @@ impl LavalinkClientBuilder {
     }
 
     /// Sets the lavalink password.
-    pub fn set_password(&mut self, password: &impl ToString) -> &mut Self {
+    pub fn set_password(&mut self, password: impl ToString) -> &mut Self {
         self.password = password.to_string();
         self
     }

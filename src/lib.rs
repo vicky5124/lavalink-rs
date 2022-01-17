@@ -35,7 +35,6 @@ pub use async_trait::async_trait;
 pub use typemap_rev;
 
 use builders::*;
-#[cfg(feature = "discord-gateway")]
 use error::LavalinkError;
 use error::LavalinkResult;
 
