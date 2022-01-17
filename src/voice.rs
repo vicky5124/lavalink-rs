@@ -129,7 +129,7 @@ pub async fn raw_handle_event_voice_server_update(
                 guild_id: Some(guild_id),
                 endpoint: Some(endpoint),
                 token: Some(token),
-                ..Default::default()
+                ..ConnectionInfo::default()
             },
         );
     };
@@ -173,7 +173,7 @@ pub fn raw_handle_event_voice_state_update(
 ) {
     let guild_id = guild_id.into();
     let user_id = user_id.into();
-    let channel_id = channel_id.map(|c| c.into());
+    let channel_id = channel_id.map(std::convert::Into::into);
 
     let gateway_data = lavalink.discord_gateway_data();
     let ws_data = gateway_data.lock();
@@ -201,7 +201,7 @@ pub fn raw_handle_event_voice_state_update(
                 guild_id: Some(guild_id),
                 session_id: Some(session_id),
                 channel_id,
-                ..Default::default()
+                ..ConnectionInfo::default()
             },
         );
     };

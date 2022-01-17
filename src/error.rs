@@ -9,6 +9,7 @@ use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
 pub type LavalinkResult<T> = std::result::Result<T, LavalinkError>;
 
 #[derive(Debug)]
+#[allow(clippy::module_name_repetitions)]
 pub enum LavalinkError {
     /// TungsteniteError redirect.
     ErrorWebsocketPayload(TungsteniteError),
@@ -25,6 +26,7 @@ pub enum LavalinkError {
     Timeout,
     #[cfg(feature = "discord-gateway")]
     MissingConnectionField(&'static str),
+    MissingLavalinkSocket,
 }
 
 impl Error for LavalinkError {}
@@ -58,6 +60,9 @@ impl Display for LavalinkError {
             #[cfg(feature = "discord-gateway")]
             &LavalinkError::MissingConnectionField(field) => {
                 write!(f, "Gateway connection is missing the field `{}`", field)
+            }
+            LavalinkError::MissingLavalinkSocket => {
+                write!(f, "Initialize a lavalink websocket connection.")
             }
         }
     }

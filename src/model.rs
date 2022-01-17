@@ -204,34 +204,34 @@ impl From<i64> for UserId {
 
 #[cfg(feature = "serenity")]
 impl From<SerenityChannelId> for ChannelId {
-    fn from(user_id: SerenityChannelId) -> ChannelId {
-        ChannelId(user_id.0)
+    fn from(channel_id: SerenityChannelId) -> ChannelId {
+        ChannelId(channel_id.0)
     }
 }
 
 #[cfg(feature = "twilight")]
 impl From<TwilightChannelId> for ChannelId {
-    fn from(user_id: TwilightChannelId) -> ChannelId {
-        ChannelId(user_id.0)
+    fn from(channel_id: TwilightChannelId) -> ChannelId {
+        ChannelId(channel_id.0)
     }
 }
 
 #[cfg(feature = "songbird")]
 impl From<SongbirdChannelId> for ChannelId {
-    fn from(user_id: SongbirdChannelId) -> ChannelId {
-        ChannelId(user_id.0)
+    fn from(channel_id: SongbirdChannelId) -> ChannelId {
+        ChannelId(channel_id.0)
     }
 }
 
 impl From<u64> for ChannelId {
-    fn from(user_id: u64) -> ChannelId {
-        ChannelId(user_id)
+    fn from(channel_id: u64) -> ChannelId {
+        ChannelId(channel_id)
     }
 }
 
 impl From<i64> for ChannelId {
-    fn from(user_id: i64) -> ChannelId {
-        ChannelId(user_id as u64)
+    fn from(channel_id: i64) -> ChannelId {
+        ChannelId(channel_id as u64)
     }
 }
 
@@ -279,22 +279,26 @@ impl FromStr for GuildId {
 impl GuildId {
     #[inline]
     #[cfg(feature = "serenity")]
+    #[must_use]
     pub fn to_serenity(&self) -> SerenityGuildId {
         SerenityGuildId(self.0)
     }
 
     #[inline]
     #[cfg(feature = "twilight")]
+    #[must_use]
     pub fn to_twilight(&self) -> TwilightGuildId {
         TwilightGuildId(self.0)
     }
 
     #[inline]
+    #[must_use]
     pub fn as_u64(&self) -> &u64 {
         &self.0
     }
 
     #[inline]
+    #[must_use]
     pub fn as_mut_u64(&mut self) -> &mut u64 {
         &mut self.0
     }
@@ -303,22 +307,26 @@ impl GuildId {
 impl UserId {
     #[inline]
     #[cfg(feature = "serenity")]
+    #[must_use]
     pub fn to_serenity(&self) -> SerenityUserId {
         SerenityUserId(self.0)
     }
 
     #[inline]
     #[cfg(feature = "twilight")]
+    #[must_use]
     pub fn to_twilight(&self) -> TwilightUserId {
         TwilightUserId(self.0)
     }
 
     #[inline]
+    #[must_use]
     pub fn as_u64(&self) -> &u64 {
         &self.0
     }
 
     #[inline]
+    #[must_use]
     pub fn as_mut_u64(&mut self) -> &mut u64 {
         &mut self.0
     }
@@ -327,22 +335,26 @@ impl UserId {
 impl ChannelId {
     #[inline]
     #[cfg(feature = "serenity")]
+    #[must_use]
     pub fn to_serenity(&self) -> SerenityChannelId {
         SerenityChannelId(self.0)
     }
 
     #[inline]
     #[cfg(feature = "twilight")]
+    #[must_use]
     pub fn to_twilight(&self) -> TwilightChannelId {
         TwilightChannelId(self.0)
     }
 
     #[inline]
+    #[must_use]
     pub fn as_u64(&self) -> &u64 {
         &self.0
     }
 
     #[inline]
+    #[must_use]
     pub fn as_mut_u64(&mut self) -> &mut u64 {
         &mut self.0
     }
@@ -355,13 +367,7 @@ impl SendOpcode {
         socket: &mut SplitSink<WsStream, TungsteniteMessage>,
     ) -> LavalinkResult<()> {
         let value = match self {
-            Self::Destroy => {
-                json!({
-                    "op" : self,
-                    "guildId" : &guild_id.into().0.to_string()
-                })
-            }
-            Self::Stop => {
+            Self::Destroy | Self::Stop => {
                 json!({
                     "op" : self,
                     "guildId" : &guild_id.into().0.to_string()

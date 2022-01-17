@@ -24,6 +24,7 @@ pub trait LavalinkEventHandler {
 }
 
 #[cfg(feature = "discord-gateway")]
+#[allow(clippy::module_name_repetitions)]
 pub fn call_discord_gateway(lavalink: &LavalinkClient, message: String) {
     lavalink
         .discord_gateway_data()

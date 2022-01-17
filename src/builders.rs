@@ -26,18 +26,18 @@ pub struct LavalinkClientBuilder {
 
 impl LavalinkClientBuilder {
     #[cfg(feature = "discord-gateway")]
-    /// Builds the LavalinkClient.
+    /// Builds the `LavalinkClient`.
     ///
     /// Default values:
-    ///   - host: localhost
-    ///   - port: 2333
-    ///   - password: youshallnotpass
-    ///   - shard_count: 1
-    ///   - is_ssl: false
-    ///   - bot_id: <required parameter>
-    ///   - bot_token: <required parameter>
-    ///   - start_gateway: true
-    ///   - gateway_start_wait_time: 6 seconds
+    ///   - `host`: localhost
+    ///   - `port`: 2333
+    ///   - `password`: youshallnotpass
+    ///   - `shard_count`: 1
+    ///   - `is_ssl`: false
+    ///   - `bot_id`: <required parameter>
+    ///   - `bot_token`: <required parameter>
+    ///   - `start_gateway`: true
+    ///   - `gateway_start_wait_time`: 6 seconds
     pub fn new(bot_id: impl Into<UserId>, bot_token: impl Into<String>) -> Self {
         Self {
             host: "localhost".to_string(),
@@ -48,21 +48,21 @@ impl LavalinkClientBuilder {
             bot_token: bot_token.into(),
             start_gateway: true,
             gateway_start_wait_time: Duration::from_secs(6),
-            ..Default::default()
+            ..Self::default()
         }
     }
 
     #[cfg(not(feature = "discord-gateway"))]
     ///
-    /// Builds the LavalinkClient.
+    /// Builds the `LavalinkClient`.
     ///
     /// Default values:
-    ///   - host: localhost
-    ///   - port: 2333
-    ///   - password: youshallnotpass
-    ///   - shard_count: 1
-    ///   - is_ssl: false
-    ///   - bot_id: <required parameter>
+    ///   - `host`: localhost
+    ///   - `port`: 2333
+    ///   - `password`: youshallnotpass
+    ///   - `shard_count`: 1
+    ///   - `is_ssl`: false
+    ///   - `bot_id`: <required parameter>
     pub fn new(bot_id: impl Into<UserId>) -> Self {
         Self {
             host: "localhost".to_string(),
@@ -70,12 +70,12 @@ impl LavalinkClientBuilder {
             password: "youshallnotpass".to_string(),
             shard_count: 1,
             bot_id: bot_id.into(),
-            ..Default::default()
+            ..Self::default()
         }
     }
 
     /// Sets the host.
-    pub fn set_host(&mut self, host: impl ToString) -> &mut Self {
+    pub fn set_host(&mut self, host: &impl ToString) -> &mut Self {
         self.host = host.to_string();
         self
     }
@@ -122,7 +122,7 @@ impl LavalinkClientBuilder {
     }
 
     /// Sets the lavalink password.
-    pub fn set_password(&mut self, password: impl ToString) -> &mut Self {
+    pub fn set_password(&mut self, password: &impl ToString) -> &mut Self {
         self.password = password.to_string();
         self
     }
@@ -178,7 +178,14 @@ impl PlayParameters {
         let client = self.client.inner.lock();
 
         SendOpcode::Play(payload)
-            .send(self.guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                self.guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -213,14 +220,14 @@ impl PlayParameters {
             let guild_id = self.guild_id;
 
             if let Some(mut node) = client_lock.nodes.get_mut(&guild_id) {
-                if !node.is_on_loops {
-                    node.is_on_loops = true;
-                } else {
+                if node.is_on_loops {
                     let mut node = client_lock.nodes.get_mut(&self.guild_id).unwrap();
                     node.queue.push(track);
 
                     return Ok(());
                 }
+
+                node.is_on_loops = true;
             } else {
                 return Err(LavalinkError::NoSessionPresent);
             }
@@ -253,11 +260,19 @@ impl PlayParameters {
                                 end_time: track.end_time,
                             };
 
-                            if let Err(why) = crate::model::SendOpcode::Play(payload)
-                                .send(guild_id, client_lock.socket_write.lock().as_mut().unwrap())
-                                .await
-                            {
-                                eprintln!("Error playing queue on guild {} -> {}", guild_id, why);
+                            if let Some(socket) = client_lock.socket_write.lock().as_mut() {
+                                if let Err(why) = crate::model::SendOpcode::Play(payload)
+                                    .send(guild_id, socket)
+                                    .await
+                                {
+                                    error!("Error playing queue on guild {}: {}", guild_id, why);
+                                }
+                            } else {
+                                error!(
+                                    "Error playing queue on guild {}: {}",
+                                    guild_id,
+                                    LavalinkError::MissingLavalinkSocket
+                                );
                             }
                         }
                     } else {
@@ -280,7 +295,8 @@ impl PlayParameters {
         Ok(())
     }
 
-    /// Generates a TrackQueue from the builder.
+    /// Generates a `TrackQueue` from the builder.
+    #[must_use]
     pub fn to_track_queue(&self) -> TrackQueue {
         crate::model::TrackQueue {
             track: self.track.clone(),

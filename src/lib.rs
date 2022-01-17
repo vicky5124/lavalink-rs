@@ -1,5 +1,12 @@
 //! A Lavalink and Andesite API wrapper library for every tokio based discord bot library.
-#![deny(clippy::unused_async, clippy::await_holding_lock)]
+#![deny(clippy::unused_async, clippy::await_holding_lock, clippy::pedantic)]
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::missing_panics_doc,
+    clippy::missing_errors_doc,
+    clippy::cast_sign_loss,
+    clippy::wildcard_imports
+)]
 
 #[cfg(feature = "tracing-log")]
 #[macro_use]
@@ -48,7 +55,7 @@ use std::{
 #[cfg(feature = "songbird")]
 use songbird_dep::ConnectionInfo as SongbirdConnectionInfo;
 
-use reqwest::{header::*, Client as ReqwestClient, Url};
+use reqwest::{header::HeaderMap, Client as ReqwestClient, Url};
 
 #[cfg(feature = "native")]
 use tokio_native_tls::TlsStream;
@@ -275,7 +282,7 @@ impl LavalinkClient {
     /// Start the discord gateway, if it has stopped, or it never started because the client builder was
     /// configured that way.
     ///
-    /// If wait_time is passed, it will override the previosuly configured wait time.
+    /// If `wait_time` is passed, it will override the previosuly configured wait time.
     #[cfg(feature = "discord-gateway")]
     pub async fn start_discord_gateway(&self, wait_time: Option<Duration>) {
         let client_clone = self.clone();
@@ -358,7 +365,7 @@ impl LavalinkClient {
     /// Creates a lavalink session on the specified guild.
     ///
     /// This also creates a Node and inserts it. The node is not added on loops unless
-    /// Play::queue() is ran.
+    /// `Play::queue()` is ran.
     #[cfg(feature = "songbird")]
     pub async fn create_session_with_songbird(
         &self,
@@ -380,7 +387,11 @@ impl LavalinkClient {
         crate::model::SendOpcode::VoiceUpdate(payload)
             .send(
                 connection_info.guild_id,
-                client.socket_write.lock().as_mut().unwrap(),
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
             )
             .await?;
 
@@ -434,7 +445,11 @@ impl LavalinkClient {
         crate::model::SendOpcode::VoiceUpdate(payload)
             .send(
                 connection_info.guild_id.unwrap(),
-                client.socket_write.lock().as_mut().unwrap(),
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
             )
             .await?;
 
@@ -499,7 +514,14 @@ impl LavalinkClient {
         }
 
         crate::model::SendOpcode::Destroy
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -510,7 +532,14 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::Stop
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -550,7 +579,14 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::Pause(payload)
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -575,7 +611,14 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::Seek(payload)
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -606,7 +649,14 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::Volume(payload)
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -638,7 +688,14 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -657,7 +714,14 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -674,7 +738,14 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -694,7 +765,14 @@ impl LavalinkClient {
         let client = self.inner.lock();
 
         crate::model::SendOpcode::Equalizer(payload)
-            .send(guild_id, client.socket_write.lock().as_mut().unwrap())
+            .send(
+                guild_id,
+                client
+                    .socket_write
+                    .lock()
+                    .as_mut()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+            )
             .await?;
 
         Ok(())
@@ -708,7 +786,7 @@ impl LavalinkClient {
 
     /// Obtains an atomic reference to the running queue loops
     ///
-    /// A node guild_id is added here the first time [`PlayParameters::queue`] is called.
+    /// A node `guild_id` is added here the first time [`PlayParameters::queue`] is called.
     ///
     /// [`PlayParameters::queue`]: crate::builders::PlayParameters
     pub async fn loops(&self) -> Arc<DashSet<u64>> {
@@ -716,16 +794,18 @@ impl LavalinkClient {
         client.loops.clone()
     }
 
-    #[cfg(feature = "discord-gateway")]
     /// Gets the discord gateway data.
     ///
     /// Note that the Mutex is from parking lot and it cannot be used across awaits.
+    #[cfg(feature = "discord-gateway")]
+    #[must_use]
     pub fn discord_gateway_data(&self) -> Arc<Mutex<DiscordGatewayData>> {
         self.inner.lock().discord_gateway_data.clone()
     }
 
-    #[cfg(feature = "discord-gateway")]
     /// Gets the list of voice connections from the discord gateway.
+    #[cfg(feature = "discord-gateway")]
+    #[must_use]
     pub fn discord_gateway_connections(&self) -> Arc<DashMap<GuildId, ConnectionInfo>> {
         self.inner
             .lock()

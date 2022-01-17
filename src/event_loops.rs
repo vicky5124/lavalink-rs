@@ -44,6 +44,7 @@ struct BaseEventNoData {
 }
 
 #[cfg(feature = "discord-gateway")]
+#[allow(clippy::too_many_lines)]
 pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_time: Duration) {
     let reconnect = Arc::new(RwLock::new(false));
     let was_reconnected = Arc::new(RwLock::new(false));
@@ -100,13 +101,13 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                         if *was_reconnected_clone.read() {
                             *was_reconnected_clone.write() = false;
                             break;
-                        } else {
-                            // thread 'tokio-runtime-worker' panicked at 'called `Result::unwrap()` on an `Err` value: SendError("{\"op\":1,\"d\":64}")', /home/nitsuga/.cargo/git/checkouts/lavalink-rs-38e41c1b59bb345b/0900b34/src/event_loops.rs:108:78
-                            // note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-                            let _ = tx_hb.send(format!(r#"{{"op":1,"d":{}}}"#, val));
-                            val += 1;
                         }
+
+                        // thread 'tokio-runtime-worker' panicked at 'called `Result::unwrap()` on an `Err` value: SendError("{\"op\":1,\"d\":64}")', /home/nitsuga/.cargo/git/checkouts/lavalink-rs-38e41c1b59bb345b/0900b34/src/event_loops.rs:108:78
+                        // note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+                        drop(tx_hb.send(format!(r#"{{"op":1,"d":{}}}"#, val)));
+                        val += 1;
                     }
                 });
             }
@@ -114,7 +115,35 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
             None => panic!("Failed to connect to the discord gateway: No Reason Provided"),
         }
 
-        let identify = if !*reconnect.read() {
+        let identify = if *reconnect.read() {
+            *reconnect.write() = false;
+            *was_reconnected.write() = true;
+            let session_id = session_id.read().clone();
+            let seq = *seq.read();
+            let rec_seq_inner = *rec_seq.read();
+
+            warn!(
+                "Session: {}, Seq: {}, Last recon Seq: {}",
+                session_id, seq, rec_seq_inner
+            );
+
+            if seq == rec_seq_inner {
+                let tx_hb = tx.clone();
+                drop(tx_hb.send("reconnect".to_string()));
+                break;
+            }
+
+            *rec_seq.write() = seq;
+
+            json!({
+                "op": 6,
+                "d": {
+                  "token": token,
+                  "session_id": &session_id,
+                  "seq": seq
+                }
+            })
+        } else {
             json!({
                 "op": 2,
                 "d": {
@@ -129,34 +158,6 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                         "$os": std::env::consts::OS,
                     },
                 },
-            })
-        } else {
-            *reconnect.write() = false;
-            *was_reconnected.write() = true;
-            let session_id = session_id.read().clone();
-            let seq = *seq.read();
-            let rec_seq_inner = *rec_seq.read();
-
-            warn!(
-                "Session: {}, Seq: {}, Last recon Seq: {}",
-                session_id, seq, rec_seq_inner
-            );
-
-            if seq == rec_seq_inner {
-                let tx_hb = tx.clone();
-                let _ = tx_hb.send("reconnect".to_string());
-                break;
-            }
-
-            *rec_seq.write() = seq;
-
-            json!({
-                "op": 6,
-                "d": {
-                  "token": token,
-                  "session_id": &session_id,
-                  "seq": seq
-                }
             })
         };
 
@@ -186,10 +187,10 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
                         *reconnect_clone.write() = true;
                         tx_hb.send("reconnect".to_string()).unwrap();
                         continue 'events;
-                    } else {
-                        tx_hb.send("reconnect".to_string()).unwrap();
-                        break 'events;
                     }
+
+                    tx_hb.send("reconnect".to_string()).unwrap();
+                    break 'events;
                 } else if let Ok(x) = resp.clone().into_text() {
                     x
                 } else {
@@ -248,7 +249,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
 
             // Guarentee reconnect
             *reconnect_clone.write() = true;
-            let _ = tx_hb.send("reconnect".to_string());
+            drop(tx_hb.send("reconnect".to_string()));
 
             warn!("Stopped getting events.");
         });
@@ -265,6 +266,7 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
     }
 }
 
+#[allow(clippy::too_many_lines)]
 pub async fn lavalink_event_loop(
     handler: impl LavalinkEventHandler + Send + Sync + 'static,
     client: LavalinkClient,
