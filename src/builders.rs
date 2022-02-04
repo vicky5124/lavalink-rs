@@ -245,9 +245,7 @@ impl PlayParameters {
 
             tokio::spawn(async move {
                 loop {
-                    let client_lock = client_clone.inner.lock();
-
-                    if let Some(mut node) = client_lock.nodes.clone().get_mut(&guild_id) {
+                    if let Some(mut node) = client_clone.nodes().await.get_mut(&guild_id) {
                         if !node.queue.is_empty() && node.now_playing.is_none() {
                             let track = node.queue[0].clone();
 
@@ -260,7 +258,12 @@ impl PlayParameters {
                                 end_time: track.end_time,
                             };
 
-                            if let Some(socket) = client_lock.socket_write.lock().as_mut() {
+                            let socket_write = {
+                                let client_lock = client_clone.inner.lock();
+                                client_lock.socket_write.clone()
+                            };
+
+                            if let Some(socket) = socket_write.lock().as_mut() {
                                 if let Err(why) = crate::model::SendOpcode::Play(payload)
                                     .send(guild_id, socket)
                                     .await
@@ -273,14 +276,12 @@ impl PlayParameters {
                                     guild_id,
                                     LavalinkError::MissingLavalinkSocket
                                 );
-                            }
+                            };
                         }
                     } else {
                         //client.loops.remove(guild_id);
                         break;
                     }
-
-                    drop(client_lock);
 
                     sleep(Duration::from_secs(1)).await;
                 }

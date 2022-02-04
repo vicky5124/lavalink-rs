@@ -107,7 +107,7 @@ pub struct LavalinkClientInner {
     pub headers: HeaderMap,
 
     /// The sender websocket split.
-    pub socket_write: Mutex<Option<SplitSink<WsStream, TungsteniteMessage>>>,
+    pub socket_write: Arc<Mutex<Option<SplitSink<WsStream, TungsteniteMessage>>>>,
     // cannot be cloned, and cannot be behind a lock
     // because it would always be open by the event loop.
     //pub socket_read: SplitStream<WsStream>,
@@ -210,7 +210,7 @@ impl LavalinkClient {
 
         let client_inner = LavalinkClientInner {
             headers: lavalink_headers,
-            socket_write: Mutex::new(None),
+            socket_write: Arc::new(Mutex::new(None)),
             rest_uri: lavalink_rest_uri,
             nodes: Arc::new(DashMap::new()),
             loops: Arc::new(DashSet::new()),
@@ -301,22 +301,21 @@ impl LavalinkClient {
 
     /// Returns the tracks from the URL or query provided.
     pub async fn get_tracks(&self, query: impl ToString) -> LavalinkResult<Tracks> {
-        let client = self.inner.lock();
+        let (rest_uri, headers) = {
+            let client = self.inner.lock();
+            (client.rest_uri.to_string(), client.headers.clone())
+        };
 
         let reqwest = ReqwestClient::new();
         let url = Url::parse_with_params(
-            &format!("{}/loadtracks", &client.rest_uri),
+            &format!("{}/loadtracks", rest_uri),
             &[("identifier", &query.to_string())],
         )
         .expect("The query cannot be formatted to a url.");
 
-        let resp = reqwest
-            .get(url)
-            .headers(client.headers.clone())
-            .send()
-            .await?
-            .json::<Tracks>()
-            .await?;
+        let raw_resp = reqwest.get(url).headers(headers).send().await?;
+
+        let resp = raw_resp.json::<Tracks>().await?;
 
         Ok(resp)
     }
@@ -341,18 +340,21 @@ impl LavalinkClient {
 
     /// Decodes a track to it's information
     pub async fn decode_track(&self, track: impl ToString) -> LavalinkResult<Info> {
-        let client = self.inner.lock();
+        let (rest_uri, headers) = {
+            let client = self.inner.lock();
+            (client.rest_uri.to_string(), client.headers.clone())
+        };
 
         let reqwest = ReqwestClient::new();
         let url = Url::parse_with_params(
-            &format!("{}/decodetrack", &client.rest_uri),
+            &format!("{}/decodetrack", &rest_uri),
             &[("track", &track.to_string())],
         )
         .expect("The query cannot be formatted to a url.");
 
         let resp = reqwest
             .get(url)
-            .headers(client.headers.clone())
+            .headers(headers)
             .send()
             .await?
             .json::<Info>()
@@ -388,6 +390,7 @@ impl LavalinkClient {
                 connection_info.guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -446,6 +449,7 @@ impl LavalinkClient {
                 connection_info.guild_id.unwrap(),
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -517,6 +521,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -535,6 +540,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -582,6 +588,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -614,6 +621,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -652,6 +660,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -691,6 +700,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -717,6 +727,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -741,6 +752,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
@@ -768,6 +780,7 @@ impl LavalinkClient {
                 guild_id,
                 client
                     .socket_write
+                    .clone()
                     .lock()
                     .as_mut()
                     .ok_or(LavalinkError::MissingLavalinkSocket)?,
