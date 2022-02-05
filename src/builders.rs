@@ -263,20 +263,24 @@ impl PlayParameters {
                                 client_lock.socket_write.clone()
                             };
 
-                            if let Some(socket) = socket_write.lock().as_mut() {
-                                if let Err(why) = crate::model::SendOpcode::Play(payload)
-                                    .send(guild_id, socket)
-                                    .await
-                                {
-                                    error!("Error playing queue on guild {}: {}", guild_id, why);
+                            {
+                                let mut socket = socket_write.lock();
+
+                                if let Some(socket) = socket.as_mut() {
+                                    if let Err(why) = crate::model::SendOpcode::Play(payload)
+                                        .send(guild_id, socket)
+                                        .await
+                                    {
+                                        error!("Error playing queue on guild {}: {}", guild_id, why);
+                                    }
+                                } else {
+                                    error!(
+                                        "Error playing queue on guild {}: {}",
+                                        guild_id,
+                                        LavalinkError::MissingLavalinkSocket
+                                    );
                                 }
-                            } else {
-                                error!(
-                                    "Error playing queue on guild {}: {}",
-                                    guild_id,
-                                    LavalinkError::MissingLavalinkSocket
-                                );
-                            };
+                            }
                         }
                     } else {
                         //client.loops.remove(guild_id);
