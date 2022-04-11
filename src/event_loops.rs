@@ -6,7 +6,6 @@ use crate::LavalinkClient;
 
 use async_tungstenite::tokio::connect_async;
 use futures::stream::StreamExt;
-#[cfg(feature = "discord-gateway")]
 use futures::SinkExt;
 use http::Request;
 #[cfg(feature = "discord-gateway")]
@@ -18,7 +17,6 @@ use serde_json::json;
 #[cfg(feature = "discord-gateway")]
 use std::sync::Arc;
 use std::time::Duration;
-#[cfg(feature = "discord-gateway")]
 use tokio::sync::mpsc;
 
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
@@ -299,9 +297,18 @@ pub async fn lavalink_event_loop(
             Ok(x) => x,
         };
 
-        let (write, mut read) = ws_stream.split();
+        let (mut write, mut read) = ws_stream.split();
+        let (rx, mut tx) = mpsc::unbounded_channel();
 
-        *client.inner.lock().socket_write.lock() = Some(write);
+        *client.inner.lock().socket_sender.write() = Some(rx);
+
+        tokio::spawn(async move {
+            while let Some(msg) = tx.recv().await {
+                if let Err(why) = write.send(msg).await {
+                    error!("Error sending lavalink event: {}", why);
+                }
+            }
+        });
 
         while let Some(Ok(resp)) = read.next().await {
             if let TungsteniteMessage::Text(x) = &resp {

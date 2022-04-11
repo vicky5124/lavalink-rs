@@ -53,8 +53,9 @@ serde-aux = "3"
 futures = "0.3"
 http = "0.2"
 typemap_rev = "0.1"
-dashmap = "4"
+dashmap = "5"
 async-trait = "0.1"
+parking_lot = "0.12"
 
 [dependencies.tokio]
 version = "1"
@@ -79,14 +80,10 @@ default-features = false
 features = ["json"]
 
 [dependencies.async-tungstenite]
-version = "0.16"
+version = "0.17"
 default-features = false
 features = ["tokio-runtime"]
 optional = true
-
-[dependencies.parking_lot]
-version = "0.12"
-features = ["send_guard"] # this disables deadlock checks but fixes the compilation of .queue()
 
 [dependencies.serenity-dep]
 package = "serenity"

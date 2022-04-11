@@ -181,10 +181,11 @@ impl PlayParameters {
             .send(
                 self.guild_id,
                 client
-                    .socket_write
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -258,15 +259,17 @@ impl PlayParameters {
                                 end_time: track.end_time,
                             };
 
-                            let socket_write = {
+                            let socket_sender = {
                                 let client_lock = client_clone.inner.lock();
-                                client_lock.socket_write.clone()
+                                let x = client_lock
+                                    .socket_sender
+                                    .read()
+                                    .clone();
+                                x
                             };
 
                             {
-                                let mut socket = socket_write.lock();
-
-                                if let Some(socket) = socket.as_mut() {
+                                if let Some(socket) = socket_sender {
                                     if let Err(why) = crate::model::SendOpcode::Play(payload)
                                         .send(guild_id, socket)
                                         .await

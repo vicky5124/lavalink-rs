@@ -364,7 +364,7 @@ impl SendOpcode {
     pub async fn send(
         &self,
         guild_id: impl Into<GuildId>,
-        socket: &mut SplitSink<WsStream, TungsteniteMessage>,
+        socket: tokio::sync::mpsc::UnboundedSender<TungsteniteMessage>,
     ) -> LavalinkResult<()> {
         let value = match self {
             Self::Destroy | Self::Stop => {
@@ -426,7 +426,7 @@ impl SendOpcode {
         let payload = serde_json::to_string(&value).unwrap();
 
         {
-            if let Err(why) = socket.send(TungsteniteMessage::text(&payload)).await {
+            if let Err(why) = socket.send(TungsteniteMessage::text(&payload)) {
                 return Err(why.into());
             };
         }

@@ -5,6 +5,7 @@ use std::{
 
 use async_tungstenite::tungstenite::error::Error as TungsteniteError;
 use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
+use tokio::sync::mpsc::error::SendError;
 
 pub type LavalinkResult<T> = std::result::Result<T, LavalinkError>;
 
@@ -27,6 +28,7 @@ pub enum LavalinkError {
     #[cfg(feature = "discord-gateway")]
     MissingConnectionField(&'static str),
     MissingLavalinkSocket,
+    ChannelSendError,
 }
 
 impl Error for LavalinkError {}
@@ -64,6 +66,9 @@ impl Display for LavalinkError {
             LavalinkError::MissingLavalinkSocket => {
                 write!(f, "Initialize a lavalink websocket connection.")
             }
+            LavalinkError::ChannelSendError => {
+                write!(f, "The channel receiver is closed.")
+            }
         }
     }
 }
@@ -83,5 +88,11 @@ impl From<InvalidHeaderValue> for LavalinkError {
 impl From<ReqwestError> for LavalinkError {
     fn from(err: ReqwestError) -> LavalinkError {
         LavalinkError::ReqwestError(err)
+    }
+}
+
+impl<T> From<SendError<T>> for LavalinkError {
+    fn from(_: SendError<T>) -> LavalinkError {
+        LavalinkError::ChannelSendError
     }
 }

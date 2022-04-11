@@ -61,7 +61,7 @@ use tokio_native_tls::TlsStream;
 #[cfg(feature = "rustls")]
 use tokio_rustls::client::TlsStream;
 
-use parking_lot::Mutex;
+use parking_lot::{Mutex, RwLock};
 use tokio::net::TcpStream;
 
 use regex::Regex;
@@ -73,7 +73,6 @@ use async_tungstenite::{
     WebSocketStream,
 };
 
-#[cfg(feature = "discord-gateway")]
 use tokio::sync::mpsc;
 
 use dashmap::{DashMap, DashSet};
@@ -107,7 +106,8 @@ pub struct LavalinkClientInner {
     pub headers: HeaderMap,
 
     /// The sender websocket split.
-    pub socket_write: Arc<Mutex<Option<SplitSink<WsStream, TungsteniteMessage>>>>,
+    pub socket_sender: RwLock<Option<mpsc::UnboundedSender<TungsteniteMessage>>>,
+    //pub socket_write: Arc<Mutex<Option<SplitSink<WsStream, TungsteniteMessage>>>>,
     // cannot be cloned, and cannot be behind a lock
     // because it would always be open by the event loop.
     //pub socket_read: SplitStream<WsStream>,
@@ -210,7 +210,7 @@ impl LavalinkClient {
 
         let client_inner = LavalinkClientInner {
             headers: lavalink_headers,
-            socket_write: Arc::new(Mutex::new(None)),
+            socket_sender: RwLock::new(None),
             rest_uri: lavalink_rest_uri,
             nodes: Arc::new(DashMap::new()),
             loops: Arc::new(DashSet::new()),
@@ -389,11 +389,11 @@ impl LavalinkClient {
             .send(
                 connection_info.guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -448,11 +448,11 @@ impl LavalinkClient {
             .send(
                 connection_info.guild_id.unwrap(),
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -520,11 +520,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -539,11 +539,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -587,11 +587,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -620,11 +620,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -659,11 +659,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -699,11 +699,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -726,11 +726,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -751,11 +751,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
@@ -779,11 +779,11 @@ impl LavalinkClient {
             .send(
                 guild_id,
                 client
-                    .socket_write
-                    .clone()
-                    .lock()
-                    .as_mut()
-                    .ok_or(LavalinkError::MissingLavalinkSocket)?,
+                    .socket_sender
+                    .read()
+                    .as_ref()
+                    .ok_or(LavalinkError::MissingLavalinkSocket)?
+                    .clone(),
             )
             .await?;
 
