@@ -66,8 +66,6 @@ use tokio::net::TcpStream;
 
 use regex::Regex;
 
-use futures::stream::SplitSink;
-
 use async_tungstenite::{
     stream::Stream, tokio::TokioAdapter, tungstenite::Message as TungsteniteMessage,
     WebSocketStream,
@@ -106,7 +104,7 @@ pub struct LavalinkClientInner {
     pub headers: HeaderMap,
 
     /// The sender websocket split.
-    pub socket_sender: RwLock<Option<mpsc::UnboundedSender<TungsteniteMessage>>>,
+    pub socket_sender: RwLock<Option<mpsc::UnboundedSender<(TungsteniteMessage, mpsc::UnboundedSender<()>)>>>,
     //pub socket_write: Arc<Mutex<Option<SplitSink<WsStream, TungsteniteMessage>>>>,
     // cannot be cloned, and cannot be behind a lock
     // because it would always be open by the event loop.
@@ -224,9 +222,10 @@ impl LavalinkClient {
         };
 
         let client_clone = client.clone();
+        let host = builder.host.to_string();
 
         tokio::spawn(async move {
-            lavalink_event_loop(handler, client_clone).await;
+            lavalink_event_loop(handler, client_clone, host).await;
         });
 
         #[cfg(feature = "discord-gateway")]

@@ -220,9 +220,8 @@ impl PlayParameters {
         if !client_lock.loops.contains(&self.guild_id) {
             let guild_id = self.guild_id;
 
-            if let Some(mut node) = client_lock.nodes.get_mut(&guild_id) {
+            if let Some(ref mut node) = client_lock.nodes.get_mut(&guild_id) {
                 if node.is_on_loops {
-                    let mut node = client_lock.nodes.get_mut(&self.guild_id).unwrap();
                     node.queue.push(track);
 
                     return Ok(());
@@ -251,6 +250,8 @@ impl PlayParameters {
                             let track = node.queue[0].clone();
 
                             node.now_playing = Some(node.queue[0].clone());
+
+                            drop(node);
 
                             let payload = crate::model::Play {
                                 track: track.track.track.clone(), // track

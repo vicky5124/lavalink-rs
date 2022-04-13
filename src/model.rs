@@ -1,12 +1,13 @@
 // oh god, this module looks terrible
 
-use crate::error::LavalinkResult;
-use crate::WsStream;
+use crate::error::{LavalinkResult, LavalinkError};
 
 use std::fmt;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use std::sync::Arc;
+
+use tokio::sync::mpsc;
 
 use typemap_rev::TypeMap;
 
@@ -28,8 +29,6 @@ use songbird_dep::id::{
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
 use serde_json::{json, Value};
-
-use futures::{sink::SinkExt, stream::SplitSink};
 
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
 use parking_lot::RwLock;
@@ -364,7 +363,7 @@ impl SendOpcode {
     pub async fn send(
         &self,
         guild_id: impl Into<GuildId>,
-        socket: tokio::sync::mpsc::UnboundedSender<TungsteniteMessage>,
+        socket: tokio::sync::mpsc::UnboundedSender<(TungsteniteMessage, mpsc::UnboundedSender<()>)>,
     ) -> LavalinkResult<()> {
         let value = match self {
             Self::Destroy | Self::Stop => {
@@ -424,12 +423,15 @@ impl SendOpcode {
         };
 
         let payload = serde_json::to_string(&value).unwrap();
+        let (tx, mut rx) = mpsc::unbounded_channel();
 
         {
-            if let Err(why) = socket.send(TungsteniteMessage::text(&payload)) {
+            if let Err(why) = socket.send((TungsteniteMessage::text(&payload), tx)) {
                 return Err(why.into());
             };
         }
+
+        rx.recv().await.ok_or(LavalinkError::ChannelSendError)?;
 
         Ok(())
     }

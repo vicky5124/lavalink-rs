@@ -4,7 +4,10 @@ use crate::model::*;
 use crate::voice::{raw_handle_event_voice_server_update, raw_handle_event_voice_state_update};
 use crate::LavalinkClient;
 
-use async_tungstenite::tokio::connect_async;
+use async_tungstenite::{
+    tokio::connect_async,
+    tungstenite::handshake::client::generate_key,
+};
 use futures::stream::StreamExt;
 use futures::SinkExt;
 use http::Request;
@@ -268,22 +271,27 @@ pub async fn discord_event_loop(client: LavalinkClient, token: &str, mut wait_ti
 pub async fn lavalink_event_loop(
     handler: impl LavalinkEventHandler + Send + Sync + 'static,
     client: LavalinkClient,
+    host: String,
 ) {
     loop {
         debug!("Starting lavalink event loop.");
 
-        let mut url_builder = Request::builder();
-
-        {
-            let ref_headers = url_builder.headers_mut().unwrap();
-            let headers = client.inner.lock().headers.clone();
-            *ref_headers = headers.clone();
-        }
-
-        let url = url_builder
+        let mut url = Request::builder()
+            .method("GET")
+            .header("Host", &host)
+            .header("Connection", "Upgrade")
+            .header("Upgrade", "websocket")
+            .header("Sec-WebSocket-Version", "13")
+            .header("Sec-WebSocket-Key", generate_key())
             .uri(client.inner.lock().socket_uri.clone())
             .body(())
             .unwrap();
+
+        {
+            let ref_headers = url.headers_mut();
+            let headers = &client.inner.lock().headers;
+            ref_headers.extend(headers.clone());
+        }
 
         let (ws_stream, _) = match connect_async(url).await {
             Err(why) => {
@@ -304,9 +312,11 @@ pub async fn lavalink_event_loop(
 
         tokio::spawn(async move {
             while let Some(msg) = tx.recv().await {
-                if let Err(why) = write.send(msg).await {
+                if let Err(why) = write.send(msg.0).await {
                     error!("Error sending lavalink event: {}", why);
                 }
+
+                msg.1.send(()).unwrap();
             }
         });
 
