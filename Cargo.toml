@@ -34,6 +34,7 @@ rustls = [
     "tokio-rustls",
     "reqwest/rustls-tls",
     "serenity-dep/rustls_backend",
+    "songbird-dep/rustls",
 ]
 
 native = [
@@ -41,6 +42,7 @@ native = [
     "tokio-native-tls",
     "reqwest/native-tls",
     "serenity-dep/native_tls_backend",
+    "songbird-dep/native",
 ]
 
 [package.metadata.docs.rs]
@@ -87,7 +89,8 @@ optional = true
 
 [dependencies.serenity-dep]
 package = "serenity"
-version = "0.10"
+git = "https://github.com/serenity-rs/serenity"
+branch = "next"
 default-features = false
 features = ["model"]
 optional = true
@@ -98,9 +101,10 @@ optional = true
 
 [dependencies.songbird-dep]
 package = "songbird"
-version = "0.2"
+git = "https://github.com/serenity-rs/songbird"
+branch = "next"
 default-features = false
-features = ["gateway"]
+features = ["gateway", "async-trait"]
 optional = true
 
 [dependencies.tracing]
@@ -117,12 +121,14 @@ features = ["full"]
 
 [dev-dependencies.serenity-dep]
 package = "serenity"
-version = "^0.10.2"
+git = "https://github.com/serenity-rs/serenity"
+branch = "next"
 features = ["client", "cache", "standard_framework", "voice"]
 
 [dev-dependencies.songbird-dep]
 package = "songbird"
-version = "0.2"
+git = "https://github.com/serenity-rs/songbird"
+branch = "next"
 default-features = false
 features = ["serenity-rustls", "gateway"]
 
