@@ -31,7 +31,7 @@ pub struct ConnectionInfo {
     pub session_id: String,
 }
 
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Filters {
     pub volume: Option<u16>,
