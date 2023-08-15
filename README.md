@@ -5,7 +5,9 @@ A `lavalink` API wrapping library for every `tokio` discord crate.
 ## To-Do
 
 - [ ] `native_tls` backend
-- [ ] Player queues
+- [x] Player queues
+- [ ] Readbale player queues
+- [ ] Search engine helpers
 - [ ] Documentation
 - [ ] Expand event logging
 - [ ] Examples

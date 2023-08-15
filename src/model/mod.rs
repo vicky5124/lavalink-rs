@@ -21,7 +21,7 @@ impl FromStr for UserId {
     type Err = ParseIntError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        u64::from_str(s).map(|x| Self(x))
+        u64::from_str(s).map(Self)
     }
 }
 
@@ -29,7 +29,7 @@ impl FromStr for GuildId {
     type Err = ParseIntError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        u64::from_str(s).map(|x| Self(x))
+        u64::from_str(s).map(Self)
     }
 }
 

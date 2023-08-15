@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-alpha.1
+
+- Implement write-only queues and players.
+
 ## 0.10.0-alpha.0
 
 - Complete rewrite of the library.

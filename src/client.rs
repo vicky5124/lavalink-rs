@@ -1,29 +1,20 @@
 use crate::error::LavalinkResult;
 use crate::model::*;
 use crate::node;
+use crate::player_context::*;
 
+use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use arc_swap::ArcSwap;
-//use dashmap::DashMap;
+use dashmap::DashMap;
 use reqwest::{header::HeaderMap, Client as ReqwestClient};
-
-//#[derive(PartialEq, Debug, Clone)]
-//pub struct Player {
-//    pub guild_id: GuildId,
-//    pub queue: Vec<TrackInQueue>,
-//    pub player_data: Option<player::Player>,
-//    //pub user_data: Arc<RwLock<TypeMap>>
-//}
-
-#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone)]
-pub struct TrackInQueue;
 
 #[derive(Debug, Clone)]
 pub struct LavalinkClient {
     pub nodes: Arc<Vec<node::Node>>,
-    //pub players: Arc<DashMap<GuildId, Player>>,
+    pub players: Arc<DashMap<GuildId, PlayerContext>>,
     pub events: events::Events,
     //user_data: Arc<RwLock<TypeMap>>
 }
@@ -103,7 +94,7 @@ impl LavalinkClient {
 
         LavalinkClient {
             nodes: Arc::new(nodes),
-            //players: Arc::new(DashMap::new()),
+            players: Arc::new(DashMap::new()),
             events,
         }
     }
@@ -138,14 +129,22 @@ impl LavalinkClient {
             .unwrap()
     }
 
+    pub fn get_player_context(&self, guild_id: GuildId) -> Option<PlayerContext> {
+        self.players.get(&guild_id).map(|x| x.clone())
+    }
+
     pub async fn create_player(
         &self,
         guild_id: GuildId,
         connection_info: &player::ConnectionInfo,
-    ) -> LavalinkResult<player::Player> {
+    ) -> LavalinkResult<PlayerContext> {
         let node = self.get_node_for_guild(guild_id);
 
-        let result = node
+        if let Some(x) = self.players.get(&guild_id) {
+            return Ok(x.clone());
+        }
+
+        let player = node
             .http
             .update_player(
                 guild_id,
@@ -158,23 +157,26 @@ impl LavalinkClient {
             )
             .await?;
 
-        Ok(result)
-    }
+        let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
-    pub async fn update_player(
-        &self,
-        guild_id: GuildId,
-        update_player: &http::UpdatePlayer,
-        no_replace: bool,
-    ) -> LavalinkResult<player::Player> {
-        let node = self.get_node_for_guild(guild_id);
+        let player_dummy = PlayerContext {
+            guild_id,
+            client: self.clone(),
+            tx,
+        };
 
-        let result = node
-            .http
-            .update_player(guild_id, &node.session_id.load(), update_player, no_replace)
-            .await?;
+        let player_context = PlayerContextInner {
+            guild_id,
+            queue: VecDeque::new(),
+            player_data: player,
+            dummy: player_dummy.clone(),
+        };
 
-        Ok(result)
+        player_context.start(rx).await;
+
+        self.players.insert(guild_id, player_dummy.clone());
+
+        Ok(player_dummy)
     }
 
     pub async fn delete_player(&self, guild_id: GuildId) -> LavalinkResult<()> {
@@ -184,154 +186,17 @@ impl LavalinkClient {
             .delete_player(guild_id, &node.session_id.load())
             .await?;
 
+        if let Some((_, player)) = self.players.remove(&guild_id) {
+            player.close()?;
+        }
+
         Ok(())
-    }
-
-    pub async fn play_now(
-        &self,
-        guild_id: GuildId,
-        track: &track::TrackData,
-    ) -> LavalinkResult<player::Player> {
-        let node = self.get_node_for_guild(guild_id);
-
-        let result = node
-            .http
-            .update_player(
-                guild_id,
-                &node.session_id.load(),
-                &http::UpdatePlayer {
-                    encoded_track: Some(track.encoded.to_string()),
-                    ..Default::default()
-                },
-                false,
-            )
-            .await?;
-
-        Ok(result)
-    }
-
-    pub async fn set_pause(
-        &self,
-        guild_id: GuildId,
-        pause: bool,
-    ) -> LavalinkResult<player::Player> {
-        let node = self.get_node_for_guild(guild_id);
-
-        let result = node
-            .http
-            .update_player(
-                guild_id,
-                &node.session_id.load(),
-                &http::UpdatePlayer {
-                    paused: Some(pause),
-                    ..Default::default()
-                },
-                true,
-            )
-            .await?;
-
-        Ok(result)
-    }
-
-    pub async fn set_volume(
-        &self,
-        guild_id: GuildId,
-        mut volume: u16,
-    ) -> LavalinkResult<player::Player> {
-        let node = self.get_node_for_guild(guild_id);
-
-        volume = volume.min(1000);
-
-        let result = node
-            .http
-            .update_player(
-                guild_id,
-                &node.session_id.load(),
-                &http::UpdatePlayer {
-                    volume: Some(volume),
-                    ..Default::default()
-                },
-                true,
-            )
-            .await?;
-
-        Ok(result)
-    }
-
-    pub async fn set_filters(
-        &self,
-        guild_id: GuildId,
-        filters: player::Filters,
-    ) -> LavalinkResult<player::Player> {
-        let node = self.get_node_for_guild(guild_id);
-
-        let result = node
-            .http
-            .update_player(
-                guild_id,
-                &node.session_id.load(),
-                &http::UpdatePlayer {
-                    filters: Some(filters),
-                    ..Default::default()
-                },
-                true,
-            )
-            .await?;
-
-        Ok(result)
-    }
-
-    pub async fn set_position(
-        &self,
-        guild_id: GuildId,
-        position: std::time::Duration,
-    ) -> LavalinkResult<player::Player> {
-        let node = self.get_node_for_guild(guild_id);
-
-        let result = node
-            .http
-            .update_player(
-                guild_id,
-                &node.session_id.load(),
-                &http::UpdatePlayer {
-                    position: Some(position.as_millis()),
-                    ..Default::default()
-                },
-                true,
-            )
-            .await?;
-
-        Ok(result)
     }
 
     pub async fn load_tracks(&self, guild_id: GuildId, term: &str) -> LavalinkResult<track::Track> {
         let node = self.get_node_for_guild(guild_id);
 
         let result = node.http.load_tracks(term).await?;
-
-        Ok(result)
-    }
-
-    pub async fn version(&self, guild_id: GuildId) -> LavalinkResult<String> {
-        let node = self.get_node_for_guild(guild_id);
-
-        let result = node.http.version().await?;
-
-        Ok(result)
-    }
-
-    pub async fn stats(&self, guild_id: GuildId) -> LavalinkResult<events::Stats> {
-        let node = self.get_node_for_guild(guild_id);
-
-        let result = node.http.stats().await?;
-
-        Ok(result)
-    }
-
-    pub async fn info(&self, guild_id: GuildId) -> LavalinkResult<http::Info> {
-        let node = self.get_node_for_guild(guild_id);
-
-        let result = node.http.info().await?;
 
         Ok(result)
     }
@@ -360,7 +225,31 @@ impl LavalinkClient {
         Ok(result)
     }
 
-    pub async fn get_player(&self, guild_id: GuildId) -> LavalinkResult<player::Player> {
+    pub async fn request_version(&self, guild_id: GuildId) -> LavalinkResult<String> {
+        let node = self.get_node_for_guild(guild_id);
+
+        let result = node.http.version().await?;
+
+        Ok(result)
+    }
+
+    pub async fn request_stats(&self, guild_id: GuildId) -> LavalinkResult<events::Stats> {
+        let node = self.get_node_for_guild(guild_id);
+
+        let result = node.http.stats().await?;
+
+        Ok(result)
+    }
+
+    pub async fn request_info(&self, guild_id: GuildId) -> LavalinkResult<http::Info> {
+        let node = self.get_node_for_guild(guild_id);
+
+        let result = node.http.info().await?;
+
+        Ok(result)
+    }
+
+    pub async fn request_player(&self, guild_id: GuildId) -> LavalinkResult<player::Player> {
         let node = self.get_node_for_guild(guild_id);
 
         let result = node
@@ -371,7 +260,10 @@ impl LavalinkClient {
         Ok(result)
     }
 
-    pub async fn get_players(&self, guild_id: GuildId) -> LavalinkResult<Vec<player::Player>> {
+    pub async fn request_all_players(
+        &self,
+        guild_id: GuildId,
+    ) -> LavalinkResult<Vec<player::Player>> {
         let node = self.get_node_for_guild(guild_id);
 
         let result = node.http.get_players(&node.session_id.load()).await?;

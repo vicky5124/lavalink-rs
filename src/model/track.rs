@@ -26,7 +26,7 @@ pub struct Track {
     pub data: Option<TrackLoadData>,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TrackData {
     pub encoded: String,
@@ -34,7 +34,7 @@ pub struct TrackData {
     pub plugin_info: Option<serde_json::Value>,
 }
 
-#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Serialize, Deserialize)]
+#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TrackInfo {
     pub identifier: String,

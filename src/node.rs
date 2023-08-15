@@ -118,7 +118,7 @@ impl Node {
 
                 tokio::spawn(async move {
                     let self_node = lavalink_client.nodes.get(self_node_id).unwrap();
-                    let ed = EventDispatcher(&self_node, &lavalink_client);
+                    let ed = EventDispatcher(self_node, &lavalink_client);
 
                     match base_event.get("op").unwrap().as_str().unwrap() {
                         "ready" => {
@@ -130,15 +130,112 @@ impl Node {
 
                             ed.dispatch(ready_event, |e| e.ready).await
                         }
-                        "playerUpdate" => ed.parse_and_dispatch(&x, |e| e.player_update).await,
+                        "playerUpdate" => {
+                            let player_update_event: events::PlayerUpdate =
+                                serde_json::from_str(&x).unwrap();
+
+                            let player = lavalink_client
+                                .get_player_context(player_update_event.guild_id)
+                                .unwrap();
+
+                            if let Err(why) = player.update_state(player_update_event.state) {
+                                error!(
+                                    "Error updating state for player {}: {}",
+                                    player_update_event.guild_id.0, why
+                                );
+                            }
+
+                            ed.parse_and_dispatch(&x, |e| e.player_update).await
+                        }
                         "stats" => ed.parse_and_dispatch(&x, |e| e.stats).await,
                         "event" => match base_event.get("type").unwrap().as_str().unwrap() {
-                            "TrackStartEvent" => ed.parse_and_dispatch(&x, |e| e.track_start).await,
-                            "TrackEndEvent" => ed.parse_and_dispatch(&x, |e| e.track_end).await,
+                            "TrackStartEvent" => {
+                                let track_event: events::TrackStart =
+                                    serde_json::from_str(&x).unwrap();
+                                let player = lavalink_client
+                                    .get_player_context(track_event.guild_id)
+                                    .unwrap();
+
+                                if let Err(why) = player.update_track(track_event.track.into()) {
+                                    error!(
+                                        "Error sending update track message for player {}: {}",
+                                        track_event.guild_id.0, why
+                                    );
+                                }
+
+                                ed.parse_and_dispatch(&x, |e| e.track_start).await
+                            }
+                            "TrackEndEvent" => {
+                                let track_event: events::TrackEnd =
+                                    serde_json::from_str(&x).unwrap();
+                                let player = lavalink_client
+                                    .get_player_context(track_event.guild_id)
+                                    .unwrap();
+
+                                if let Err(why) = player.finish(track_event.reason.into()) {
+                                    error!(
+                                        "Error sending finish message for player {}: {}",
+                                        track_event.guild_id.0, why
+                                    );
+                                }
+
+                                if let Err(why) = player.update_track(track_event.track.into()) {
+                                    error!(
+                                        "Error sending update track message for player {}: {}",
+                                        track_event.guild_id.0, why
+                                    );
+                                }
+
+                                ed.parse_and_dispatch(&x, |e| e.track_end).await
+                            }
                             "TrackExceptionEvent" => {
+                                let track_event: events::TrackException =
+                                    serde_json::from_str(&x).unwrap();
+
+                                let player = lavalink_client
+                                    .get_player_context(track_event.guild_id)
+                                    .unwrap();
+
+                                if let Err(why) = player.finish(true) {
+                                    error!(
+                                        "Error sending finish message for player {}: {}",
+                                        track_event.guild_id.0, why
+                                    );
+                                }
+
+                                if let Err(why) = player.update_track(track_event.track.into()) {
+                                    error!(
+                                        "Error sending update track message for player {}: {}",
+                                        track_event.guild_id.0, why
+                                    );
+                                }
+
                                 ed.parse_and_dispatch(&x, |e| e.track_exception).await
                             }
-                            "TrackStuckEvent" => ed.parse_and_dispatch(&x, |e| e.track_stuck).await,
+                            "TrackStuckEvent" => {
+                                let track_event: events::TrackStuck =
+                                    serde_json::from_str(&x).unwrap();
+
+                                let player = lavalink_client
+                                    .get_player_context(track_event.guild_id)
+                                    .unwrap();
+
+                                if let Err(why) = player.finish(true) {
+                                    error!(
+                                        "Error sending finish message for player {}: {}",
+                                        track_event.guild_id.0, why
+                                    );
+                                }
+
+                                if let Err(why) = player.update_track(track_event.track.into()) {
+                                    error!(
+                                        "Error sending update track message for player {}: {}",
+                                        track_event.guild_id.0, why
+                                    );
+                                }
+
+                                ed.parse_and_dispatch(&x, |e| e.track_stuck).await
+                            }
                             "WebSocketClosedEvent" => {
                                 ed.parse_and_dispatch(&x, |e| e.websocket_closed).await
                             }

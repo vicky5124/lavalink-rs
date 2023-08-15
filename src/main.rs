@@ -1,8 +1,6 @@
 #[macro_use]
 extern crate tracing;
 
-use std::time::Duration;
-
 use lavalink_rs::client::LavalinkClient;
 use lavalink_rs::model::player::ConnectionInfo;
 use lavalink_rs::model::track::TrackLoadData;
@@ -89,7 +87,8 @@ async fn play(
         }
     };
 
-    lava_client.play_now(lavalink_guild_id, track).await?;
+    let player = lava_client.get_player_context(lavalink_guild_id).unwrap();
+    player.play_now(track).await?;
 
     if let Some(uri) = &track.info.uri {
         ctx.say(format!(
@@ -100,6 +99,57 @@ async fn play(
     } else {
         ctx.say(format!(
             "Playing: {} - {}",
+            track.info.author, track.info.title
+        ))
+        .await?;
+    }
+
+    Ok(())
+}
+
+/// Add a song to the queue
+#[poise::command(slash_command, prefix_command)]
+async fn queue(
+    ctx: Context<'_>,
+    #[description = "Search term or URL"]
+    #[rest]
+    term: String,
+) -> Result<(), Error> {
+    let guild = ctx.guild().unwrap();
+    let guild_id = guild.id;
+    let lavalink_guild_id = GuildId(guild_id.0);
+
+    let lava_client = ctx.data().lavalink.clone();
+
+    let Some(player) = lava_client.get_player_context(lavalink_guild_id) else {
+        ctx.say("Join the bot to a voice channel first.").await?;
+        return Ok(());
+    };
+
+    let loaded_tracks = lava_client.load_tracks(lavalink_guild_id, &term).await?;
+
+    let track = match &loaded_tracks.data {
+        Some(TrackLoadData::Track(x)) => x,
+        Some(TrackLoadData::Playlist(x)) => &x.tracks[0],
+        Some(TrackLoadData::Search(x)) => &x[0],
+
+        _ => {
+            ctx.say(format!("{:?}", loaded_tracks)).await?;
+            return Ok(());
+        }
+    };
+
+    player.queue(track)?;
+
+    if let Some(uri) = &track.info.uri {
+        ctx.say(format!(
+            "Added to queue: [{} - {}](<{}>)",
+            track.info.author, track.info.title, uri
+        ))
+        .await?;
+    } else {
+        ctx.say(format!(
+            "Added to queue: {} - {}",
             track.info.author, track.info.title
         ))
         .await?;
@@ -132,11 +182,16 @@ async fn leave(ctx: Context<'_>) -> Result<(), Error> {
 /// Test
 #[poise::command(prefix_command)]
 async fn test(ctx: Context<'_>) -> Result<(), Error> {
+    //use std::time::Duration;
+
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
     let lavalink_guild_id = GuildId(guild_id.0);
 
     let lava_client = ctx.data().lavalink.clone();
+
+    let player = lava_client.get_player_context(lavalink_guild_id).unwrap();
+    player.skip()?;
 
     //dbg!(lava_client.info(lavalink_guild_id).await?);
     //dbg!(lava_client.stats(lavalink_guild_id).await?);
@@ -146,17 +201,15 @@ async fn test(ctx: Context<'_>) -> Result<(), Error> {
     //dbg!(lava_client.get_player(lavalink_guild_id).await?);
     //dbg!(lava_client.get_players(lavalink_guild_id).await?);
 
-    lava_client
-        .set_position(lavalink_guild_id, Duration::from_secs(120))
-        .await?;
-    tokio::time::sleep(Duration::from_secs(2)).await;
-    lava_client.set_pause(lavalink_guild_id, true).await?;
-    tokio::time::sleep(Duration::from_secs(2)).await;
-    lava_client.set_pause(lavalink_guild_id, false).await?;
-    tokio::time::sleep(Duration::from_secs(2)).await;
-    lava_client.set_volume(lavalink_guild_id, 50).await?;
-    tokio::time::sleep(Duration::from_secs(2)).await;
-    lava_client.set_volume(lavalink_guild_id, 100).await?;
+    //lava_client.set_position(lavalink_guild_id, Duration::from_secs(120)).await?;
+    //tokio::time::sleep(Duration::from_secs(2)).await;
+    //lava_client.set_pause(lavalink_guild_id, true).await?;
+    //tokio::time::sleep(Duration::from_secs(2)).await;
+    //lava_client.set_pause(lavalink_guild_id, false).await?;
+    //tokio::time::sleep(Duration::from_secs(2)).await;
+    //lava_client.set_volume(lavalink_guild_id, 50).await?;
+    //tokio::time::sleep(Duration::from_secs(2)).await;
+    //lava_client.set_volume(lavalink_guild_id, 100).await?;
 
     ctx.say("all good!").await?;
 
@@ -171,7 +224,7 @@ async fn main() {
     let framework = poise::Framework::builder()
         .client_settings(|c| c.register_songbird())
         .options(poise::FrameworkOptions {
-            commands: vec![play(), leave(), test()],
+            commands: vec![play(), queue(), leave(), test()],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some(",".to_string()),
                 ..Default::default()
