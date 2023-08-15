@@ -1,0 +1,29 @@
+[package]
+name = "poise_example"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+poise = "0.5"
+itertools = "0.11"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+serde_json = "1"
+futures = "0.3"
+
+[dependencies.songbird]
+version = "0.3"
+default-features = false
+features = ["serenity-rustls", "gateway"]
+
+[dependencies.tokio]
+version = "1"
+features = ["rt-multi-thread", "macros"]
+
+[dependencies.hook]
+git = "https://github.com/arqunis/hook"
+
+[dependencies.lavalink-rs]
+path = "../../"

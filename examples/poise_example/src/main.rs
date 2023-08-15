@@ -4,7 +4,6 @@ extern crate tracing;
 use lavalink_rs::model::player::ConnectionInfo;
 use lavalink_rs::{
     model::events,
-
     GuildId, // TODO: Remove this
     LavalinkClient,
     NodeBuilder,

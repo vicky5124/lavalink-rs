@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.0-alpha.2
+
+- Implement readers for queues and players.
+- Remove main.rs and move to its own example.
+
 ## 0.10.0-alpha.1
 
 - Implement write-only queues and players.
