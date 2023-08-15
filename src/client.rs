@@ -170,6 +170,7 @@ impl LavalinkClient {
             queue: VecDeque::new(),
             player_data: player,
             dummy: player_dummy.clone(),
+            last_should_continue: true,
         };
 
         player_context.start(rx).await;

@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::client::LavalinkClient;
 use crate::error::LavalinkResult;
 use crate::model::*;
@@ -49,20 +51,38 @@ impl PlayerContext {
 
     pub fn replace_queue(
         &self,
-        tracks: impl Iterator<Item = super::TrackInQueue>,
+        tracks: impl IntoIterator<Item = super::TrackInQueue>,
     ) -> LavalinkResult<()> {
-        self.tx
-            .send(super::PlayerMessage::ReplaceQueue(tracks.collect()))?;
+        self.tx.send(super::PlayerMessage::ReplaceQueue(
+            tracks.into_iter().collect(),
+        ))?;
         Ok(())
     }
 
     pub fn append_queue(
         &self,
-        tracks: impl Iterator<Item = super::TrackInQueue>,
+        tracks: impl IntoIterator<Item = super::TrackInQueue>,
     ) -> LavalinkResult<()> {
-        self.tx
-            .send(super::PlayerMessage::AppendQueue(tracks.collect()))?;
+        self.tx.send(super::PlayerMessage::AppendQueue(
+            tracks.into_iter().collect(),
+        ))?;
         Ok(())
+    }
+
+    pub async fn get_queue(&self) -> LavalinkResult<VecDeque<crate::TrackInQueue>> {
+        let (tx, rx) = oneshot::channel();
+
+        self.tx.send(super::PlayerMessage::GetQueue(tx))?;
+
+        Ok(rx.await?)
+    }
+
+    pub async fn get_player(&self) -> LavalinkResult<player::Player> {
+        let (tx, rx) = oneshot::channel();
+
+        self.tx.send(super::PlayerMessage::GetPlayer(tx))?;
+
+        Ok(rx.await?)
     }
 
     pub async fn update_player(

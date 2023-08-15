@@ -5,6 +5,7 @@ use std::fmt::{Display, Formatter, Result};
 
 use async_tungstenite::tungstenite::error::Error as TungsteniteError;
 use http::Error as HttpError;
+use oneshot::RecvError;
 use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
 use tokio::sync::mpsc::error::SendError;
 use url::ParseError;
@@ -44,6 +45,7 @@ pub enum LavalinkError {
     ReqwestError(ReqwestError),
     HttpError(HttpError),
     ChannelSendError,
+    ChannelReceiveError(RecvError),
     UrlParseError(ParseError),
 
     ResponseError(ResponseError),
@@ -74,6 +76,9 @@ impl Display for LavalinkError {
             }
             LavalinkError::ChannelSendError => {
                 write!(f, "The channel receiver is closed.")
+            }
+            LavalinkError::ChannelReceiveError(why) => {
+                write!(f, "Error receiving from player context: {:?}", why)
             }
             LavalinkError::UrlParseError(why) => {
                 write!(f, "Url Parsing Error => {:?}", why)
@@ -140,5 +145,11 @@ impl From<ParseError> for LavalinkError {
 impl<T> From<SendError<T>> for LavalinkError {
     fn from(_: SendError<T>) -> LavalinkError {
         LavalinkError::ChannelSendError
+    }
+}
+
+impl From<RecvError> for LavalinkError {
+    fn from(err: RecvError) -> LavalinkError {
+        LavalinkError::ChannelReceiveError(err)
     }
 }

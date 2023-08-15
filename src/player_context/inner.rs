@@ -10,6 +10,7 @@ pub(crate) struct PlayerContextInner {
     pub queue: VecDeque<super::TrackInQueue>,
     pub player_data: player::Player,
     pub dummy: super::PlayerContext,
+    pub last_should_continue: bool,
 }
 
 impl PlayerContextInner {
@@ -22,10 +23,37 @@ impl PlayerContextInner {
                     UpdatePlayer(player) => self.player_data = player,
                     UpdatePlayerTrack(track) => self.player_data.track = track,
                     UpdatePlayerState(state) => self.player_data.state = state,
-                    InsertToQueue(track) => self.queue.push_back(track),
-                    ReplaceQueue(tracks) => self.queue = tracks,
-                    AppendQueue(mut tracks) => self.queue.append(&mut tracks),
+                    GetPlayer(tx) => {
+                        if let Err(why) = tx.send(self.player_data.clone()) {
+                            error!(
+                                "Error sending player back to the player {}: {}",
+                                self.guild_id.0, why
+                            );
+                        }
+                    }
+                    InsertToQueue(track) => {
+                        self.queue_init().await;
+                        self.queue.push_back(track);
+                    }
+                    ReplaceQueue(tracks) => {
+                        self.queue_init().await;
+                        self.queue = tracks;
+                    }
+                    AppendQueue(mut tracks) => {
+                        self.queue_init().await;
+                        self.queue.append(&mut tracks);
+                    }
+                    GetQueue(tx) => {
+                        if let Err(why) = tx.send(self.queue.clone()) {
+                            error!(
+                                "Error sending queue back to the player {}: {}",
+                                self.guild_id.0, why
+                            );
+                        }
+                    }
                     TrackFinished(should_continue) => {
+                        self.last_should_continue = should_continue;
+
                         if should_continue {
                             if let Err(why) = self.dummy.skip() {
                                 error!(
@@ -53,5 +81,16 @@ impl PlayerContextInner {
                 };
             }
         });
+    }
+
+    async fn queue_init(&self) {
+        if self.last_should_continue && self.player_data.track.is_none() {
+            if let Err(why) = self.dummy.skip() {
+                error!(
+                    "Error sending skip message in player {}: {}",
+                    self.guild_id.0, why
+                );
+            }
+        }
     }
 }

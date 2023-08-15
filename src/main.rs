@@ -1,13 +1,19 @@
 #[macro_use]
 extern crate tracing;
 
-use lavalink_rs::client::LavalinkClient;
 use lavalink_rs::model::player::ConnectionInfo;
-use lavalink_rs::model::track::TrackLoadData;
-use lavalink_rs::model::*;
-use lavalink_rs::node;
+use lavalink_rs::{
+    model::events,
+
+    GuildId, // TODO: Remove this
+    LavalinkClient,
+    NodeBuilder,
+    TrackLoadData,
+    UserId, // TODO: Remove this
+}; // TODO: Remove this
 
 use hook::hook;
+use itertools::Itertools;
 use poise::serenity_prelude as serenity;
 use serenity::Mentionable;
 use songbird::SerenityInit;
@@ -74,12 +80,22 @@ async fn play(
         }
     }
 
+    let Some(player) = lava_client.get_player_context(lavalink_guild_id) else {
+        ctx.say("Join the bot to a voice channel first.").await?;
+        return Ok(());
+    };
+
     let loaded_tracks = lava_client.load_tracks(lavalink_guild_id, &term).await?;
 
-    let track = match &loaded_tracks.data {
-        Some(TrackLoadData::Track(x)) => x,
-        Some(TrackLoadData::Playlist(x)) => &x.tracks[0],
-        Some(TrackLoadData::Search(x)) => &x[0],
+    let mut playlist_info = None;
+
+    let tracks: Vec<lavalink_rs::TrackInQueue> = match loaded_tracks.data {
+        Some(TrackLoadData::Track(x)) => vec![x.into()],
+        Some(TrackLoadData::Search(x)) => vec![x[0].clone().into()],
+        Some(TrackLoadData::Playlist(x)) => {
+            playlist_info = Some(x.info);
+            x.tracks.iter().map(|x| x.into()).collect()
+        }
 
         _ => {
             ctx.say(format!("{:?}", loaded_tracks)).await?;
@@ -87,34 +103,35 @@ async fn play(
         }
     };
 
-    let player = lava_client.get_player_context(lavalink_guild_id).unwrap();
-    player.play_now(track).await?;
-
-    if let Some(uri) = &track.info.uri {
-        ctx.say(format!(
-            "Playing: [{} - {}](<{}>)",
-            track.info.author, track.info.title, uri
-        ))
-        .await?;
+    if let Some(info) = playlist_info {
+        ctx.say(format!("Added playlist to queue: {}", info.name,))
+            .await?;
     } else {
-        ctx.say(format!(
-            "Playing: {} - {}",
-            track.info.author, track.info.title
-        ))
-        .await?;
+        let track = &tracks[0].track;
+
+        if let Some(uri) = &track.info.uri {
+            ctx.say(format!(
+                "Added to queue: [{} - {}](<{}>)",
+                track.info.author, track.info.title, uri
+            ))
+            .await?;
+        } else {
+            ctx.say(format!(
+                "Added to queue: {} - {}",
+                track.info.author, track.info.title
+            ))
+            .await?;
+        }
     }
+
+    player.append_queue(tracks)?;
 
     Ok(())
 }
 
 /// Add a song to the queue
 #[poise::command(slash_command, prefix_command)]
-async fn queue(
-    ctx: Context<'_>,
-    #[description = "Search term or URL"]
-    #[rest]
-    term: String,
-) -> Result<(), Error> {
+async fn queue(ctx: Context<'_>) -> Result<(), Error> {
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
     let lavalink_guild_id = GuildId(guild_id.0);
@@ -126,34 +143,48 @@ async fn queue(
         return Ok(());
     };
 
-    let loaded_tracks = lava_client.load_tracks(lavalink_guild_id, &term).await?;
+    let queue = player.get_queue().await?;
+    let player_data = player.get_player().await?;
 
-    let track = match &loaded_tracks.data {
-        Some(TrackLoadData::Track(x)) => x,
-        Some(TrackLoadData::Playlist(x)) => &x.tracks[0],
-        Some(TrackLoadData::Search(x)) => &x[0],
+    let max = queue.len().min(9);
+    let queue_message = queue
+        .range(0..max)
+        .enumerate()
+        .map(|(idx, x)| {
+            if let Some(uri) = &x.track.info.uri {
+                format!(
+                    "{} -> [{} - {}](<{}>)",
+                    idx + 1,
+                    x.track.info.author,
+                    x.track.info.title,
+                    uri
+                )
+            } else {
+                format!(
+                    "{} -> {} - {}",
+                    idx + 1,
+                    x.track.info.author,
+                    x.track.info.title
+                )
+            }
+        })
+        .join("\n");
 
-        _ => {
-            ctx.say(format!("{:?}", loaded_tracks)).await?;
-            return Ok(());
+    let now_playing_message = if let Some(track) = player_data.track {
+        if let Some(uri) = &track.info.uri {
+            format!(
+                "Now playing: [{} - {}](<{}>)",
+                track.info.author, track.info.title, uri
+            )
+        } else {
+            format!("Now playing: {} - {}", track.info.author, track.info.title)
         }
+    } else {
+        "Now playing: nothing".to_string()
     };
 
-    player.queue(track)?;
-
-    if let Some(uri) = &track.info.uri {
-        ctx.say(format!(
-            "Added to queue: [{} - {}](<{}>)",
-            track.info.author, track.info.title, uri
-        ))
+    ctx.say(format!("{}\n\n{}", now_playing_message, queue_message))
         .await?;
-    } else {
-        ctx.say(format!(
-            "Added to queue: {} - {}",
-            track.info.author, track.info.title
-        ))
-        .await?;
-    }
 
     Ok(())
 }
@@ -243,7 +274,7 @@ async fn main() {
                     ..Default::default()
                 };
 
-                let node_local = node::NodeBuilder {
+                let node_local = NodeBuilder {
                     hostname: "localhost:2333".to_string(),
                     is_ssl: false,
                     events: events::Events::default(),
