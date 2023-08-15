@@ -9,6 +9,7 @@ pub mod events;
 pub mod http;
 pub mod player;
 pub mod track;
+pub mod search;
 
 pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 

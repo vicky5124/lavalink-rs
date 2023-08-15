@@ -21,3 +21,4 @@ pub use model::UserId;
 pub use node::NodeBuilder;
 pub use player_context::PlayerContext;
 pub use player_context::TrackInQueue;
+pub use model::search::*;

@@ -8,6 +8,7 @@ use lavalink_rs::{
     LavalinkClient,
     NodeBuilder,
     TrackLoadData,
+    SearchEngines,
     UserId, // TODO: Remove this
 }; // TODO: Remove this
 
@@ -39,7 +40,7 @@ async fn play(
     let manager = songbird::get(ctx.serenity_context()).await.unwrap().clone();
     let lava_client = ctx.data().lavalink.clone();
 
-    if manager.get(guild_id).is_none() {
+    if manager.get(guild_id).is_none() || lava_client.get_player_context(lavalink_guild_id).is_none() {
         let channel_id = guild
             .voice_states
             .get(&ctx.author().id)
@@ -84,7 +85,13 @@ async fn play(
         return Ok(());
     };
 
-    let loaded_tracks = lava_client.load_tracks(lavalink_guild_id, &term).await?;
+    let query = if term.starts_with("http") {
+        term
+    } else {
+        SearchEngines::YouTube.to_query(&term)?
+    };
+
+    let loaded_tracks = lava_client.load_tracks(lavalink_guild_id, &query).await?;
 
     let mut playlist_info = None;
 
@@ -214,6 +221,8 @@ async fn leave(ctx: Context<'_>) -> Result<(), Error> {
 async fn test(ctx: Context<'_>) -> Result<(), Error> {
     //use std::time::Duration;
 
+    ctx.say("AAAAAAAAAAA").await?;
+
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
     let lavalink_guild_id = GuildId(guild_id.0);
@@ -248,7 +257,7 @@ async fn test(ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    std::env::set_var("RUST_LOG", "info,lavalink-rs=trace");
+    std::env::set_var("RUST_LOG", "info,lavalink_rs=trace");
     tracing_subscriber::fmt::init();
 
     let framework = poise::Framework::builder()
@@ -301,6 +310,7 @@ async fn raw_event(_: LavalinkClient, session_id: String, event: &serde_json::Va
 }
 
 #[hook]
-async fn ready_event(_: LavalinkClient, session_id: String, event: &events::Ready) {
+async fn ready_event(client: LavalinkClient, session_id: String, event: &events::Ready) {
+    client.delete_all_players().await.unwrap();
     info!("{:?} -> {:?}", session_id, event);
 }

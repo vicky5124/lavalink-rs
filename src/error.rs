@@ -47,6 +47,7 @@ pub enum LavalinkError {
     ChannelSendError,
     ChannelReceiveError(RecvError),
     UrlParseError(ParseError),
+    SerdeError(serde_qs::Error),
 
     ResponseError(ResponseError),
     NoSessionPresent,
@@ -82,6 +83,9 @@ impl Display for LavalinkError {
             }
             LavalinkError::UrlParseError(why) => {
                 write!(f, "Url Parsing Error => {:?}", why)
+            }
+            LavalinkError::SerdeError(why) => {
+                write!(f, "Error serializing or desesrializing => {:?}", why)
             }
 
             LavalinkError::NoSessionPresent => {
@@ -152,4 +156,10 @@ impl From<RecvError> for LavalinkError {
     fn from(err: RecvError) -> LavalinkError {
         LavalinkError::ChannelReceiveError(err)
     }
+}
+
+impl From<serde_qs::Error> for LavalinkError {
+   fn from(err: serde_qs::Error) -> Self {
+       LavalinkError::SerdeError(err)
+   } 
 }

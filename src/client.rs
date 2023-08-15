@@ -183,12 +183,21 @@ impl LavalinkClient {
     pub async fn delete_player(&self, guild_id: GuildId) -> LavalinkResult<()> {
         let node = self.get_node_for_guild(guild_id);
 
+        if let Some((_, player)) = self.players.remove(&guild_id) {
+            player.close()?;
+        }
+
         node.http
             .delete_player(guild_id, &node.session_id.load())
             .await?;
 
-        if let Some((_, player)) = self.players.remove(&guild_id) {
-            player.close()?;
+
+        Ok(())
+    }
+
+    pub async fn delete_all_players(&self) -> LavalinkResult<()> {
+        for guild_id in self.players.iter().map(|i| i.guild_id).collect::<Vec<_>>() {
+            self.delete_player(guild_id).await?;
         }
 
         Ok(())

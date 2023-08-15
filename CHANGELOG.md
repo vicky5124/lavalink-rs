@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.0-alpha.3
+
+- Implemented search engine helpers with plugin support.
+- Implemented a fix for player context death on lavalink restart.
+
 ## 0.10.0-alpha.2
 
 - Implement readers for queues and players.
