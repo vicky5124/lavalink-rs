@@ -4,6 +4,10 @@
 
 - Implemented search engine helpers with plugin support.
 - Implemented a fix for player context death on lavalink restart.
+- Add support for songbird.
+- Add support for serenity.
+- Add support for twilight-model.
+- Switch reqwest from native-tls to rustls.
 
 ## 0.10.0-alpha.2
 

@@ -12,7 +12,9 @@ pub struct Http {
 }
 
 impl Http {
-    pub async fn delete_player(&self, guild_id: GuildId, session_id: &str) -> LavalinkResult<()> {
+    pub async fn delete_player(&self, guild_id: impl Into<GuildId>, session_id: &str) -> LavalinkResult<()> {
+        let guild_id = guild_id.into();
+
         self.rest_client
             .delete(format!(
                 "{}/sessions/{}/players/{}",
@@ -26,11 +28,13 @@ impl Http {
 
     pub async fn update_player(
         &self,
-        guild_id: GuildId,
+        guild_id: impl Into<GuildId>,
         session_id: &str,
         data: &http::UpdatePlayer,
         no_replace: bool,
     ) -> LavalinkResult<player::Player> {
+        let guild_id = guild_id.into();
+
         let url = Url::parse_with_params(
             &format!(
                 "{}/sessions/{}/players/{}",
@@ -163,9 +167,11 @@ impl Http {
 
     pub async fn get_player(
         &self,
-        guild_id: GuildId,
+        guild_id: impl Into<GuildId>,
         session_id: &str,
     ) -> LavalinkResult<player::Player> {
+        let guild_id = guild_id.into();
+
         let response = self
             .rest_client
             .get(format!(

@@ -1,16 +1,13 @@
 #[macro_use]
 extern crate tracing;
 
-use lavalink_rs::model::player::ConnectionInfo;
 use lavalink_rs::{
     model::events,
-    GuildId, // TODO: Remove this
     LavalinkClient,
     NodeBuilder,
-    TrackLoadData,
     SearchEngines,
-    UserId, // TODO: Remove this
-}; // TODO: Remove this
+    TrackLoadData,
+};
 
 use hook::hook;
 use itertools::Itertools;
@@ -35,12 +32,13 @@ async fn play(
 ) -> Result<(), Error> {
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
-    let lavalink_guild_id = GuildId(guild_id.0);
 
     let manager = songbird::get(ctx.serenity_context()).await.unwrap().clone();
     let lava_client = ctx.data().lavalink.clone();
 
-    if manager.get(guild_id).is_none() || lava_client.get_player_context(lavalink_guild_id).is_none() {
+    if manager.get(guild_id).is_none()
+        || lava_client.get_player_context(guild_id).is_none()
+    {
         let channel_id = guild
             .voice_states
             .get(&ctx.author().id)
@@ -60,14 +58,7 @@ async fn play(
         match handler {
             Ok(connection_info) => {
                 lava_client
-                    .create_player(
-                        lavalink_guild_id,
-                        &ConnectionInfo {
-                            endpoint: connection_info.endpoint,
-                            token: connection_info.token,
-                            session_id: connection_info.session_id,
-                        },
-                    )
+                    .create_player(guild_id, connection_info)
                     .await?;
 
                 ctx.say(format!("Joined {}", connect_to.mention())).await?;
@@ -80,7 +71,7 @@ async fn play(
         }
     }
 
-    let Some(player) = lava_client.get_player_context(lavalink_guild_id) else {
+    let Some(player) = lava_client.get_player_context(guild_id) else {
         ctx.say("Join the bot to a voice channel first.").await?;
         return Ok(());
     };
@@ -91,7 +82,7 @@ async fn play(
         SearchEngines::YouTube.to_query(&term)?
     };
 
-    let loaded_tracks = lava_client.load_tracks(lavalink_guild_id, &query).await?;
+    let loaded_tracks = lava_client.load_tracks(guild_id, &query).await?;
 
     let mut playlist_info = None;
 
@@ -140,11 +131,10 @@ async fn play(
 async fn queue(ctx: Context<'_>) -> Result<(), Error> {
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
-    let lavalink_guild_id = GuildId(guild_id.0);
 
     let lava_client = ctx.data().lavalink.clone();
 
-    let Some(player) = lava_client.get_player_context(lavalink_guild_id) else {
+    let Some(player) = lava_client.get_player_context(guild_id) else {
         ctx.say("Join the bot to a voice channel first.").await?;
         return Ok(());
     };
@@ -200,12 +190,11 @@ async fn queue(ctx: Context<'_>) -> Result<(), Error> {
 async fn leave(ctx: Context<'_>) -> Result<(), Error> {
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
-    let lavalink_guild_id = GuildId(guild_id.0);
 
     let manager = songbird::get(ctx.serenity_context()).await.unwrap().clone();
     let lava_client = ctx.data().lavalink.clone();
 
-    lava_client.delete_player(lavalink_guild_id).await?;
+    lava_client.delete_player(guild_id).await?;
 
     if manager.get(guild_id).is_some() {
         manager.remove(guild_id).await?;
@@ -225,30 +214,29 @@ async fn test(ctx: Context<'_>) -> Result<(), Error> {
 
     let guild = ctx.guild().unwrap();
     let guild_id = guild.id;
-    let lavalink_guild_id = GuildId(guild_id.0);
 
     let lava_client = ctx.data().lavalink.clone();
 
-    let player = lava_client.get_player_context(lavalink_guild_id).unwrap();
+    let player = lava_client.get_player_context(guild_id).unwrap();
     player.skip()?;
 
-    //dbg!(lava_client.info(lavalink_guild_id).await?);
-    //dbg!(lava_client.stats(lavalink_guild_id).await?);
-    //dbg!(lava_client.version(lavalink_guild_id).await?);
-    //dbg!(lava_client.decode_track(lavalink_guild_id, "QAAAxAMAEU5vc2VibGVlZCBTZWN0aW9uABtTaWdodGxlc3MgaW4gU2hhZG93IC0gVG9waWMAAAAAAAJxAAALTFdNUi1rY3dHLTgAAQAraHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1MV01SLWtjd0ctOAEAOmh0dHBzOi8vaS55dGltZy5jb20vdmlfd2VicC9MV01SLWtjd0ctOC9tYXhyZXNkZWZhdWx0LndlYnAAAAd5b3V0dWJlAAAAAAACb1w=").await?);
-    //dbg!(lava_client.decode_tracks(lavalink_guild_id, &["QAAAxAMAEU5vc2VibGVlZCBTZWN0aW9uABtTaWdodGxlc3MgaW4gU2hhZG93IC0gVG9waWMAAAAAAAJxAAALTFdNUi1rY3dHLTgAAQAraHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1MV01SLWtjd0ctOAEAOmh0dHBzOi8vaS55dGltZy5jb20vdmlfd2VicC9MV01SLWtjd0ctOC9tYXhyZXNkZWZhdWx0LndlYnAAAAd5b3V0dWJlAAAAAAACb1w=".to_string()]).await?);
-    //dbg!(lava_client.get_player(lavalink_guild_id).await?);
-    //dbg!(lava_client.get_players(lavalink_guild_id).await?);
+    //dbg!(lava_client.info(guild_id).await?);
+    //dbg!(lava_client.stats(guild_id).await?);
+    //dbg!(lava_client.version(guild_id).await?);
+    //dbg!(lava_client.decode_track(guild_id, "QAAAxAMAEU5vc2VibGVlZCBTZWN0aW9uABtTaWdodGxlc3MgaW4gU2hhZG93IC0gVG9waWMAAAAAAAJxAAALTFdNUi1rY3dHLTgAAQAraHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1MV01SLWtjd0ctOAEAOmh0dHBzOi8vaS55dGltZy5jb20vdmlfd2VicC9MV01SLWtjd0ctOC9tYXhyZXNkZWZhdWx0LndlYnAAAAd5b3V0dWJlAAAAAAACb1w=").await?);
+    //dbg!(lava_client.decode_tracks(guild_id, &["QAAAxAMAEU5vc2VibGVlZCBTZWN0aW9uABtTaWdodGxlc3MgaW4gU2hhZG93IC0gVG9waWMAAAAAAAJxAAALTFdNUi1rY3dHLTgAAQAraHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1MV01SLWtjd0ctOAEAOmh0dHBzOi8vaS55dGltZy5jb20vdmlfd2VicC9MV01SLWtjd0ctOC9tYXhyZXNkZWZhdWx0LndlYnAAAAd5b3V0dWJlAAAAAAACb1w=".to_string()]).await?);
+    //dbg!(lava_client.get_player(guild_id).await?);
+    //dbg!(lava_client.get_players(guild_id).await?);
 
-    //lava_client.set_position(lavalink_guild_id, Duration::from_secs(120)).await?;
+    //lava_client.set_position(guild_id, Duration::from_secs(120)).await?;
     //tokio::time::sleep(Duration::from_secs(2)).await;
-    //lava_client.set_pause(lavalink_guild_id, true).await?;
+    //lava_client.set_pause(guild_id, true).await?;
     //tokio::time::sleep(Duration::from_secs(2)).await;
-    //lava_client.set_pause(lavalink_guild_id, false).await?;
+    //lava_client.set_pause(guild_id, false).await?;
     //tokio::time::sleep(Duration::from_secs(2)).await;
-    //lava_client.set_volume(lavalink_guild_id, 50).await?;
+    //lava_client.set_volume(guild_id, 50).await?;
     //tokio::time::sleep(Duration::from_secs(2)).await;
-    //lava_client.set_volume(lavalink_guild_id, 100).await?;
+    //lava_client.set_volume(guild_id, 100).await?;
 
     ctx.say("all good!").await?;
 
@@ -287,7 +275,7 @@ async fn main() {
                     is_ssl: false,
                     events: events::Events::default(),
                     password: env!("LAVALINK_PASSWORD").to_string(),
-                    user_id: UserId(ctx.cache.current_user_id().0),
+                    user_id: ctx.cache.current_user_id().into(),
                     session_id: None,
                 };
 

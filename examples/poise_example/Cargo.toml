@@ -27,3 +27,4 @@ git = "https://github.com/arqunis/hook"
 
 [dependencies.lavalink-rs]
 path = "../../"
+features = ["songbird", "serenity"]

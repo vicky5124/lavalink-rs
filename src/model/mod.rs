@@ -64,3 +64,62 @@ where
         StringOrInt::Number(i) => Ok(i),
     }
 }
+
+#[cfg(feature = "serenity")]
+use serenity_dep::model::id::{
+    GuildId as SerenityGuildId,
+    UserId as SerenityUserId,
+};
+
+#[cfg(feature = "serenity")]
+impl From<SerenityUserId> for UserId {
+    fn from(id: SerenityUserId) -> UserId {
+        UserId(id.0)
+    }
+}
+
+#[cfg(feature = "serenity")]
+impl From<SerenityGuildId> for GuildId {
+    fn from(id: SerenityGuildId) -> GuildId {
+        GuildId(id.0)
+    }
+}
+
+#[cfg(feature = "twilight")]
+use twilight_model::id::{
+    Id, marker::{GuildMarker, UserMarker}
+};
+
+#[cfg(feature = "twilight")]
+impl From<Id<UserMarker>> for UserId {
+    fn from(id: Id<UserMarker>) -> UserId {
+        UserId(id.get())
+    }
+}
+
+#[cfg(feature = "twilight")]
+impl From<Id<GuildMarker>> for GuildId {
+    fn from(id: Id<GuildMarker>) -> GuildId {
+        GuildId(id.get())
+    }
+}
+
+#[cfg(feature = "songbird")]
+use songbird_dep::id::{
+    GuildId as SongbirdGuildId,
+    UserId as SongbirdUserId,
+};
+
+#[cfg(feature = "songbird")]
+impl From<SongbirdUserId> for UserId {
+    fn from(id: SongbirdUserId) -> UserId {
+        UserId(id.0)
+    }
+}
+
+#[cfg(feature = "songbird")]
+impl From<SongbirdGuildId> for GuildId {
+    fn from(id: SongbirdGuildId) -> GuildId {
+        GuildId(id.0)
+    }
+}

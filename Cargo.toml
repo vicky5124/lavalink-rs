@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.10.0-alpha.2"
+version = "0.10.0-alpha.3"
 edition = "2021"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 license = "MPL-2.0"
@@ -15,7 +15,18 @@ documentation = "https://docs.rs/lavalink-rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["examples/poise_example"]
+exclude = ["examples/poise_example"]
+
+[features]
+serenity = ["serenity-dep", "serenity-dep/rustls_backend"]
+twilight = ["twilight-model"]
+songbird = ["songbird-dep"]
+
+#rustls = ["serenity_dep/rustls_backend", "reqwest/rustls-tls", "async-tungstenite/tokio-rustls-webpki-roots"]
+#native-tls = ["serenity_dep/native_tls_backend", "reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
+
+[package.metadata.docs.rs]
+features = ["twilight", "serenity", "songbird"]
 
 [dependencies]
 arc-swap = "1"
@@ -42,4 +53,22 @@ features = ["derive"]
 
 [dependencies.reqwest]
 version = "0.11"
-features = ["json"]
+default-features = false
+features = ["json", "rustls-tls"]
+
+[dependencies.songbird-dep]
+package = "songbird"
+version = "0.3"
+default-features = false
+optional = true
+
+[dependencies.serenity-dep]
+package = "serenity"
+version = "0.11"
+default-features = false
+features = ["model"]
+optional = true
+
+[dependencies.twilight-model]
+version = "0.15"
+optional = true

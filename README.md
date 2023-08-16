@@ -12,9 +12,9 @@ A `lavalink` API wrapping library for every `tokio` discord crate.
 - [ ] Documentation
 - [ ] Expand event logging
 - [ ] Examples
-- [ ] Songbird utilities
-- [ ] Serenity utilities
-- [ ] Twilight utilities
+- [x] Songbird utilities
+- [x] Serenity utilities
+- [x] Twilight utilities
 - [ ] Lavasnek (PyO3)
 - [ ] Tests
 - [ ] Implement abstractions for ease of use
@@ -66,4 +66,6 @@ branch = "next"
 
 ### Features
 
-None for now.
+- `songbird`: for (songbird)[https://lib.rs/crates/songbird] support.
+- `serenity`: for (serenity)[https://lib.rs/crates/serenity] support.
+- `twilight`: for (twilight-model)[https://lib.rs/crates/twilight-model] support.

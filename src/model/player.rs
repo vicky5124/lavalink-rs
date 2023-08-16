@@ -31,6 +31,20 @@ pub struct ConnectionInfo {
     pub session_id: String,
 }
 
+#[cfg(feature = "songbird")]
+use songbird_dep::ConnectionInfo as SongbirdConnectionInfo;
+
+#[cfg(feature = "songbird")]
+impl From<SongbirdConnectionInfo> for ConnectionInfo {
+    fn from(connection_info: SongbirdConnectionInfo) -> ConnectionInfo {
+        ConnectionInfo {
+            endpoint: connection_info.endpoint,
+            token: connection_info.token,
+            session_id: connection_info.session_id,
+        }
+    }
+}
+
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Filters {
