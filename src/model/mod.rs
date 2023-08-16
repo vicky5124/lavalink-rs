@@ -8,8 +8,8 @@ use serde::{de, Deserialize, Deserializer};
 pub mod events;
 pub mod http;
 pub mod player;
-pub mod track;
 pub mod search;
+pub mod track;
 
 pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
@@ -66,10 +66,7 @@ where
 }
 
 #[cfg(feature = "serenity")]
-use serenity_dep::model::id::{
-    GuildId as SerenityGuildId,
-    UserId as SerenityUserId,
-};
+use serenity_dep::model::id::{GuildId as SerenityGuildId, UserId as SerenityUserId};
 
 #[cfg(feature = "serenity")]
 impl From<SerenityUserId> for UserId {
@@ -87,7 +84,8 @@ impl From<SerenityGuildId> for GuildId {
 
 #[cfg(feature = "twilight")]
 use twilight_model::id::{
-    Id, marker::{GuildMarker, UserMarker}
+    marker::{GuildMarker, UserMarker},
+    Id,
 };
 
 #[cfg(feature = "twilight")]
@@ -105,10 +103,7 @@ impl From<Id<GuildMarker>> for GuildId {
 }
 
 #[cfg(feature = "songbird")]
-use songbird_dep::id::{
-    GuildId as SongbirdGuildId,
-    UserId as SongbirdUserId,
-};
+use songbird_dep::id::{GuildId as SongbirdGuildId, UserId as SongbirdUserId};
 
 #[cfg(feature = "songbird")]
 impl From<SongbirdUserId> for UserId {

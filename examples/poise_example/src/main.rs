@@ -1,13 +1,7 @@
 #[macro_use]
 extern crate tracing;
 
-use lavalink_rs::{
-    model::events,
-    LavalinkClient,
-    NodeBuilder,
-    SearchEngines,
-    TrackLoadData,
-};
+use lavalink_rs::{model::events, LavalinkClient, NodeBuilder, SearchEngines, TrackLoadData};
 
 use hook::hook;
 use itertools::Itertools;
@@ -36,9 +30,7 @@ async fn play(
     let manager = songbird::get(ctx.serenity_context()).await.unwrap().clone();
     let lava_client = ctx.data().lavalink.clone();
 
-    if manager.get(guild_id).is_none()
-        || lava_client.get_player_context(guild_id).is_none()
-    {
+    if manager.get(guild_id).is_none() || lava_client.get_player_context(guild_id).is_none() {
         let channel_id = guild
             .voice_states
             .get(&ctx.author().id)
@@ -57,9 +49,7 @@ async fn play(
 
         match handler {
             Ok(connection_info) => {
-                lava_client
-                    .create_player(guild_id, connection_info)
-                    .await?;
+                lava_client.create_player(guild_id, connection_info).await?;
 
                 ctx.say(format!("Joined {}", connect_to.mention())).await?;
             }

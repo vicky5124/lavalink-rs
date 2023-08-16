@@ -12,7 +12,11 @@ pub struct Http {
 }
 
 impl Http {
-    pub async fn delete_player(&self, guild_id: impl Into<GuildId>, session_id: &str) -> LavalinkResult<()> {
+    pub async fn delete_player(
+        &self,
+        guild_id: impl Into<GuildId>,
+        session_id: &str,
+    ) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
 
         self.rest_client

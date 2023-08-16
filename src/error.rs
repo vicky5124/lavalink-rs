@@ -159,7 +159,7 @@ impl From<RecvError> for LavalinkError {
 }
 
 impl From<serde_qs::Error> for LavalinkError {
-   fn from(err: serde_qs::Error) -> Self {
-       LavalinkError::SerdeError(err)
-   } 
+    fn from(err: serde_qs::Error) -> Self {
+        LavalinkError::SerdeError(err)
+    }
 }

@@ -1,3 +1,5 @@
+#![allow(clippy::large_enum_variant)]
+
 use crate::LavalinkResult;
 
 pub enum SearchEngines {
@@ -35,9 +37,8 @@ impl SearchEngines {
     pub fn to_query(&self, base_query: &str) -> LavalinkResult<String> {
         use SearchEngines::*;
         match self {
-            YouTube | YouTubeMusic | SoundCloud | Spotify | AppleMusic | Deezer | DeezerISRC | YandexMusic => {
-                Ok(format!("{}:{}", self.to_string(), base_query))
-            }
+            YouTube | YouTubeMusic | SoundCloud | Spotify | AppleMusic | Deezer | DeezerISRC
+            | YandexMusic => Ok(format!("{}:{}", self.to_string(), base_query)),
             SpotifyRecommended(x) => {
                 let query = serde_qs::to_string(&x)?;
                 Ok(format!("{}{}?{}", self.to_string(), base_query, query))
