@@ -1,18 +1,20 @@
-use std::collections::VecDeque;
-
 use crate::client::LavalinkClient;
 use crate::error::LavalinkResult;
 use crate::model::*;
 
+use std::collections::VecDeque;
+
 use tokio::sync::mpsc::UnboundedSender;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(not(feature = "user-data"), derive(Debug))]
 /// The player context.
 pub struct PlayerContext {
     pub guild_id: GuildId,
     pub client: LavalinkClient,
     pub(crate) tx: UnboundedSender<super::PlayerMessage>,
-    //pub user_data: Arc<RwLock<TypeMap>>
+    #[cfg(feature = "user-data")]
+    pub user_data: std::sync::Arc<parking_lot::RwLock<typemap_rev::TypeMap>>,
 }
 
 impl PlayerContext {

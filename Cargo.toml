@@ -18,7 +18,9 @@ documentation = "https://docs.rs/lavalink-rs"
 exclude = ["examples/poise_example"]
 
 [features]
-default = ["rustls"]
+default = ["rustls", "user-data"]
+
+user-data = ["typemap_rev", "parking_lot"]
 
 songbird = ["songbird-dep"]
 twilight = ["twilight-model"]
@@ -31,7 +33,7 @@ rustls = ["reqwest/rustls-tls", "async-tungstenite/tokio-rustls-webpki-roots"]
 native-tls = ["reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
 
 [package.metadata.docs.rs]
-features = ["rustls", "twilight", "serenity-rustls", "songbird"]
+features = ["rustls", "user-data", "twilight", "serenity-rustls", "songbird"]
 
 [dependencies]
 arc-swap = "1"
@@ -75,6 +77,14 @@ optional = true
 
 [dependencies.twilight-model]
 version = "0.15"
+optional = true
+
+[dependencies.typemap_rev]
+version = "0.3"
+optional = true
+
+[dependencies.parking_lot]
+version = "0.12"
 optional = true
 
 [build-dependencies]

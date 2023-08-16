@@ -11,13 +11,15 @@ use arc_swap::ArcSwap;
 use dashmap::DashMap;
 use reqwest::{header::HeaderMap, Client as ReqwestClient};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(not(feature = "user-data"), derive(Debug))]
 /// The main client, where everything gets done, from events to requests to management.
 pub struct LavalinkClient {
     pub nodes: Arc<Vec<node::Node>>,
     pub players: Arc<DashMap<GuildId, PlayerContext>>,
     pub events: events::Events,
-    //user_data: Arc<RwLock<TypeMap>>
+    #[cfg(feature = "user-data")]
+    pub user_data: Arc<parking_lot::RwLock<typemap_rev::TypeMap>>,
 }
 
 impl LavalinkClient {
@@ -103,6 +105,8 @@ impl LavalinkClient {
             nodes: Arc::new(built_nodes),
             players: Arc::new(DashMap::new()),
             events,
+            #[cfg(feature = "user-data")]
+            user_data: Arc::new(parking_lot::RwLock::new(typemap_rev::TypeMap::new()))
         }
     }
 
@@ -212,6 +216,8 @@ impl LavalinkClient {
             guild_id,
             client: self.clone(),
             tx,
+            #[cfg(feature = "user-data")]
+            user_data: Arc::new(parking_lot::RwLock::new(typemap_rev::TypeMap::new()))
         };
 
         let player_context = PlayerContextInner {

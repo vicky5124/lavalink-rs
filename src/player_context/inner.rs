@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 
 use tokio::sync::mpsc::UnboundedReceiver;
 
-#[derive(Debug)]
+#[cfg_attr(not(feature = "user-data"), derive(Debug))]
 pub(crate) struct PlayerContextInner {
     pub guild_id: GuildId,
     pub queue: VecDeque<super::TrackInQueue>,
