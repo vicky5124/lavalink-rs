@@ -37,12 +37,12 @@ A `lavalink` API wrapping library for every `tokio` discord crate.
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = "0.10.0-alpha"
+lavalink-rs = "0.10.0-beta"
 
 # or
 
 [dependencies.lavalink-rs]
-version = "0.10.0-alpha"
+version = "0.10.0-beta"
 ```
 
 Or the development release:
@@ -67,6 +67,7 @@ branch = "next"
 
 ### Features
 
+- `user-data`: default feature. Allows the client and player context to store custom user data.
 - `rustls`: default feature. Use rustls.
 - `native-tls`: default feature. Use the system native tls.
 - `serenity-rustls`: for (serenity)[https://lib.rs/crates/serenity] with rustls support.

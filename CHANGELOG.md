@@ -3,6 +3,8 @@
 ## 0.10.0-beta.0
 
 - Implement native-tls support.
+- Improve user data.
+- Document code.
 
 ## 0.10.0-alpha.3
 
