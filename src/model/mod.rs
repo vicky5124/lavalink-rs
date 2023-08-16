@@ -1,21 +1,26 @@
 use std::fmt::Display;
 use std::num::ParseIntError;
-use std::pin::Pin;
-use std::{future::Future, str::FromStr};
+use std::str::FromStr;
 
+pub use futures::future::BoxFuture;
 use serde::{de, Deserialize, Deserializer};
 
+/// Models related to the lavalink events.
 pub mod events;
+/// Models related to the lavalink REST API.
 pub mod http;
+/// Models related to the lavalink Player.
 pub mod player;
-pub mod search;
+/// Models related to the tracks.
 pub mod track;
+/// Models related to search engines.
+pub mod search;
 
-pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
-
-#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize)]
+/// A discord User ID.
 pub struct UserId(pub u64);
-#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize)]
+/// A discord Guild ID.
 pub struct GuildId(pub u64);
 
 impl FromStr for UserId {

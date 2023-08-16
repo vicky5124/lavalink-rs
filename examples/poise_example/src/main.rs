@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate tracing;
 
-use lavalink_rs::{model::events, LavalinkClient, NodeBuilder, SearchEngines, TrackLoadData};
+use lavalink_rs::{model::events, prelude::*};
 
 use hook::hook;
 use itertools::Itertools;
@@ -76,7 +76,7 @@ async fn play(
 
     let mut playlist_info = None;
 
-    let tracks: Vec<lavalink_rs::TrackInQueue> = match loaded_tracks.data {
+    let tracks: Vec<TrackInQueue> = match loaded_tracks.data {
         Some(TrackLoadData::Track(x)) => vec![x.into()],
         Some(TrackLoadData::Search(x)) => vec![x[0].clone().into()],
         Some(TrackLoadData::Playlist(x)) => {

@@ -1,17 +1,25 @@
 #![allow(clippy::large_enum_variant)]
 
-use crate::LavalinkResult;
+use crate::error::LavalinkResult;
 
+/// Search engines supported by Lavalink and LavaSrc.
 pub enum SearchEngines {
     YouTube,
     YouTubeMusic,
     SoundCloud,
+    /// NOTE: Requires LavaSrc plugin.
     Spotify,
+    /// NOTE: Requires LavaSrc plugin.
     SpotifyRecommended(SpotifyRecommendedParameters),
+    /// NOTE: Requires LavaSrc plugin.
     AppleMusic,
+    /// NOTE: Requires LavaSrc plugin.
     Deezer,
+    /// NOTE: Requires LavaSrc plugin.
     DeezerISRC,
+    /// NOTE: Requires LavaSrc plugin.
     YandexMusic,
+    /// NOTE: Requires LavaSrc plugin.
     FloweryTTS(FloweryTTSParameters),
 }
 
@@ -34,6 +42,13 @@ impl ToString for SearchEngines {
 }
 
 impl SearchEngines {
+    /// Create a String you can pip to `load_tracks()` to get the search results.
+    ///
+    /// Example:
+    /// ```rust,untested
+    /// let query = SearchEngines::YouTubeMusic.to_query("Ne Obliviscaris - Forget Not").unwrap();
+    /// lavalink_client.load_tracks(guild_id, query).await?;
+    /// ```
     pub fn to_query(&self, base_query: &str) -> LavalinkResult<String> {
         use SearchEngines::*;
         match self {

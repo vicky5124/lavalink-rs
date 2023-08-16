@@ -9,7 +9,8 @@ A `lavalink` API wrapping library for every `tokio` discord crate.
 - [x] Readbale player queues
 - [ ] Streamable queue reader
 - [x] Search engine helpers
-- [ ] Documentation
+- [x] Write basic cocumentation
+- [ ] Improve documentation with examples, better formatting, and fill in missing data
 - [ ] Expand event logging
 - [ ] Examples
 - [x] Songbird utilities

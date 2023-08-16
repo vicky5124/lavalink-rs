@@ -10,7 +10,10 @@ use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
 use tokio::sync::mpsc::error::SendError;
 use url::ParseError;
 
+pub type LavalinkResult<T> = std::result::Result<T, LavalinkError>;
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Response sent by REST requests when there's an error.
 pub struct ResponseError {
     pub status: u16,
     pub timestamp: u64,
@@ -20,11 +23,9 @@ pub struct ResponseError {
     pub trace: Option<String>,
 }
 
-pub type LavalinkResult<T> = std::result::Result<T, LavalinkError>;
-
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum RequestResult<T> {
+pub(crate) enum RequestResult<T> {
     Ok(T),
     Err(ResponseError),
 }
@@ -39,6 +40,7 @@ impl<T> RequestResult<T> {
 }
 
 #[derive(Debug)]
+/// Every error the library can return.
 pub enum LavalinkError {
     WebsocketError(TungsteniteError),
     InvalidHeaderValue(InvalidHeaderValue),

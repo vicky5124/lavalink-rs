@@ -12,6 +12,7 @@ pub struct Http {
 }
 
 impl Http {
+    /// Destroys the player for this guild in this session.
     pub async fn delete_player(
         &self,
         guild_id: impl Into<GuildId>,
@@ -30,6 +31,7 @@ impl Http {
         Ok(())
     }
 
+    /// Updates or creates the player for this guild.
     pub async fn update_player(
         &self,
         guild_id: impl Into<GuildId>,
@@ -60,6 +62,7 @@ impl Http {
         Ok(response)
     }
 
+    /// Updates the session with the resuming state and timeout.
     pub async fn set_resuming_state(
         &self,
         session_id: &str,
@@ -78,10 +81,18 @@ impl Http {
         Ok(response)
     }
 
-    pub async fn load_tracks(&self, term: &str) -> LavalinkResult<track::Track> {
+    /// Resolves audio tracks for use with the `update_player` endpoint.
+    ///
+    /// # Parameters
+    ///
+    /// - `identifier`: A track identifier.
+    ///  - Can be a url: "https://youtu.be/watch?v=DrM2lo6B04I"
+    ///  - A unique identifier: "DrM2lo6B04I"
+    ///  - A search: "ytsearch:Ne Obliviscaris - Forget Not"
+    pub async fn load_tracks(&self, identifier: &str) -> LavalinkResult<track::Track> {
         let url = Url::parse_with_params(
             &format!("{}/loadtracks", self.rest_address),
-            &[("identifier", &term)],
+            &[("identifier", &identifier)],
         )?;
 
         let result = self
@@ -99,6 +110,7 @@ impl Http {
         }
     }
 
+    /// Request Lavalink server version.
     pub async fn version(&self) -> LavalinkResult<String> {
         let response = self
             .rest_client
@@ -111,6 +123,9 @@ impl Http {
         Ok(response)
     }
 
+    /// Request Lavalink statistics.
+    ///
+    /// NOTE: The frame stats will never be returned.
     pub async fn stats(&self) -> LavalinkResult<events::Stats> {
         let response = self
             .rest_client
@@ -124,6 +139,7 @@ impl Http {
         Ok(response)
     }
 
+    /// Request Lavalink server information.
     pub async fn info(&self) -> LavalinkResult<http::Info> {
         let response = self
             .rest_client
@@ -137,6 +153,11 @@ impl Http {
         Ok(response)
     }
 
+    /// Decode a single track into its info.
+    ///
+    /// # Parameters
+    ///
+    /// - `track`: base64 encoded track data.
     pub async fn decode_track(&self, track: &str) -> LavalinkResult<track::TrackData> {
         let url = Url::parse_with_params(
             &format!("{}/decodetrack", self.rest_address),
@@ -155,6 +176,11 @@ impl Http {
         Ok(response)
     }
 
+    /// Decode multiple tracks into their info.
+    ///
+    /// # Parameters
+    ///
+    /// - `tracks`: base64 encoded tracks.
     pub async fn decode_tracks(&self, tracks: &[String]) -> LavalinkResult<Vec<track::TrackData>> {
         let response = self
             .rest_client
@@ -169,6 +195,7 @@ impl Http {
         Ok(response)
     }
 
+    /// Returns the player for this guild in this session.
     pub async fn get_player(
         &self,
         guild_id: impl Into<GuildId>,
@@ -191,6 +218,7 @@ impl Http {
         Ok(response)
     }
 
+    /// Returns a list of players in this specific session.
     pub async fn get_players(&self, session_id: &str) -> LavalinkResult<Vec<player::Player>> {
         let response = self
             .rest_client

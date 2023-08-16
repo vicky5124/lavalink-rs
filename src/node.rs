@@ -12,17 +12,41 @@ use futures::stream::StreamExt;
 use http::Request;
 use reqwest::header::HeaderMap;
 
-#[derive(Hash, Debug, Clone)]
+#[derive(Hash, Debug, Clone, Default)]
+/// A builder for the node.
+///
+/// # Example
+///
+/// ```
+/// # use crate::model::UserId;
+/// let node_builder = NodeBuilder { 
+///     hostname: "localhost:2333".to_string(),
+///     password: "youshallnotpass".to_string(),
+///     user_id: UserId(551759974905151548),
+///     ..Default::default()
+/// };
+/// ```
 pub struct NodeBuilder {
+    /// The hostname of the Lavalink server.
+    ///
+    /// Example: "localhost:2333"
     pub hostname: String,
+    /// If the Lavalink server is behind SSL encryption.
     pub is_ssl: bool,
+    /// The event handler specific for this node.
+    ///
+    /// In most cases, the default is good.
     pub events: events::Events,
+    /// The Lavalink server password.
     pub password: String,
+    /// The bot User ID that will use Lavalink.
     pub user_id: UserId,
+    /// The previous Session ID if resuming.
     pub session_id: Option<String>,
 }
 
 #[derive(Debug)]
+/// A Lavalink server node.
 pub struct Node {
     pub id: usize,
     pub session_id: ArcSwap<String>,
@@ -39,7 +63,7 @@ struct EventDispatcher<'a>(&'a Node, &'a LavalinkClient);
 
 // Thanks Alba :D
 impl<'a> EventDispatcher<'a> {
-    pub async fn dispatch<T, F>(self, event: T, handler: F)
+    pub(crate) async fn dispatch<T, F>(self, event: T, handler: F)
     where
         F: Fn(&events::Events) -> Option<fn(LavalinkClient, String, &T) -> BoxFuture<()>>,
     {
@@ -52,7 +76,7 @@ impl<'a> EventDispatcher<'a> {
         }
     }
 
-    pub async fn parse_and_dispatch<T, F>(self, event: &'a str, handler: F)
+    pub(crate) async fn parse_and_dispatch<T, F>(self, event: &'a str, handler: F)
     where
         F: Fn(&events::Events) -> Option<fn(LavalinkClient, String, &T) -> BoxFuture<()>>,
         T: serde::Deserialize<'a>,
@@ -64,6 +88,7 @@ impl<'a> EventDispatcher<'a> {
 }
 
 impl Node {
+    /// Create a connection to the Lavalink server.
     pub async fn connect(&self, lavalink_client: LavalinkClient) -> Result<(), LavalinkError> {
         let mut url = Request::builder()
             .method("GET")

@@ -31,7 +31,7 @@ rustls = ["reqwest/rustls-tls", "async-tungstenite/tokio-rustls-webpki-roots"]
 native-tls = ["reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
 
 [package.metadata.docs.rs]
-features = ["twilight", "serenity", "songbird"]
+features = ["rustls", "twilight", "serenity-rustls", "songbird"]
 
 [dependencies]
 arc-swap = "1"

@@ -9,11 +9,17 @@ pub use context::PlayerContext;
 pub(crate) use inner::PlayerContextInner;
 
 #[derive(PartialEq, Debug, Clone, Default)]
+/// A track that's inside the queue.
 pub struct TrackInQueue {
+    /// The track itself.
     pub track: track::TrackData,
-    pub start_time: Option<u128>,
-    pub end_time: Option<u128>,
+    /// The time the track should start at.
+    pub start_time: Option<std::time::Duration>,
+    /// The time the track should end at.
+    pub end_time: Option<std::time::Duration>,
+    /// The volume the track should start at.
     pub volume: Option<u16>,
+    /// The filters the track should start at.
     pub filters: Option<player::Filters>,
 }
 
@@ -35,8 +41,8 @@ impl TrackInQueue {
     fn into_update_player(self) -> http::UpdatePlayer {
         http::UpdatePlayer {
             encoded_track: self.track.encoded.into(),
-            position: self.start_time,
-            end_time: self.end_time,
+            position: self.start_time.map(|x| x.as_millis()),
+            end_time: self.end_time.map(|x| x.as_millis()),
             volume: self.volume,
             filters: self.filters,
             ..Default::default()

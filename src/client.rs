@@ -12,6 +12,7 @@ use dashmap::DashMap;
 use reqwest::{header::HeaderMap, Client as ReqwestClient};
 
 #[derive(Debug, Clone)]
+/// The main client, where everything gets done, from events to requests to management.
 pub struct LavalinkClient {
     pub nodes: Arc<Vec<node::Node>>,
     pub players: Arc<DashMap<GuildId, PlayerContext>>,
@@ -20,10 +21,16 @@ pub struct LavalinkClient {
 }
 
 impl LavalinkClient {
-    pub fn new(events: events::Events, hostnames: Vec<node::NodeBuilder>) -> LavalinkClient {
-        let mut nodes = Vec::new();
+    /// Create a new Lavalink Client.
+    ///
+    /// # Parameters
+    ///
+    /// - `events`: The lavalink event handler.
+    /// - `nodes`: List of nodes to connect to.
+    pub fn new(events: events::Events, nodes: Vec<node::NodeBuilder>) -> LavalinkClient {
+        let mut built_nodes = Vec::new();
 
-        for (idx, i) in hostnames.into_iter().enumerate() {
+        for (idx, i) in nodes.into_iter().enumerate() {
             let mut headers = HeaderMap::new();
             headers.insert("Authorization", i.password.parse().unwrap());
             headers.insert("User-Id", i.user_id.0.to_string().parse().unwrap());
@@ -89,16 +96,17 @@ impl LavalinkClient {
                 }
             };
 
-            nodes.push(node);
+            built_nodes.push(node);
         }
 
         LavalinkClient {
-            nodes: Arc::new(nodes),
+            nodes: Arc::new(built_nodes),
             players: Arc::new(DashMap::new()),
             events,
         }
     }
 
+    /// Establish the connection(s) and start listening for events.
     pub async fn start(&self) {
         for node in &*self.nodes {
             if let Err(why) = node.connect(self.clone()).await {
@@ -123,6 +131,7 @@ impl LavalinkClient {
         });
     }
 
+    /// Get the node assigned to a guild.
     pub fn get_node_for_guild(&self, guild_id: impl Into<GuildId>) -> &node::Node {
         let guild_id = guild_id.into();
 
@@ -131,13 +140,46 @@ impl LavalinkClient {
             .unwrap()
     }
 
+    /// Get the player context for a guild, if it exists.
     pub fn get_player_context(&self, guild_id: impl Into<GuildId>) -> Option<PlayerContext> {
         let guild_id = guild_id.into();
 
         self.players.get(&guild_id).map(|x| x.clone())
     }
 
+    /// Creates a new player without a context.
+    ///
+    /// Calling this method is required to play tracks on a guild.
     pub async fn create_player(
+        &self,
+        guild_id: impl Into<GuildId>,
+        connection_info: impl Into<player::ConnectionInfo>,
+    ) -> LavalinkResult<player::Player> {
+        let guild_id = guild_id.into();
+        let connection_info = connection_info.into();
+
+        let node = self.get_node_for_guild(guild_id);
+
+        let player = node
+            .http
+            .update_player(
+                guild_id,
+                &node.session_id.load(),
+                &http::UpdatePlayer {
+                    voice: Some(connection_info.clone()),
+                    ..Default::default()
+                },
+                true,
+            )
+            .await?;
+
+        Ok(player)
+    }
+
+    /// Creates a new player with context.
+    ///
+    /// Calling this method is required to create the initial player, and be able to use the built-in queue.
+    pub async fn create_player_context(
         &self,
         guild_id: impl Into<GuildId>,
         connection_info: impl Into<player::ConnectionInfo>,
@@ -187,6 +229,7 @@ impl LavalinkClient {
         Ok(player_dummy)
     }
 
+    /// Deletes and closes a specific player context, if it exists.
     pub async fn delete_player(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
         let node = self.get_node_for_guild(guild_id);
@@ -202,7 +245,11 @@ impl LavalinkClient {
         Ok(())
     }
 
-    pub async fn delete_all_players(&self) -> LavalinkResult<()> {
+    /// Deletes all stored player contexts.
+    ///
+    /// This is useful to put on the ready event, to close already open players in case the
+    /// Lavalink server restarts.
+    pub async fn delete_all_player_contexts(&self) -> LavalinkResult<()> {
         for guild_id in self.players.iter().map(|i| i.guild_id).collect::<Vec<_>>() {
             self.delete_player(guild_id).await?;
         }
@@ -210,19 +257,59 @@ impl LavalinkClient {
         Ok(())
     }
 
-    pub async fn load_tracks(
+    /// Request a raw player update.
+    pub async fn update_player(
         &self,
         guild_id: impl Into<GuildId>,
-        term: &str,
-    ) -> LavalinkResult<track::Track> {
+        update_player: &http::UpdatePlayer,
+        no_replace: bool,
+    ) -> LavalinkResult<player::Player> {
         let guild_id = guild_id.into();
         let node = self.get_node_for_guild(guild_id);
 
-        let result = node.http.load_tracks(term).await?;
+        let result = node
+            .http
+            .update_player(
+                guild_id,
+                &node.session_id.load(),
+                update_player,
+                no_replace,
+            )
+            .await?;
+
+        if let Some(player) = self.get_player_context(guild_id) {
+            player.update_player_data(result.clone())?;
+        }
 
         Ok(result)
     }
 
+    /// Resolves audio tracks for use with the `update_player` endpoint.
+    ///
+    /// # Parameters
+    ///
+    /// - `identifier`: A track identifier.
+    ///  - Can be a url: "https://youtu.be/watch?v=DrM2lo6B04I"
+    ///  - A unique identifier: "DrM2lo6B04I"
+    ///  - A search: "
+    pub async fn load_tracks(
+        &self,
+        guild_id: impl Into<GuildId>,
+        identifier: &str,
+    ) -> LavalinkResult<track::Track> {
+        let guild_id = guild_id.into();
+        let node = self.get_node_for_guild(guild_id);
+
+        let result = node.http.load_tracks(identifier).await?;
+
+        Ok(result)
+    }
+
+    /// Decode a single track into its info.
+    ///
+    /// # Parameters
+    ///
+    /// - `track`: base64 encoded track data.
     pub async fn decode_track(
         &self,
         guild_id: impl Into<GuildId>,
@@ -236,6 +323,11 @@ impl LavalinkClient {
         Ok(result)
     }
 
+    /// Decode multiple tracks into their info.
+    ///
+    /// # Parameters
+    ///
+    /// - `tracks`: base64 encoded tracks.
     pub async fn decode_tracks(
         &self,
         guild_id: impl Into<GuildId>,
@@ -249,6 +341,7 @@ impl LavalinkClient {
         Ok(result)
     }
 
+    /// Request Lavalink server version.
     pub async fn request_version(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<String> {
         let guild_id = guild_id.into();
         let node = self.get_node_for_guild(guild_id);
@@ -258,6 +351,9 @@ impl LavalinkClient {
         Ok(result)
     }
 
+    /// Request Lavalink statistics.
+    ///
+    /// NOTE: The frame stats will never be returned.
     pub async fn request_stats(
         &self,
         guild_id: impl Into<GuildId>,
@@ -270,6 +366,7 @@ impl LavalinkClient {
         Ok(result)
     }
 
+    /// Request Lavalink server information.
     pub async fn request_info(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<http::Info> {
         let guild_id = guild_id.into();
         let node = self.get_node_for_guild(guild_id);
@@ -279,6 +376,7 @@ impl LavalinkClient {
         Ok(result)
     }
 
+    /// Returns the player for the guild.
     pub async fn request_player(
         &self,
         guild_id: impl Into<GuildId>,
@@ -294,6 +392,7 @@ impl LavalinkClient {
         Ok(result)
     }
 
+    /// Returns all players from the Node bound to the guild.
     pub async fn request_all_players(
         &self,
         guild_id: impl Into<GuildId>,
