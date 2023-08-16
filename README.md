@@ -4,7 +4,7 @@ A `lavalink` API wrapping library for every `tokio` discord crate.
 
 ## To-Do
 
-- [ ] `native_tls` backend
+- [x] `native_tls` backend
 - [x] Player queues
 - [x] Readbale player queues
 - [ ] Streamable queue reader
@@ -66,6 +66,9 @@ branch = "next"
 
 ### Features
 
+- `rustls`: default feature. Use rustls.
+- `native-tls`: default feature. Use the system native tls.
+- `serenity-rustls`: for (serenity)[https://lib.rs/crates/serenity] with rustls support.
+- `serenity-native`: for (serenity)[https://lib.rs/crates/serenity] with native-tls support.
 - `songbird`: for (songbird)[https://lib.rs/crates/songbird] support.
-- `serenity`: for (serenity)[https://lib.rs/crates/serenity] support.
 - `twilight`: for (twilight-model)[https://lib.rs/crates/twilight-model] support.

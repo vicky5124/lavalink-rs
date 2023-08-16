@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-beta.0
+
+- Implement native-tls support.
+
 ## 0.10.0-alpha.3
 
 - Implemented search engine helpers with plugin support.

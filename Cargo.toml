@@ -18,12 +18,17 @@ documentation = "https://docs.rs/lavalink-rs"
 exclude = ["examples/poise_example"]
 
 [features]
-serenity = ["serenity-dep", "serenity-dep/rustls_backend"]
-twilight = ["twilight-model"]
-songbird = ["songbird-dep"]
+default = ["rustls"]
 
-#rustls = ["serenity_dep/rustls_backend", "reqwest/rustls-tls", "async-tungstenite/tokio-rustls-webpki-roots"]
-#native-tls = ["serenity_dep/native_tls_backend", "reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
+songbird = ["songbird-dep"]
+twilight = ["twilight-model"]
+
+serenity = ["serenity-dep"]
+serenity-rustls = ["serenity", "serenity-dep/rustls_backend"]
+serenity-native = ["serenity", "serenity-dep/native_tls_backend"]
+
+rustls = ["reqwest/rustls-tls", "async-tungstenite/tokio-rustls-webpki-roots"]
+native-tls = ["reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
 
 [package.metadata.docs.rs]
 features = ["twilight", "serenity", "songbird"]
@@ -41,7 +46,6 @@ serde_qs = "0.12"
 
 [dependencies.async-tungstenite]
 version = "0.23"
-features = ["tokio-rustls-webpki-roots"]
 
 [dependencies.tokio]
 version = "1"
@@ -54,7 +58,7 @@ features = ["derive"]
 [dependencies.reqwest]
 version = "0.11"
 default-features = false
-features = ["json", "rustls-tls"]
+features = ["json"]
 
 [dependencies.songbird-dep]
 package = "songbird"
@@ -72,3 +76,6 @@ optional = true
 [dependencies.twilight-model]
 version = "0.15"
 optional = true
+
+[build-dependencies]
+version_check = "0.9"
