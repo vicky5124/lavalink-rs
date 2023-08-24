@@ -41,8 +41,8 @@ impl TrackInQueue {
     fn into_update_player(self) -> http::UpdatePlayer {
         http::UpdatePlayer {
             encoded_track: self.track.encoded.into(),
-            position: self.start_time.map(|x| x.as_millis()),
-            end_time: self.end_time.map(|x| x.as_millis()),
+            position: self.start_time.map(|x| x.as_millis() as u64),
+            end_time: self.end_time.map(|x| x.as_millis() as u64),
             volume: self.volume,
             filters: self.filters,
             ..Default::default()

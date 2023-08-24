@@ -58,11 +58,11 @@ pub struct TrackInfo {
     /// The track author.
     pub author: String,
     /// The track length in milliseconds.
-    pub length: u128,
+    pub length: u64,
     /// Whether the track is a stream.
     pub is_stream: bool,
     /// The track position in milliseconds.
-    pub position: u128,
+    pub position: u64,
     /// The track title,
     pub title: String,
     /// The track uri.

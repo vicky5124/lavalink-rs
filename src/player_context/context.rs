@@ -197,7 +197,7 @@ impl PlayerContext {
     ) -> LavalinkResult<player::Player> {
         self.update_player(
             &http::UpdatePlayer {
-                position: Some(position.as_millis()),
+                position: Some(position.as_millis() as u64),
                 ..Default::default()
             },
             true,

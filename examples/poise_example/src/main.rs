@@ -49,7 +49,7 @@ async fn play(
 
         match handler {
             Ok(connection_info) => {
-                lava_client.create_player(guild_id, connection_info).await?;
+                lava_client.create_player_context(guild_id, connection_info).await?;
 
                 ctx.say(format!("Joined {}", connect_to.mention())).await?;
             }
@@ -289,6 +289,6 @@ async fn raw_event(_: LavalinkClient, session_id: String, event: &serde_json::Va
 
 #[hook]
 async fn ready_event(client: LavalinkClient, session_id: String, event: &events::Ready) {
-    client.delete_all_players().await.unwrap();
+    client.delete_all_player_contexts().await.unwrap();
     info!("{:?} -> {:?}", session_id, event);
 }

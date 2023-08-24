@@ -94,11 +94,11 @@ pub struct SpotifyRecommendedParameters {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_danceability: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub min_duration_ms: Option<u128>,
+    pub min_duration_ms: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_duration_ms: Option<u128>,
+    pub max_duration_ms: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub target_duration_ms: Option<u128>,
+    pub target_duration_ms: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub min_energy: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]

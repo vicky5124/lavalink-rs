@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-beta.1
+
+- Replace all u128 with u64 due to [serde issue](https://github.com/serde-rs/json/issues/625).
+
 ## 0.10.0-beta.0
 
 - Implement native-tls support.
