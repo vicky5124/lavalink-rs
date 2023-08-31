@@ -19,7 +19,7 @@ use reqwest::header::HeaderMap;
 ///
 /// ```
 /// # use crate::model::UserId;
-/// let node_builder = NodeBuilder { 
+/// let node_builder = NodeBuilder {
 ///     hostname: "localhost:2333".to_string(),
 ///     password: "youshallnotpass".to_string(),
 ///     user_id: UserId(551759974905151548),

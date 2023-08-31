@@ -6,4 +6,5 @@ pub use crate::model::GuildId;
 pub use crate::model::UserId;
 pub use crate::node::NodeBuilder;
 pub use crate::player_context::PlayerContext;
+pub use crate::player_context::QueueMessage;
 pub use crate::player_context::TrackInQueue;

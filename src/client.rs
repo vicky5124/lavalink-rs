@@ -106,7 +106,7 @@ impl LavalinkClient {
             players: Arc::new(DashMap::new()),
             events,
             #[cfg(feature = "user-data")]
-            user_data: Arc::new(parking_lot::RwLock::new(typemap_rev::TypeMap::new()))
+            user_data: Arc::new(parking_lot::RwLock::new(typemap_rev::TypeMap::new())),
         }
     }
 
@@ -217,7 +217,7 @@ impl LavalinkClient {
             client: self.clone(),
             tx,
             #[cfg(feature = "user-data")]
-            user_data: Arc::new(parking_lot::RwLock::new(typemap_rev::TypeMap::new()))
+            user_data: Arc::new(parking_lot::RwLock::new(typemap_rev::TypeMap::new())),
         };
 
         let player_context = PlayerContextInner {
@@ -275,12 +275,7 @@ impl LavalinkClient {
 
         let result = node
             .http
-            .update_player(
-                guild_id,
-                &node.session_id.load(),
-                update_player,
-                no_replace,
-            )
+            .update_player(guild_id, &node.session_id.load(), update_player, no_replace)
             .await?;
 
         if let Some(player) = self.get_player_context(guild_id) {

@@ -49,7 +49,9 @@ async fn play(
 
         match handler {
             Ok(connection_info) => {
-                lava_client.create_player_context(guild_id, connection_info).await?;
+                lava_client
+                    .create_player_context(guild_id, connection_info)
+                    .await?;
 
                 ctx.say(format!("Joined {}", connect_to.mention())).await?;
             }
@@ -111,7 +113,7 @@ async fn play(
         }
     }
 
-    player.append_queue(tracks)?;
+    player.set_queue(QueueMessage::Append(tracks.into()))?;
 
     Ok(())
 }

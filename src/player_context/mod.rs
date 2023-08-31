@@ -24,17 +24,34 @@ pub struct TrackInQueue {
 }
 
 pub(crate) enum PlayerMessage {
+    GetPlayer(oneshot::Sender<player::Player>),
     UpdatePlayer(player::Player),
     UpdatePlayerTrack(Option<track::TrackData>),
     UpdatePlayerState(player::State),
-    GetPlayer(oneshot::Sender<player::Player>),
-    InsertToQueue(TrackInQueue),
-    ReplaceQueue(VecDeque<TrackInQueue>),
-    AppendQueue(VecDeque<TrackInQueue>),
+
     GetQueue(oneshot::Sender<VecDeque<TrackInQueue>>),
+    SetQueue(QueueMessage),
+
     TrackFinished(bool),
     StartTrack,
     Close,
+}
+
+pub enum QueueMessage {
+    /// Add a track to the end of the queue.
+    PushToBack(TrackInQueue),
+    /// Add a track to the start of the queue.
+    PushToFront(TrackInQueue),
+    /// Insert a track to a specific position in the queue.
+    Insert(usize, TrackInQueue),
+    /// Remove a track from the queue.
+    Remove(usize),
+    /// Clear the queue.
+    Clear,
+    /// Replace the entire queue with another one.
+    Replace(VecDeque<TrackInQueue>),
+    /// Append a queue to the end of the current one.
+    Append(VecDeque<TrackInQueue>),
 }
 
 impl TrackInQueue {

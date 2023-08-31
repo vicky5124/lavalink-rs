@@ -30,7 +30,7 @@ pub struct UpdatePlayer {
     pub volume: Option<u16>,
     #[serde(skip_serializing_if = "Option::is_none")]
     /// The track position in milliseconds.
-    /// 
+    ///
     /// This value can be set to start a track at a specific time.
     pub position: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]

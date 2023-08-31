@@ -193,7 +193,7 @@ pub struct WebSocketClosed {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub guild_id: GuildId,
     /// Status code returned by discord.
-    /// 
+    ///
     /// See the [discord docs](https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes)
     /// for a list of them.
     pub code: u16,

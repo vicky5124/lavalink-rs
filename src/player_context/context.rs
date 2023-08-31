@@ -59,33 +59,9 @@ impl PlayerContext {
         Ok(())
     }
 
-    /// Add a track to the queue.
+    /// Add a track to the end of the queue.
     pub fn queue(&self, track: impl Into<super::TrackInQueue>) -> LavalinkResult<()> {
-        self.tx
-            .send(super::PlayerMessage::InsertToQueue(track.into()))?;
-        Ok(())
-    }
-
-    /// Replace the entire queue with another one.
-    pub fn replace_queue(
-        &self,
-        tracks: impl IntoIterator<Item = super::TrackInQueue>,
-    ) -> LavalinkResult<()> {
-        self.tx.send(super::PlayerMessage::ReplaceQueue(
-            tracks.into_iter().collect(),
-        ))?;
-        Ok(())
-    }
-
-    /// Append another queue to the end of the current one.
-    pub fn append_queue(
-        &self,
-        tracks: impl IntoIterator<Item = super::TrackInQueue>,
-    ) -> LavalinkResult<()> {
-        self.tx.send(super::PlayerMessage::AppendQueue(
-            tracks.into_iter().collect(),
-        ))?;
-        Ok(())
+        self.set_queue(super::QueueMessage::PushToBack(track.into()))
     }
 
     /// Get the current queue.
@@ -95,6 +71,13 @@ impl PlayerContext {
         self.tx.send(super::PlayerMessage::GetQueue(tx))?;
 
         Ok(rx.await?)
+    }
+
+    /// Modify the queue in specific ways.
+    pub fn set_queue(&self, queue_message: super::QueueMessage) -> LavalinkResult<()> {
+        self.tx
+            .send(super::PlayerMessage::SetQueue(queue_message))?;
+        Ok(())
     }
 
     /// Get the current player information.

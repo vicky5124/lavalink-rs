@@ -11,15 +11,19 @@ pub mod events;
 pub mod http;
 /// Models related to the lavalink Player.
 pub mod player;
-/// Models related to the tracks.
-pub mod track;
 /// Models related to search engines.
 pub mod search;
+/// Models related to the tracks.
+pub mod track;
 
-#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize)]
+#[derive(
+    Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize,
+)]
 /// A discord User ID.
 pub struct UserId(pub u64);
-#[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize)]
+#[derive(
+    Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize,
+)]
 /// A discord Guild ID.
 pub struct GuildId(pub u64);
 
