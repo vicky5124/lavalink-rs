@@ -4,6 +4,7 @@ use crate::model::*;
 
 use std::collections::VecDeque;
 
+use ::http::Method;
 use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Clone)]
@@ -131,8 +132,18 @@ impl PlayerContext {
     ///
     /// This does not continue playback of the queue.
     pub async fn stop_now(&self) -> LavalinkResult<player::Player> {
-        self.update_player(&http::UpdatePlayer::default(), false)
-            .await
+        let node = self.client.get_node_for_guild(self.guild_id);
+
+        let path = format!("/v4/sessions/{}/players/{}", &node.session_id.load(), self.guild_id.0);
+
+        let result = node.http.raw_request(Method::PATCH, path, &serde_json::json!({"encodedTrack": null})).await?;
+
+        let player = serde_json::from_value::<crate::error::RequestResult<player::Player>>(result)?.to_result()?;
+
+        self.tx
+            .send(super::PlayerMessage::UpdatePlayer(player.clone()))?;
+
+        Ok(player)
     }
 
     /// Set the pause state of the player.

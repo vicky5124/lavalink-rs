@@ -1,6 +1,7 @@
 use crate::error::LavalinkResult;
 use crate::model::*;
 
+use ::http::Method;
 use reqwest::Client as ReqwestClient;
 use url::Url;
 
@@ -12,6 +13,36 @@ pub struct Http {
 }
 
 impl Http {
+    /// Makes a raw request to the Lavalink REST API
+    ///
+    /// # Example:
+    ///
+    /// ```rust
+    /// use ::http::Method;
+    ///
+    /// let node = lavalink_client.get_node_for_guild(guild_id);
+    /// let path = format!("/v4/sessions/{}/players/{}", &node.session_id.load(), guild_id.0);
+    /// let result = node.http.raw_request(Method::PATCH, path, &serde_json::json!({"encodedTrack": null})).await?;
+    /// let player = serde_json::from_value::<lavalink_rs::error::RequestResult<lavalink_rs::player::Player>>(result)?.to_result()?;
+    /// ```
+    pub async fn raw_request(&self, method: Method, path: String, data: &serde_json::Value) -> LavalinkResult<serde_json::Value> {
+        let url = format!(
+                "{}{}",
+                self.rest_address_versionless, path
+            );
+
+        let response = self
+            .rest_client
+            .request(method, url)
+            .json(data)
+            .send()
+            .await?
+            .json::<serde_json::Value>()
+            .await?;
+
+        Ok(response)
+    }
+
     /// Destroys the player for this guild in this session.
     pub async fn delete_player(
         &self,
