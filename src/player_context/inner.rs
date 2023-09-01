@@ -95,11 +95,7 @@ impl PlayerContextInner {
                                 );
                             }
                         } else {
-                            if let Err(why) = self
-                                .dummy
-                                .stop_now()
-                                .await
-                            {
+                            if let Err(why) = self.dummy.stop_now().await {
                                 error!(
                                     "Error sending stop request in player {}: {}",
                                     self.guild_id.0, why

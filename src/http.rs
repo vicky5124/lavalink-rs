@@ -25,11 +25,13 @@ impl Http {
     /// let result = node.http.raw_request(Method::PATCH, path, &serde_json::json!({"encodedTrack": null})).await?;
     /// let player = serde_json::from_value::<lavalink_rs::error::RequestResult<lavalink_rs::player::Player>>(result)?.to_result()?;
     /// ```
-    pub async fn raw_request(&self, method: Method, path: String, data: &serde_json::Value) -> LavalinkResult<serde_json::Value> {
-        let url = format!(
-                "{}{}",
-                self.rest_address_versionless, path
-            );
+    pub async fn raw_request(
+        &self,
+        method: Method,
+        path: String,
+        data: &serde_json::Value,
+    ) -> LavalinkResult<serde_json::Value> {
+        let url = format!("{}{}", self.rest_address_versionless, path);
 
         let response = self
             .rest_client
