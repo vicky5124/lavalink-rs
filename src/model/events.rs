@@ -29,6 +29,7 @@ pub struct Events {
 
 #[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Dispatched by Lavalink upon successful connection and authorization.
 pub struct Ready {
     pub op: String,
@@ -40,6 +41,7 @@ pub struct Ready {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Dispatched periodically with the current state of a player.
 pub struct PlayerUpdate {
     pub op: String,
@@ -51,6 +53,7 @@ pub struct PlayerUpdate {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// A collection of statistics sent every minute.
 pub struct Stats {
     #[serde(default)]
@@ -73,6 +76,7 @@ pub struct Stats {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct Cpu {
     pub cores: u64,
     pub system_load: f64,
@@ -80,6 +84,7 @@ pub struct Cpu {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct Memory {
     pub free: u64,
     pub used: u64,
@@ -88,6 +93,7 @@ pub struct Memory {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct FrameStats {
     /// The amount of frames sent to Discord.
     pub sent: u64,
@@ -102,6 +108,7 @@ pub struct FrameStats {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Dispatched when a track starts playing.
 pub struct TrackStart {
     pub op: String,
@@ -115,6 +122,7 @@ pub struct TrackStart {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Dispatched when a track ends.
 /// track_exception and track_stuck will also trigger this event.
 pub struct TrackEnd {
@@ -131,6 +139,7 @@ pub struct TrackEnd {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// The reason the track finished.
 pub enum TrackEndReason {
     Finished,
@@ -155,6 +164,7 @@ impl From<TrackEndReason> for bool {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Dispatched when a track throws an exception.
 pub struct TrackException {
     pub op: String,
@@ -170,6 +180,7 @@ pub struct TrackException {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Dispatched when a track gets stuck while playing.
 pub struct TrackStuck {
     pub op: String,
@@ -185,6 +196,7 @@ pub struct TrackStuck {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Dispatched when an audio WebSocket to Discord is closed.
 pub struct WebSocketClosed {
     pub op: String,

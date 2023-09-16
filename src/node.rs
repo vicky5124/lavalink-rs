@@ -13,6 +13,7 @@ use http::Request;
 use reqwest::header::HeaderMap;
 
 #[derive(Hash, Debug, Clone, Default)]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// A builder for the node.
 ///
 /// # Example
@@ -46,6 +47,7 @@ pub struct NodeBuilder {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// A Lavalink server node.
 pub struct Node {
     pub id: usize,
@@ -153,7 +155,7 @@ impl Node {
                                 .session_id
                                 .swap(Arc::new(ready_event.session_id.to_string()));
 
-                            ed.dispatch(ready_event, |e| e.ready).await
+                            ed.dispatch(ready_event, |e| e.ready).await;
                         }
                         "playerUpdate" => {
                             let player_update_event: events::PlayerUpdate =
@@ -170,7 +172,7 @@ impl Node {
                                 }
                             }
 
-                            ed.parse_and_dispatch(&x, |e| e.player_update).await
+                            ed.parse_and_dispatch(&x, |e| e.player_update).await;
                         }
                         "stats" => ed.parse_and_dispatch(&x, |e| e.stats).await,
                         "event" => match base_event.get("type").unwrap().as_str().unwrap() {
@@ -190,7 +192,7 @@ impl Node {
                                     }
                                 }
 
-                                ed.parse_and_dispatch(&x, |e| e.track_start).await
+                                ed.parse_and_dispatch(&x, |e| e.track_start).await;
                             }
                             "TrackEndEvent" => {
                                 let track_event: events::TrackEnd =
@@ -215,14 +217,14 @@ impl Node {
                                     }
                                 }
 
-                                ed.parse_and_dispatch(&x, |e| e.track_end).await
+                                ed.parse_and_dispatch(&x, |e| e.track_end).await;
                             }
                             "TrackExceptionEvent" => {
-                                ed.parse_and_dispatch(&x, |e| e.track_exception).await
+                                ed.parse_and_dispatch(&x, |e| e.track_exception).await;
                             }
                             "TrackStuckEvent" => ed.parse_and_dispatch(&x, |e| e.track_stuck).await,
                             "WebSocketClosedEvent" => {
-                                ed.parse_and_dispatch(&x, |e| e.websocket_closed).await
+                                ed.parse_and_dispatch(&x, |e| e.websocket_closed).await;
                             }
                             _ => (),
                         },
@@ -230,7 +232,7 @@ impl Node {
                         _ => (),
                     }
 
-                    ed.dispatch(base_event, |e| e.raw).await
+                    ed.dispatch(base_event, |e| e.raw).await;
                 });
             }
 

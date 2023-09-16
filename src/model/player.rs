@@ -2,6 +2,7 @@ use crate::model::*;
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Information about the player of a guild.
 pub struct Player {
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -22,6 +23,7 @@ pub struct Player {
 
 #[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct State {
     /// Unix timestamp in milliseconds.
     pub time: u64,
@@ -38,6 +40,7 @@ pub struct State {
 
 #[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Discord voice websocket connection information.
 pub struct ConnectionInfo {
     /// The Discord voice endpoint to connect to.
@@ -56,6 +59,12 @@ pub struct ConnectionInfo {
     pub session_id: String,
 }
 
+impl ConnectionInfo {
+    pub fn fix(&mut self) {
+        self.endpoint = self.endpoint.replace("wss://", "");
+    }
+}
+
 #[cfg(feature = "songbird")]
 use songbird_dep::ConnectionInfo as SongbirdConnectionInfo;
 
@@ -72,6 +81,7 @@ impl From<SongbirdConnectionInfo> for ConnectionInfo {
 
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Filters {
     /// Adjusts the player volume from 0.0 to 5.0, where 1.0 is 100%.
     ///
@@ -101,6 +111,7 @@ pub struct Filters {
 
 #[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Mixes both channels (left and right), with a configurable factor on how much each channel affects the other.
 ///
 /// With the defaults, both channels are kept independent of each other.
@@ -115,6 +126,7 @@ pub struct ChannelMix {
 
 #[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Distortion effect.
 ///
 /// It can generate some pretty unique audio effects.
@@ -131,6 +143,7 @@ pub struct Distortion {
 
 #[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// A fixed band equalizer.
 pub struct Equalizer {
     /// The band (0 to 14)
@@ -144,6 +157,7 @@ pub struct Equalizer {
 
 #[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Uses equalization to eliminate part of a band, usually targeting vocals.
 pub struct Karaoke {
     /// The level (0 to 1.0 where 0.0 is no effect and 1.0 is full effect)
@@ -158,6 +172,7 @@ pub struct Karaoke {
 
 #[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Higher frequencies get suppressed, while lower frequencies pass through this filter.
 pub struct LowPass {
     /// The smoothing factor (1.0 < x)
@@ -168,6 +183,7 @@ pub struct LowPass {
 
 #[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Rotates the sound around the stereo channels/user headphones (aka Audio Panning).
 ///
 /// It can produce an effect similar to [this](https://youtu.be/QB9EB8mTKcc) without the reverb.
@@ -180,6 +196,7 @@ pub struct Rotation {
 
 #[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Changes the speed, pitch, and rate.
 ///
 /// All default to 1.0.
@@ -194,6 +211,7 @@ pub struct Timescale {
 
 #[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Tremolo uses amplification to create a shuddering effect, where the volume quickly oscillates.
 ///
 /// [Demo](https://en.wikipedia.org/wiki/File:Fuse_Electronics_Tremolo_MK-III_Quick_Demo.ogv)

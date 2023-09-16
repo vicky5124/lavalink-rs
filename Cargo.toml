@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.10.0-beta.2"
+version = "0.10.0-beta.3"
 edition = "2021"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 license = "MPL-2.0"
@@ -13,6 +13,10 @@ categories = ["multimedia"]
 documentation = "https://docs.rs/lavalink-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "lavalink_rs"
+crate-type = ["cdylib", "rlib"]
 
 [workspace]
 exclude = ["examples/poise_example"]
@@ -31,6 +35,8 @@ serenity-native = ["serenity", "serenity-dep/native_tls_backend"]
 
 rustls = ["reqwest/rustls-tls", "async-tungstenite/tokio-rustls-webpki-roots"]
 native-tls = ["reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
+
+python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute"]
 
 [package.metadata.docs.rs]
 features = ["rustls", "user-data", "twilight", "serenity-rustls", "songbird"]
@@ -85,6 +91,32 @@ optional = true
 
 [dependencies.parking_lot]
 version = "0.12"
+optional = true
+
+[dependencies.pyo3]
+version = "0.19"
+features = ["extension-module"]
+optional = true
+
+[dependencies.pyo3-asyncio]
+version = "0.19"
+features = ["attributes", "tokio-runtime"]
+optional = true
+
+[dependencies.pyo3-log]
+version = "0.8"
+optional = true
+
+[dependencies.log]
+version = "0.4"
+optional = true
+
+[dependencies.paste]
+version = "1"
+optional = true
+
+[dependencies.macro_rules_attribute]
+version = "0.2"
 optional = true
 
 [build-dependencies]

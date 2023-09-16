@@ -9,6 +9,7 @@ pub use context::PlayerContext;
 pub(crate) use inner::PlayerContextInner;
 
 #[derive(PartialEq, Debug, Clone, Default)]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// A track that's inside the queue.
 pub struct TrackInQueue {
     /// The track itself.
@@ -37,6 +38,7 @@ pub(crate) enum PlayerMessage {
     Close,
 }
 
+#[derive(PartialEq, Debug, Clone)]
 pub enum QueueMessage {
     /// Add a track to the end of the queue.
     PushToBack(TrackInQueue),

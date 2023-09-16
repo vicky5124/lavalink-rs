@@ -10,6 +10,11 @@ use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
 use tokio::sync::mpsc::error::SendError;
 use url::ParseError;
 
+#[cfg(feature = "python")]
+use pyo3::exceptions::PyException;
+#[cfg(feature = "python")]
+use pyo3::PyErr;
+
 pub type LavalinkResult<T> = std::result::Result<T, LavalinkError>;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -173,5 +178,13 @@ impl From<serde_qs::Error> for LavalinkError {
 impl From<serde_json::Error> for LavalinkError {
     fn from(err: serde_json::Error) -> Self {
         LavalinkError::SerdeErrorJson(err)
+    }
+}
+
+#[cfg(feature = "python")]
+impl From<LavalinkError> for PyErr {
+    fn from(err: LavalinkError) -> PyErr {
+        error!("{}", err);
+        PyErr::new::<PyException, _>(format!("{:?}", err))
     }
 }

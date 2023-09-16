@@ -6,6 +6,7 @@ use reqwest::Client as ReqwestClient;
 use url::Url;
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Http {
     pub rest_address: String,
     pub rest_address_versionless: String,

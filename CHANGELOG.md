@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-beta.3
+
+- Initial Python implementation.
+
 ## 0.10.0-beta.2
 
 - Implement additional queue altering actions.

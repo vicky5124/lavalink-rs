@@ -12,3 +12,9 @@ Cargo.lock
 
 dev_*
 .vim
+
+.venv
+*.so
+
+.mypy_cache
+__pycache__

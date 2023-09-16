@@ -9,6 +9,7 @@ use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Clone)]
 #[cfg_attr(not(feature = "user-data"), derive(Debug))]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// The player context.
 pub struct PlayerContext {
     pub guild_id: GuildId,

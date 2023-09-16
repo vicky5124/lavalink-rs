@@ -13,6 +13,7 @@ use reqwest::{header::HeaderMap, Client as ReqwestClient};
 
 #[derive(Clone)]
 #[cfg_attr(not(feature = "user-data"), derive(Debug))]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// The main client, where everything gets done, from events to requests to management.
 pub struct LavalinkClient {
     pub nodes: Arc<Vec<node::Node>>,
@@ -160,7 +161,8 @@ impl LavalinkClient {
         connection_info: impl Into<player::ConnectionInfo>,
     ) -> LavalinkResult<player::Player> {
         let guild_id = guild_id.into();
-        let connection_info = connection_info.into();
+        let mut connection_info = connection_info.into();
+        connection_info.fix();
 
         let node = self.get_node_for_guild(guild_id);
 
@@ -189,7 +191,8 @@ impl LavalinkClient {
         connection_info: impl Into<player::ConnectionInfo>,
     ) -> LavalinkResult<PlayerContext> {
         let guild_id = guild_id.into();
-        let connection_info = connection_info.into();
+        let mut connection_info = connection_info.into();
+        connection_info.fix();
 
         let node = self.get_node_for_guild(guild_id);
 

@@ -19,11 +19,13 @@ pub mod track;
 #[derive(
     Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize,
 )]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// A discord User ID.
 pub struct UserId(pub u64);
 #[derive(
     Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize,
 )]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// A discord Guild ID.
 pub struct GuildId(pub u64);
 
@@ -40,6 +42,18 @@ impl FromStr for GuildId {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         u64::from_str(s).map(Self)
+    }
+}
+
+impl From<u64> for UserId {
+    fn from(i: u64) -> Self {
+        Self(i)
+    }
+}
+
+impl From<u64> for GuildId {
+    fn from(i: u64) -> Self {
+        Self(i)
     }
 }
 

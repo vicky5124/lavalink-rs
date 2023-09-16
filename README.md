@@ -1,6 +1,6 @@
 # lavalink-rs
 
-An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord crates.
+An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord crates or `asyncio` based discord python libraries.
 
 ## To-Do
 
@@ -9,7 +9,7 @@ An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord cra
 - [ ] Expand event logging
 - [ ] Examples
 - [ ] Gitlab CI Tests
-- [ ] Lavasnek (PyO3)
+- [ ] Lavasnek events
 - [ ] Implement abstractions for ease of use
 - [ ] Round-Robin node selection method
 - [ ] Region based node selection method
@@ -26,6 +26,7 @@ An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord cra
 - [x] Serenity utilities
 - [x] Twilight utilities
 - [x] Load balancer node selection method
+- [x] Lavasnek (PyO3)
 
 ## Links to download stuff you will need
 
@@ -64,6 +65,15 @@ git = "https://github.com/serenity-rs/songbird"
 branch = "next"
 ```
 
+To build for python, you can use maturin.
+
+```
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install maturin
+maturin develop --target x86_64-unknown-linux-gnu
+```
+
 ### Features
 
 - `user-data` - **default feature** - Allows the client and player context to store custom user data.
@@ -73,3 +83,4 @@ branch = "next"
 - `serenity-native` for [serenity](https://lib.rs/crates/serenity) with native-tls support.
 - `songbird` for [songbird](https://lib.rs/crates/songbird) support.
 - `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) support.
+- `python` for python3.8+ support.

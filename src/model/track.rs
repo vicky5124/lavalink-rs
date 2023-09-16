@@ -2,6 +2,7 @@ use crate::model::deserialize_option_number;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// The type of data returned when loading a track.
 pub enum TrackLoadType {
     Track,
@@ -37,6 +38,7 @@ pub struct Track {
 
 #[derive(PartialEq, Eq, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// Information about a track.
 pub struct TrackData {
     /// The base64 encoded track data.
@@ -49,6 +51,7 @@ pub struct TrackData {
 
 #[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Information and metadata about the track.
 pub struct TrackInfo {
     /// The track identifier.
@@ -77,6 +80,7 @@ pub struct TrackInfo {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct PlaylistData {
     /// The information of the playlist.
     pub info: PlaylistInfo,
@@ -88,6 +92,7 @@ pub struct PlaylistData {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct PlaylistInfo {
     /// The name of the playlist.
     pub name: String,
@@ -99,6 +104,7 @@ pub struct PlaylistInfo {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct TrackError {
     /// The message of the exception.
     pub message: String,

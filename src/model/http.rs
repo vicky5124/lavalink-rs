@@ -2,6 +2,7 @@ use crate::model::*;
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Updates or creates the player for this guild.
 ///
 /// If every field is None, the player will stop playing.
@@ -49,6 +50,7 @@ pub struct UpdatePlayer {
 }
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Updates the session with the resuming state and timeout.
 ///
 /// You must call this method if you wish to restart the discord bot without having all players
@@ -66,6 +68,7 @@ pub struct ResumingState {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Information about the Lavalink node.
 pub struct Info {
     /// The semver version of the Lavalink server.
@@ -88,6 +91,7 @@ pub struct Info {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct Git {
     /// The branch the Lavalink server was built on.
     pub branch: String,
@@ -98,6 +102,7 @@ pub struct Git {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct Plugin {
     /// The name of the plugin
     pub name: String,
@@ -107,6 +112,7 @@ pub struct Plugin {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Check out [Semantic Versioning 2.0.0](https://semver.org/) to know what these fields mean.
 pub struct Version {
     pub semver: String,

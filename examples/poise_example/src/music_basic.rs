@@ -126,8 +126,8 @@ pub async fn play(
 
     player.set_queue(QueueMessage::Append(tracks.into()))?;
 
-    if let Ok(player_context) = player.get_player().await {
-        if player_context.track.is_none() && player.get_queue().await.is_ok_and(|x| !x.is_empty()) {
+    if let Ok(player_data) = player.get_player().await {
+        if player_data.track.is_none() && player.get_queue().await.is_ok_and(|x| !x.is_empty()) {
             player.skip()?;
         }
     }

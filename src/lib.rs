@@ -1,8 +1,17 @@
 #![allow(clippy::type_complexity)]
 #![allow(rustdoc::bare_urls)]
 
+#[cfg(not(feature = "python"))]
 #[macro_use]
 extern crate tracing;
+
+#[cfg(feature = "python")]
+#[macro_use]
+extern crate log;
+
+#[cfg(feature = "python")]
+#[macro_use]
+extern crate macro_rules_attribute;
 
 #[macro_use]
 extern crate serde;
@@ -25,3 +34,39 @@ pub mod prelude;
 #[cfg(feature = "user-data")]
 /// Re-export of typemap_rev for user data.
 pub use typemap_rev;
+
+#[cfg(feature = "python")]
+use pyo3::{prelude::*, types::PyDict, wrap_pymodule};
+
+#[cfg(feature = "python")]
+mod python;
+
+#[cfg(feature = "python")]
+#[pymodule]
+fn lavalink_rs(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    let handle = pyo3_log::Logger::new(py, pyo3_log::Caching::LoggersAndLevels)?
+        .filter(log::LevelFilter::Trace)
+        .install()
+        .expect("Someone installed a logger before lavalink_rs.");
+
+    // Some time in the future when logging changes, reset the caches:
+    handle.reset();
+
+    m.add_function(wrap_pyfunction!(python::test, m)?)?;
+
+    m.add_class::<client::LavalinkClient>()?;
+    m.add_class::<player_context::PlayerContext>()?;
+    m.add_class::<node::NodeBuilder>()?;
+    m.add_class::<node::Node>()?;
+
+    m.add_class::<model::UserId>()?;
+    m.add_class::<model::GuildId>()?;
+
+    m.add_wrapped(wrap_pymodule!(python::model::model))?;
+
+    let sys = PyModule::import(py, "sys")?;
+    let sys_modules: &PyDict = sys.getattr("modules")?.downcast()?;
+    sys_modules.set_item("lavalink_rs.model", m.getattr("model")?)?;
+
+    Ok(())
+}
