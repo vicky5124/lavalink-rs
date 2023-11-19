@@ -64,7 +64,7 @@ pub struct TrackInfo {
     pub length: u64,
     /// Whether the track is a stream.
     pub is_stream: bool,
-    /// The track position in milliseconds.
+    /// The track starting position in milliseconds.
     pub position: u64,
     /// The track title,
     pub title: String,

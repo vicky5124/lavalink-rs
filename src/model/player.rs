@@ -27,7 +27,7 @@ pub struct Player {
 pub struct State {
     /// Unix timestamp in milliseconds.
     pub time: u64,
-    /// The position of the track in milliseconds.
+    /// The current position of the track in milliseconds.
     pub position: u64,
     /// Whether Lavalink is connected to the discord voice gateway.
     pub connected: bool,
