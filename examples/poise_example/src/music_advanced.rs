@@ -48,13 +48,17 @@ pub async fn queue(ctx: Context<'_>) -> Result<(), Error> {
         .join("\n");
 
     let now_playing_message = if let Some(track) = player_data.track {
+        let time_s = player_data.state.position / 1000 % 60;
+        let time_m = player_data.state.position / 1000 / 60;
+        let time = format!("{:02}:{:02}", time_m, time_s);
+
         if let Some(uri) = &track.info.uri {
             format!(
-                "Now playing: [{} - {}](<{}>)",
-                track.info.author, track.info.title, uri
+                "Now playing: [{} - {}](<{}>) | {}",
+                track.info.author, track.info.title, uri, time
             )
         } else {
-            format!("Now playing: {} - {}", track.info.author, track.info.title)
+            format!("Now playing: {} - {} | {}", track.info.author, track.info.title, time)
         }
     } else {
         "Now playing: nothing".to_string()
