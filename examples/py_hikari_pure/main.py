@@ -7,6 +7,7 @@ from lavalink_voice import LavalinkVoice
 import hikari
 import lavalink_rs
 from lavalink_rs.model.track import TrackData, PlaylistData
+from lavalink_rs.model import events
 
 
 class Data:
@@ -24,6 +25,14 @@ class Bot(hikari.GatewayBot):
         self.data = Data()
 
 
+class Events:
+    async def ready(self, client: lavalink_rs.LavalinkClient, session_id: str, event: events.Ready):
+        logging.info("HOLY READY")
+
+    async def track_start(self, client: lavalink_rs.LavalinkClient, session_id: str, event: events.TrackStart):
+        logging.info(f"Started track {event.track.info.author} - {event.track.info.title} in {event.guild_id.inner}")
+
+
 bot = Bot(token=os.environ["DISCORD_TOKEN"], intents=hikari.intents.Intents.ALL)
 
 logging.getLogger().setLevel(logging.DEBUG)
@@ -33,11 +42,11 @@ logging.getLogger().setLevel(logging.DEBUG)
 async def on_starting(_event: hikari.StartingEvent) -> None:
     node = lavalink_rs.NodeBuilder(
         "localhost:2333",
-        False,
+        False, # is the server SSL?
         os.environ["LAVALINK_PASSWORD"],
-        601749512456896522,
+        601749512456896522, # Bot ID
     )
-    lavalink_client = lavalink_rs.LavalinkClient([node])
+    lavalink_client = lavalink_rs.LavalinkClient([node], Events())
     await lavalink_client.start()
     bot.data.lavalink_client = lavalink_client
 

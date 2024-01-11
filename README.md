@@ -9,7 +9,6 @@ An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord cra
 - [ ] Expand event logging
 - [ ] Examples
 - [ ] Gitlab CI Tests
-- [ ] Lavasnek events
 - [ ] Implement abstractions for ease of use
 - [ ] Round-Robin node selection method
 - [ ] Region based node selection method
@@ -27,6 +26,7 @@ An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord cra
 - [x] Twilight utilities
 - [x] Load balancer node selection method
 - [x] Lavasnek (PyO3)
+- [x] Lavasnek events
 
 ## Links to download stuff you will need
 

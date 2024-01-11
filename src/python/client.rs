@@ -20,13 +20,22 @@ fn raw_event(
 #[pymethods]
 impl crate::client::LavalinkClient {
     #[new]
-    fn new_py(nodes: Vec<crate::node::NodeBuilder>) -> Self {
+    fn new_py(py: Python<'_>, nodes: Vec<crate::node::NodeBuilder>, events: PyObject) -> PyResult<Self> {
+        let current_loop = pyo3_asyncio::get_running_loop(py)?;
+        let loop_ref = PyObject::from(current_loop);
+
+        let event_handler = crate::python::event::EventHandler {
+             inner: events,
+             current_loop: loop_ref,
+        };
+
         let events = Events {
             raw: Some(raw_event),
+            event_handler: Some(event_handler),
             ..Default::default()
         };
 
-        crate::client::LavalinkClient::new(events, nodes)
+        Ok(crate::client::LavalinkClient::new(events, nodes))
     }
 
     #[pyo3(name = "start")]

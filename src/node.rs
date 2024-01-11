@@ -12,7 +12,8 @@ use futures::stream::StreamExt;
 use http::Request;
 use reqwest::header::HeaderMap;
 
-#[derive(Hash, Debug, Clone, Default)]
+#[derive(Debug, Clone)]
+#[cfg_attr(not(feature = "python"), derive(Hash, Default))]
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 /// A builder for the node.
 ///
@@ -78,6 +79,7 @@ impl<'a> EventDispatcher<'a> {
         }
     }
 
+    #[cfg(not(feature = "python"))]
     pub(crate) async fn parse_and_dispatch<T, F>(self, event: &'a str, handler: F)
     where
         F: Fn(&events::Events) -> Option<fn(LavalinkClient, String, &T) -> BoxFuture<()>>,
@@ -155,6 +157,18 @@ impl Node {
                                 .session_id
                                 .swap(Arc::new(ready_event.session_id.to_string()));
 
+                            #[cfg(feature = "python")]
+                            {
+                                let session_id = self_node.session_id.load_full();
+
+                                if let Some(handler) = &self_node.events.event_handler {
+                                    handler.event_ready(lavalink_client.clone(), (*session_id).clone(), ready_event.clone()).await;
+                                }
+                                if let Some(handler) = &lavalink_client.events.event_handler {
+                                    handler.event_ready(lavalink_client.clone(), (*session_id).clone(), ready_event.clone()).await;
+                                }
+                            }
+
                             ed.dispatch(ready_event, |e| e.ready).await;
                         }
                         "playerUpdate" => {
@@ -164,7 +178,7 @@ impl Node {
                             if let Some(player) =
                                 lavalink_client.get_player_context(player_update_event.guild_id)
                             {
-                                if let Err(why) = player.update_state(player_update_event.state) {
+                                if let Err(why) = player.update_state(player_update_event.state.clone()) {
                                     error!(
                                         "Error updating state for player {}: {}",
                                         player_update_event.guild_id.0, why
@@ -172,9 +186,38 @@ impl Node {
                                 }
                             }
 
-                            ed.parse_and_dispatch(&x, |e| e.player_update).await;
+                            #[cfg(feature = "python")]
+                            {
+                                let session_id = self_node.session_id.load_full();
+
+                                if let Some(handler) = &self_node.events.event_handler {
+                                    handler.event_player_update(lavalink_client.clone(), (*session_id).clone(), player_update_event.clone()).await;
+                                }
+                                if let Some(handler) = &lavalink_client.events.event_handler {
+                                    handler.event_player_update(lavalink_client.clone(), (*session_id).clone(), player_update_event.clone()).await;
+                                }
+                            }
+
+                            ed.dispatch(player_update_event, |e| e.player_update).await;
                         }
-                        "stats" => ed.parse_and_dispatch(&x, |e| e.stats).await,
+                        "stats" => {
+                            #[cfg(feature = "python")]
+                            {
+                                let event: events::Stats = serde_json::from_str(&x).unwrap();
+                                let session_id = self_node.session_id.load_full();
+
+                                if let Some(handler) = &self_node.events.event_handler {
+                                    handler.event_stats(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                }
+                                if let Some(handler) = &lavalink_client.events.event_handler {
+                                    handler.event_stats(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                }
+
+                                ed.dispatch(event, |e| e.stats).await;
+                            }
+                            #[cfg(not(feature = "python"))]
+                            ed.parse_and_dispatch(&x, |e| e.stats).await;
+                        }
                         "event" => match base_event.get("type").unwrap().as_str().unwrap() {
                             "TrackStartEvent" => {
                                 let track_event: events::TrackStart =
@@ -183,7 +226,7 @@ impl Node {
                                 if let Some(player) =
                                     lavalink_client.get_player_context(track_event.guild_id)
                                 {
-                                    if let Err(why) = player.update_track(track_event.track.into())
+                                    if let Err(why) = player.update_track(track_event.track.clone().into())
                                     {
                                         error!(
                                             "Error sending update track message for player {}: {}",
@@ -192,7 +235,19 @@ impl Node {
                                     }
                                 }
 
-                                ed.parse_and_dispatch(&x, |e| e.track_start).await;
+                                #[cfg(feature = "python")]
+                                {
+                                    let session_id = self_node.session_id.load_full();
+
+                                    if let Some(handler) = &self_node.events.event_handler {
+                                        handler.event_track_start(lavalink_client.clone(), (*session_id).clone(), track_event.clone()).await;
+                                    }
+                                    if let Some(handler) = &lavalink_client.events.event_handler {
+                                        handler.event_track_start(lavalink_client.clone(), (*session_id).clone(), track_event.clone()).await;
+                                    }
+                                }
+
+                                ed.dispatch(track_event, |e| e.track_start).await;
                             }
                             "TrackEndEvent" => {
                                 let track_event: events::TrackEnd =
@@ -201,14 +256,14 @@ impl Node {
                                 if let Some(player) =
                                     lavalink_client.get_player_context(track_event.guild_id)
                                 {
-                                    if let Err(why) = player.finish(track_event.reason.into()) {
+                                    if let Err(why) = player.finish(track_event.reason.clone().into()) {
                                         error!(
                                             "Error sending finish message for player {}: {}",
                                             track_event.guild_id.0, why
                                         );
                                     }
 
-                                    if let Err(why) = player.update_track(track_event.track.into())
+                                    if let Err(why) = player.update_track(track_event.track.clone().into())
                                     {
                                         error!(
                                             "Error sending update track message for player {}: {}",
@@ -217,13 +272,72 @@ impl Node {
                                     }
                                 }
 
-                                ed.parse_and_dispatch(&x, |e| e.track_end).await;
+                                #[cfg(feature = "python")]
+                                {
+                                    let session_id = self_node.session_id.load_full();
+
+                                    if let Some(handler) = &self_node.events.event_handler {
+                                        handler.event_track_end(lavalink_client.clone(), (*session_id).clone(), track_event.clone()).await;
+                                    }
+                                    if let Some(handler) = &lavalink_client.events.event_handler {
+                                        handler.event_track_end(lavalink_client.clone(), (*session_id).clone(), track_event.clone()).await;
+                                    }
+                                }
+
+                                ed.dispatch(track_event, |e| e.track_end).await;
                             }
                             "TrackExceptionEvent" => {
+                                #[cfg(feature = "python")]
+                                {
+                                    let event: events::TrackException = serde_json::from_str(&x).unwrap();
+                                    let session_id = self_node.session_id.load_full();
+
+                                    if let Some(handler) = &self_node.events.event_handler {
+                                        handler.event_track_exception(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                    }
+                                    if let Some(handler) = &lavalink_client.events.event_handler {
+                                        handler.event_track_exception(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                    }
+
+                                    ed.dispatch(event, |e| e.track_exception).await;
+                                }
+                                #[cfg(not(feature = "python"))]
                                 ed.parse_and_dispatch(&x, |e| e.track_exception).await;
                             }
-                            "TrackStuckEvent" => ed.parse_and_dispatch(&x, |e| e.track_stuck).await,
+                            "TrackStuckEvent" => {
+                                #[cfg(feature = "python")]
+                                {
+                                    let event: events::TrackStuck = serde_json::from_str(&x).unwrap();
+                                    let session_id = self_node.session_id.load_full();
+
+                                    if let Some(handler) = &self_node.events.event_handler {
+                                        handler.event_track_stuck(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                    }
+                                    if let Some(handler) = &lavalink_client.events.event_handler {
+                                        handler.event_track_stuck(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                    }
+
+                                    ed.dispatch(event, |e| e.track_stuck).await;
+                                }
+                                #[cfg(not(feature = "python"))]
+                                ed.parse_and_dispatch(&x, |e| e.track_stuck).await;
+                            }
                             "WebSocketClosedEvent" => {
+                                #[cfg(feature = "python")]
+                                {
+                                    let event: events::WebSocketClosed = serde_json::from_str(&x).unwrap();
+                                    let session_id = self_node.session_id.load_full();
+
+                                    if let Some(handler) = &self_node.events.event_handler {
+                                        handler.event_websocket_closed(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                    }
+                                    if let Some(handler) = &lavalink_client.events.event_handler {
+                                        handler.event_websocket_closed(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                    }
+
+                                    ed.dispatch(event, |e| e.websocket_closed).await;
+                                }
+                                #[cfg(not(feature = "python"))]
                                 ed.parse_and_dispatch(&x, |e| e.websocket_closed).await;
                             }
                             _ => (),

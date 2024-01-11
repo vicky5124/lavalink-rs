@@ -15,19 +15,38 @@ impl crate::node::NodeBuilder {
 
     #[new]
     fn new(
+        py: Python<'_>,
         hostname: String,
         is_ssl: bool,
         password: String,
         user_id: super::model::PyUserId,
         session_id: Option<String>,
-    ) -> Self {
-        crate::node::NodeBuilder {
+        events: Option<PyObject>,
+    ) -> PyResult<Self> {
+        let events = if let Some(events) = events {
+            let current_loop = pyo3_asyncio::get_running_loop(py)?;
+            let loop_ref = PyObject::from(current_loop);
+
+            let event_handler = crate::python::event::EventHandler {
+                 inner: events,
+                 current_loop: loop_ref,
+            };
+
+            Events {
+                event_handler: Some(event_handler),
+                ..Default::default()
+            }
+        } else {
+            Events::default()
+        };
+
+        Ok(crate::node::NodeBuilder {
             hostname,
             is_ssl,
-            events: Events::default(),
+            events,
             password,
             user_id: user_id.into(),
             session_id,
-        }
+        })
     }
 }

@@ -1,7 +1,8 @@
 use crate::client::LavalinkClient;
 use crate::model::*;
 
-#[derive(Hash, Debug, Clone, Default)]
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(not(feature = "python"), derive(Hash))]
 pub struct Events {
     /// Every single event will trigger this event with the raw data received.
     pub raw: Option<fn(LavalinkClient, session_id: String, &serde_json::Value) -> BoxFuture<()>>,
@@ -25,6 +26,9 @@ pub struct Events {
     /// Dispatched when an audio WebSocket to Discord is closed.
     pub websocket_closed:
         Option<fn(LavalinkClient, session_id: String, &WebSocketClosed) -> BoxFuture<()>>,
+
+    #[cfg(feature = "python")]
+    pub(crate) event_handler: Option<crate::python::event::EventHandler>,
 }
 
 #[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Serialize, Deserialize)]
