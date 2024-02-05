@@ -37,12 +37,12 @@ To install Lavalink, you can follow their [getting started guide](https://lavali
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = "0.10.0-beta"
+lavalink-rs = "0.10"
 
 # or
 
 [dependencies.lavalink-rs]
-version = "0.10.0-beta"
+version = "0.10.0"
 ```
 
 Or the development release:
