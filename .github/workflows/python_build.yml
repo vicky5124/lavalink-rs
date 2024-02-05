@@ -5,14 +5,7 @@
 #
 name: CI
 
-on:
-  push:
-    branches:
-      - gh-actions
-    tags:
-      - '*'
-  pull_request:
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
@@ -100,20 +93,3 @@ jobs:
         with:
           name: wheels
           path: dist
-
-  #release:
-  #  name: Release
-  #  runs-on: ubuntu-latest
-  #  if: "startsWith(github.ref, 'refs/tags/')"
-  #  needs: [linux, windows, macos, sdist]
-  #  steps:
-  #    - uses: actions/download-artifact@v3
-  #      with:
-  #        name: wheels
-  #    - name: Publish to PyPI
-  #      uses: PyO3/maturin-action@v1
-  #      env:
-  #        MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-  #      with:
-  #        command: upload
-  #        args: --non-interactive --skip-existing *
