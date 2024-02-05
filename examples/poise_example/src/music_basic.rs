@@ -1,6 +1,8 @@
 use crate::Context;
 use crate::Error;
 
+use std::ops::Deref;
+
 use lavalink_rs::prelude::*;
 
 use poise::serenity_prelude as serenity;
@@ -11,7 +13,6 @@ async fn _join(
     guild_id: serenity::GuildId,
     channel_id: Option<serenity::ChannelId>,
 ) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
     let lava_client = ctx.data().lavalink.clone();
 
     let manager = songbird::get(ctx.serenity_context()).await.unwrap().clone();
@@ -20,6 +21,7 @@ async fn _join(
         let connect_to = match channel_id {
             Some(x) => x,
             None => {
+                let guild = ctx.guild().unwrap().deref().clone();
                 let user_channel_id = guild
                     .voice_states
                     .get(&ctx.author().id)
@@ -36,10 +38,10 @@ async fn _join(
             }
         };
 
-        let (_, handler) = manager.join_gateway(guild_id, connect_to).await;
+        let handler = manager.join_gateway(guild_id, connect_to).await;
 
         match handler {
-            Ok(connection_info) => {
+            Ok((connection_info, _)) => {
                 lava_client
                     .create_player_context(guild_id, connection_info)
                     .await?;
@@ -67,8 +69,7 @@ pub async fn play(
     #[rest]
     term: String,
 ) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     _join(&ctx, guild_id, None).await?;
 
@@ -143,8 +144,7 @@ pub async fn join(
     #[channel_types("Voice")]
     channel_id: Option<serenity::ChannelId>,
 ) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     _join(&ctx, guild_id, channel_id).await?;
 
@@ -153,8 +153,7 @@ pub async fn join(
 /// Leave the current voice channel.
 #[poise::command(slash_command, prefix_command)]
 pub async fn leave(ctx: Context<'_>) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let manager = songbird::get(ctx.serenity_context()).await.unwrap().clone();
     let lava_client = ctx.data().lavalink.clone();

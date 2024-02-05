@@ -10,8 +10,7 @@ use itertools::Itertools;
 /// Add a song to the queue
 #[poise::command(slash_command, prefix_command)]
 pub async fn queue(ctx: Context<'_>) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -58,7 +57,10 @@ pub async fn queue(ctx: Context<'_>) -> Result<(), Error> {
                 track.info.author, track.info.title, uri, time
             )
         } else {
-            format!("Now playing: {} - {} | {}", track.info.author, track.info.title, time)
+            format!(
+                "Now playing: {} - {} | {}",
+                track.info.author, track.info.title, time
+            )
         }
     } else {
         "Now playing: nothing".to_string()
@@ -73,8 +75,7 @@ pub async fn queue(ctx: Context<'_>) -> Result<(), Error> {
 /// Skip the current song.
 #[poise::command(slash_command, prefix_command)]
 pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -98,8 +99,7 @@ pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
 /// Pause the current song.
 #[poise::command(slash_command, prefix_command)]
 pub async fn pause(ctx: Context<'_>) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -118,8 +118,7 @@ pub async fn pause(ctx: Context<'_>) -> Result<(), Error> {
 /// Resume playing the current song.
 #[poise::command(slash_command, prefix_command)]
 pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -138,8 +137,7 @@ pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
 /// Stops the playback of the current song.
 #[poise::command(slash_command, prefix_command)]
 pub async fn stop(ctx: Context<'_>) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -166,8 +164,7 @@ pub async fn seek(
     ctx: Context<'_>,
     #[description = "Time to jump to (in seconds)"] time: u64,
 ) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -194,8 +191,7 @@ pub async fn remove(
     ctx: Context<'_>,
     #[description = "Queue item index to remove"] index: usize,
 ) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -214,8 +210,7 @@ pub async fn remove(
 /// Clear the current queue.
 #[poise::command(slash_command, prefix_command)]
 pub async fn clear(ctx: Context<'_>) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -238,8 +233,7 @@ pub async fn swap(
     #[description = "Queue item index to swap"] index1: usize,
     #[description = "The other queue item index to swap"] index2: usize,
 ) -> Result<(), Error> {
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 

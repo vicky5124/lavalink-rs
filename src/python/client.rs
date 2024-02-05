@@ -20,13 +20,17 @@ fn raw_event(
 #[pymethods]
 impl crate::client::LavalinkClient {
     #[new]
-    fn new_py(py: Python<'_>, nodes: Vec<crate::node::NodeBuilder>, events: PyObject) -> PyResult<Self> {
+    fn new_py(
+        py: Python<'_>,
+        nodes: Vec<crate::node::NodeBuilder>,
+        events: PyObject,
+    ) -> PyResult<Self> {
         let current_loop = pyo3_asyncio::get_running_loop(py)?;
         let loop_ref = PyObject::from(current_loop);
 
         let event_handler = crate::python::event::EventHandler {
-             inner: events,
-             current_loop: loop_ref,
+            inner: events,
+            current_loop: loop_ref,
         };
 
         let events = Events {
@@ -160,10 +164,7 @@ impl crate::client::LavalinkClient {
     }
 
     #[pyo3(name = "delete_all_player_contexts")]
-    fn delete_all_player_contexts_py<'a>(
-        &self,
-        py: Python<'a>,
-    ) -> PyResult<&'a PyAny> {
+    fn delete_all_player_contexts_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
         let client = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -184,7 +185,9 @@ impl crate::client::LavalinkClient {
         let client = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
-            let player = client.update_player(guild_id, &update_player, no_replace).await?;
+            let player = client
+                .update_player(guild_id, &update_player, no_replace)
+                .await?;
 
             Ok(player)
         })

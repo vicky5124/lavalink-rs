@@ -4,7 +4,7 @@ use crate::model::*;
 
 use std::collections::VecDeque;
 
-use ::http::Method;
+use reqwest::Method;
 use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Clone)]

@@ -1,5 +1,5 @@
-use crate::prelude::LavalinkClient;
 use crate::model::events::*;
+use crate::prelude::LavalinkClient;
 
 use pyo3::prelude::*;
 
@@ -89,28 +89,68 @@ impl EventHandler {
 }
 
 impl EventHandler {
-    pub(crate) async fn event_stats(&self, client: LavalinkClient, session_id: String, event: Stats) {
+    pub(crate) async fn event_stats(
+        &self,
+        client: LavalinkClient,
+        session_id: String,
+        event: Stats,
+    ) {
         call_event(self, client, session_id, event, "stats");
     }
-    pub(crate) async fn event_player_update(&self, client: LavalinkClient, session_id: String, event: PlayerUpdate) {
+    pub(crate) async fn event_player_update(
+        &self,
+        client: LavalinkClient,
+        session_id: String,
+        event: PlayerUpdate,
+    ) {
         call_event(self, client, session_id, event, "player_update");
     }
-    pub(crate) async fn event_track_start(&self, client: LavalinkClient, session_id: String, event: TrackStart) {
+    pub(crate) async fn event_track_start(
+        &self,
+        client: LavalinkClient,
+        session_id: String,
+        event: TrackStart,
+    ) {
         call_event(self, client, session_id, event, "track_start");
     }
-    pub(crate) async fn event_track_end(&self, client: LavalinkClient, session_id: String, event: TrackEnd) {
+    pub(crate) async fn event_track_end(
+        &self,
+        client: LavalinkClient,
+        session_id: String,
+        event: TrackEnd,
+    ) {
         call_event(self, client, session_id, event, "track_end");
     }
-    pub(crate) async fn event_track_exception(&self, client: LavalinkClient, session_id: String, event: TrackException) {
+    pub(crate) async fn event_track_exception(
+        &self,
+        client: LavalinkClient,
+        session_id: String,
+        event: TrackException,
+    ) {
         call_event(self, client, session_id, event, "track_exception");
     }
-    pub(crate) async fn event_track_stuck(&self, client: LavalinkClient, session_id: String, event: TrackStuck) {
+    pub(crate) async fn event_track_stuck(
+        &self,
+        client: LavalinkClient,
+        session_id: String,
+        event: TrackStuck,
+    ) {
         call_event(self, client, session_id, event, "track_stuck");
     }
-    pub(crate) async fn event_websocket_closed(&self, client: LavalinkClient, session_id: String, event: WebSocketClosed) {
+    pub(crate) async fn event_websocket_closed(
+        &self,
+        client: LavalinkClient,
+        session_id: String,
+        event: WebSocketClosed,
+    ) {
         call_event(self, client, session_id, event, "websocket_closed");
     }
-    pub(crate) async fn event_ready(&self, client: LavalinkClient, session_id: String, event: Ready) {
+    pub(crate) async fn event_ready(
+        &self,
+        client: LavalinkClient,
+        session_id: String,
+        event: Ready,
+    ) {
         call_event(self, client, session_id, event, "ready");
     }
 }
@@ -134,11 +174,8 @@ fn call_event<T: Send + Sync + pyo3::IntoPy<PyObject> + 'static>(
             async move {
                 let future = Python::with_gil(|py| {
                     let py_event_handler = slf2.inner.as_ref(py);
-                    let coro_result = py_event_handler.call_method(
-                        name,
-                        (client, session_id, event),
-                        None,
-                    );
+                    let coro_result =
+                        py_event_handler.call_method(name, (client, session_id, event), None);
 
                     if let Ok(coro) = coro_result {
                         pyo3_asyncio::tokio::into_future(coro)

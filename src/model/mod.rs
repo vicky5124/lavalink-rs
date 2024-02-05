@@ -94,14 +94,14 @@ use serenity_dep::model::id::{GuildId as SerenityGuildId, UserId as SerenityUser
 #[cfg(feature = "serenity")]
 impl From<SerenityUserId> for UserId {
     fn from(id: SerenityUserId) -> UserId {
-        UserId(id.0)
+        UserId(id.get().into())
     }
 }
 
 #[cfg(feature = "serenity")]
 impl From<SerenityGuildId> for GuildId {
     fn from(id: SerenityGuildId) -> GuildId {
-        GuildId(id.0)
+        GuildId(id.get().into())
     }
 }
 
@@ -131,13 +131,13 @@ use songbird_dep::id::{GuildId as SongbirdGuildId, UserId as SongbirdUserId};
 #[cfg(feature = "songbird")]
 impl From<SongbirdUserId> for UserId {
     fn from(id: SongbirdUserId) -> UserId {
-        UserId(id.0)
+        UserId(id.0.into())
     }
 }
 
 #[cfg(feature = "songbird")]
 impl From<SongbirdGuildId> for GuildId {
     fn from(id: SongbirdGuildId) -> GuildId {
-        GuildId(id.0)
+        GuildId(id.0.into())
     }
 }

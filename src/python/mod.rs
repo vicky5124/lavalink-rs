@@ -1,8 +1,8 @@
 pub mod client;
+pub mod event;
 pub mod model;
 pub mod node;
 pub mod player;
-pub mod event;
 
 use pyo3::prelude::*;
 

@@ -28,8 +28,8 @@ impl crate::node::NodeBuilder {
             let loop_ref = PyObject::from(current_loop);
 
             let event_handler = crate::python::event::EventHandler {
-                 inner: events,
-                 current_loop: loop_ref,
+                inner: events,
+                current_loop: loop_ref,
             };
 
             Events {

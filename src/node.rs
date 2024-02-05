@@ -9,8 +9,8 @@ use arc_swap::ArcSwap;
 use async_tungstenite::tungstenite::Message as TungsteniteMessage;
 use async_tungstenite::{tokio::connect_async, tungstenite::handshake::client::generate_key};
 use futures::stream::StreamExt;
+use http::HeaderMap;
 use http::Request;
-use reqwest::header::HeaderMap;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(not(feature = "python"), derive(Hash, Default))]
@@ -162,10 +162,22 @@ impl Node {
                                 let session_id = self_node.session_id.load_full();
 
                                 if let Some(handler) = &self_node.events.event_handler {
-                                    handler.event_ready(lavalink_client.clone(), (*session_id).clone(), ready_event.clone()).await;
+                                    handler
+                                        .event_ready(
+                                            lavalink_client.clone(),
+                                            (*session_id).clone(),
+                                            ready_event.clone(),
+                                        )
+                                        .await;
                                 }
                                 if let Some(handler) = &lavalink_client.events.event_handler {
-                                    handler.event_ready(lavalink_client.clone(), (*session_id).clone(), ready_event.clone()).await;
+                                    handler
+                                        .event_ready(
+                                            lavalink_client.clone(),
+                                            (*session_id).clone(),
+                                            ready_event.clone(),
+                                        )
+                                        .await;
                                 }
                             }
 
@@ -178,7 +190,9 @@ impl Node {
                             if let Some(player) =
                                 lavalink_client.get_player_context(player_update_event.guild_id)
                             {
-                                if let Err(why) = player.update_state(player_update_event.state.clone()) {
+                                if let Err(why) =
+                                    player.update_state(player_update_event.state.clone())
+                                {
                                     error!(
                                         "Error updating state for player {}: {}",
                                         player_update_event.guild_id.0, why
@@ -191,10 +205,22 @@ impl Node {
                                 let session_id = self_node.session_id.load_full();
 
                                 if let Some(handler) = &self_node.events.event_handler {
-                                    handler.event_player_update(lavalink_client.clone(), (*session_id).clone(), player_update_event.clone()).await;
+                                    handler
+                                        .event_player_update(
+                                            lavalink_client.clone(),
+                                            (*session_id).clone(),
+                                            player_update_event.clone(),
+                                        )
+                                        .await;
                                 }
                                 if let Some(handler) = &lavalink_client.events.event_handler {
-                                    handler.event_player_update(lavalink_client.clone(), (*session_id).clone(), player_update_event.clone()).await;
+                                    handler
+                                        .event_player_update(
+                                            lavalink_client.clone(),
+                                            (*session_id).clone(),
+                                            player_update_event.clone(),
+                                        )
+                                        .await;
                                 }
                             }
 
@@ -207,10 +233,22 @@ impl Node {
                                 let session_id = self_node.session_id.load_full();
 
                                 if let Some(handler) = &self_node.events.event_handler {
-                                    handler.event_stats(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                    handler
+                                        .event_stats(
+                                            lavalink_client.clone(),
+                                            (*session_id).clone(),
+                                            event.clone(),
+                                        )
+                                        .await;
                                 }
                                 if let Some(handler) = &lavalink_client.events.event_handler {
-                                    handler.event_stats(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                    handler
+                                        .event_stats(
+                                            lavalink_client.clone(),
+                                            (*session_id).clone(),
+                                            event.clone(),
+                                        )
+                                        .await;
                                 }
 
                                 ed.dispatch(event, |e| e.stats).await;
@@ -226,7 +264,8 @@ impl Node {
                                 if let Some(player) =
                                     lavalink_client.get_player_context(track_event.guild_id)
                                 {
-                                    if let Err(why) = player.update_track(track_event.track.clone().into())
+                                    if let Err(why) =
+                                        player.update_track(track_event.track.clone().into())
                                     {
                                         error!(
                                             "Error sending update track message for player {}: {}",
@@ -240,10 +279,22 @@ impl Node {
                                     let session_id = self_node.session_id.load_full();
 
                                     if let Some(handler) = &self_node.events.event_handler {
-                                        handler.event_track_start(lavalink_client.clone(), (*session_id).clone(), track_event.clone()).await;
+                                        handler
+                                            .event_track_start(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                track_event.clone(),
+                                            )
+                                            .await;
                                     }
                                     if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler.event_track_start(lavalink_client.clone(), (*session_id).clone(), track_event.clone()).await;
+                                        handler
+                                            .event_track_start(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                track_event.clone(),
+                                            )
+                                            .await;
                                     }
                                 }
 
@@ -256,14 +307,17 @@ impl Node {
                                 if let Some(player) =
                                     lavalink_client.get_player_context(track_event.guild_id)
                                 {
-                                    if let Err(why) = player.finish(track_event.reason.clone().into()) {
+                                    if let Err(why) =
+                                        player.finish(track_event.reason.clone().into())
+                                    {
                                         error!(
                                             "Error sending finish message for player {}: {}",
                                             track_event.guild_id.0, why
                                         );
                                     }
 
-                                    if let Err(why) = player.update_track(track_event.track.clone().into())
+                                    if let Err(why) =
+                                        player.update_track(track_event.track.clone().into())
                                     {
                                         error!(
                                             "Error sending update track message for player {}: {}",
@@ -277,10 +331,22 @@ impl Node {
                                     let session_id = self_node.session_id.load_full();
 
                                     if let Some(handler) = &self_node.events.event_handler {
-                                        handler.event_track_end(lavalink_client.clone(), (*session_id).clone(), track_event.clone()).await;
+                                        handler
+                                            .event_track_end(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                track_event.clone(),
+                                            )
+                                            .await;
                                     }
                                     if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler.event_track_end(lavalink_client.clone(), (*session_id).clone(), track_event.clone()).await;
+                                        handler
+                                            .event_track_end(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                track_event.clone(),
+                                            )
+                                            .await;
                                     }
                                 }
 
@@ -289,14 +355,27 @@ impl Node {
                             "TrackExceptionEvent" => {
                                 #[cfg(feature = "python")]
                                 {
-                                    let event: events::TrackException = serde_json::from_str(&x).unwrap();
+                                    let event: events::TrackException =
+                                        serde_json::from_str(&x).unwrap();
                                     let session_id = self_node.session_id.load_full();
 
                                     if let Some(handler) = &self_node.events.event_handler {
-                                        handler.event_track_exception(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                        handler
+                                            .event_track_exception(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                event.clone(),
+                                            )
+                                            .await;
                                     }
                                     if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler.event_track_exception(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                        handler
+                                            .event_track_exception(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                event.clone(),
+                                            )
+                                            .await;
                                     }
 
                                     ed.dispatch(event, |e| e.track_exception).await;
@@ -307,14 +386,27 @@ impl Node {
                             "TrackStuckEvent" => {
                                 #[cfg(feature = "python")]
                                 {
-                                    let event: events::TrackStuck = serde_json::from_str(&x).unwrap();
+                                    let event: events::TrackStuck =
+                                        serde_json::from_str(&x).unwrap();
                                     let session_id = self_node.session_id.load_full();
 
                                     if let Some(handler) = &self_node.events.event_handler {
-                                        handler.event_track_stuck(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                        handler
+                                            .event_track_stuck(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                event.clone(),
+                                            )
+                                            .await;
                                     }
                                     if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler.event_track_stuck(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                        handler
+                                            .event_track_stuck(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                event.clone(),
+                                            )
+                                            .await;
                                     }
 
                                     ed.dispatch(event, |e| e.track_stuck).await;
@@ -325,14 +417,27 @@ impl Node {
                             "WebSocketClosedEvent" => {
                                 #[cfg(feature = "python")]
                                 {
-                                    let event: events::WebSocketClosed = serde_json::from_str(&x).unwrap();
+                                    let event: events::WebSocketClosed =
+                                        serde_json::from_str(&x).unwrap();
                                     let session_id = self_node.session_id.load_full();
 
                                     if let Some(handler) = &self_node.events.event_handler {
-                                        handler.event_websocket_closed(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                        handler
+                                            .event_websocket_closed(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                event.clone(),
+                                            )
+                                            .await;
                                     }
                                     if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler.event_websocket_closed(lavalink_client.clone(), (*session_id).clone(), event.clone()).await;
+                                        handler
+                                            .event_websocket_closed(
+                                                lavalink_client.clone(),
+                                                (*session_id).clone(),
+                                                event.clone(),
+                                            )
+                                            .await;
                                     }
 
                                     ed.dispatch(event, |e| e.websocket_closed).await;

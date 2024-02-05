@@ -1,67 +1,53 @@
 use std::time::Duration;
 
-use crate::{player_context::{QueueMessage, TrackInQueue}, model::{http::UpdatePlayer, player::{Filters, Player}, track::TrackData}};
+use crate::{
+    model::{
+        http::UpdatePlayer,
+        player::{Filters, Player},
+        track::TrackData,
+    },
+    player_context::{QueueMessage, TrackInQueue},
+};
 
 use pyo3::prelude::*;
 
-
 #[pymethods]
 impl crate::player_context::PlayerContext {
-    fn set_queue_push_to_back<'a>(
-        &self,
-        track: PyTrackInQueue,
-    ) -> PyResult<()> {
+    fn set_queue_push_to_back<'a>(&self, track: PyTrackInQueue) -> PyResult<()> {
         self.set_queue(QueueMessage::PushToBack(track.into()))?;
         Ok(())
     }
-    fn set_queue_push_to_front<'a>(
-        &self,
-        track: PyTrackInQueue,
-    ) -> PyResult<()> {
+    fn set_queue_push_to_front<'a>(&self, track: PyTrackInQueue) -> PyResult<()> {
         self.set_queue(QueueMessage::PushToFront(track.into()))?;
         Ok(())
     }
-    fn set_queue_insert<'a>(
-        &self,
-        position: usize,
-        track: PyTrackInQueue,
-    ) -> PyResult<()> {
+    fn set_queue_insert<'a>(&self, position: usize, track: PyTrackInQueue) -> PyResult<()> {
         self.set_queue(QueueMessage::Insert(position, track.into()))?;
         Ok(())
     }
-    fn set_queue_remove<'a>(
-        &self,
-        position: usize,
-    ) -> PyResult<()> {
+    fn set_queue_remove<'a>(&self, position: usize) -> PyResult<()> {
         self.set_queue(QueueMessage::Remove(position))?;
         Ok(())
     }
-    fn set_queue_clear<'a>(
-        &self,
-    ) -> PyResult<()> {
+    fn set_queue_clear<'a>(&self) -> PyResult<()> {
         self.set_queue(QueueMessage::Clear)?;
         Ok(())
     }
-    fn set_queue_replace<'a>(
-        &self,
-        tracks: Vec<PyTrackInQueue>,
-    ) -> PyResult<()> {
-        self.set_queue(QueueMessage::Replace(tracks.into_iter().map(TrackInQueue::from).collect()))?;
+    fn set_queue_replace<'a>(&self, tracks: Vec<PyTrackInQueue>) -> PyResult<()> {
+        self.set_queue(QueueMessage::Replace(
+            tracks.into_iter().map(TrackInQueue::from).collect(),
+        ))?;
         Ok(())
     }
-    fn set_queue_append<'a>(
-        &self,
-        tracks: Vec<PyTrackInQueue>,
-    ) -> PyResult<()> {
-        self.set_queue(QueueMessage::Append(tracks.into_iter().map(TrackInQueue::from).collect()))?;
+    fn set_queue_append<'a>(&self, tracks: Vec<PyTrackInQueue>) -> PyResult<()> {
+        self.set_queue(QueueMessage::Append(
+            tracks.into_iter().map(TrackInQueue::from).collect(),
+        ))?;
         Ok(())
     }
 
     #[pyo3(name = "get_queue")]
-    fn get_queue_py<'a>(
-        &self,
-        py: Python<'a>,
-    ) -> PyResult<&'a PyAny> {
+    fn get_queue_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
         let player = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -72,10 +58,7 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "get_player")]
-    fn get_player_py<'a>(
-        &self,
-        py: Python<'a>,
-    ) -> PyResult<&'a PyAny> {
+    fn get_player_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
         let player = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -116,12 +99,8 @@ impl crate::player_context::PlayerContext {
         })
     }
 
-
     #[pyo3(name = "stop_now")]
-    fn stop_now_py<'a>(
-        &self,
-        py: Python<'a>,
-    ) -> PyResult<&'a PyAny> {
+    fn stop_now_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
         let player = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -132,11 +111,7 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "set_pause")]
-    fn set_pause_py<'a>(
-        &self,
-        py: Python<'a>,
-        pause: bool,
-    ) -> PyResult<&'a PyAny> {
+    fn set_pause_py<'a>(&self, py: Python<'a>, pause: bool) -> PyResult<&'a PyAny> {
         let player = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -147,11 +122,7 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "set_volume")]
-    fn set_volume_py<'a>(
-        &self,
-        py: Python<'a>,
-        volume: u16,
-    ) -> PyResult<&'a PyAny> {
+    fn set_volume_py<'a>(&self, py: Python<'a>, volume: u16) -> PyResult<&'a PyAny> {
         let player = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -162,11 +133,7 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "set_filters")]
-    fn set_filters_py<'a>(
-        &self,
-        py: Python<'a>,
-        filters: Filters,
-    ) -> PyResult<&'a PyAny> {
+    fn set_filters_py<'a>(&self, py: Python<'a>, filters: Filters) -> PyResult<&'a PyAny> {
         let player = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -177,11 +144,7 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "set_position_ms")]
-    fn set_position_ms_py<'a>(
-        &self,
-        py: Python<'a>,
-        position: u64,
-    ) -> PyResult<&'a PyAny> {
+    fn set_position_ms_py<'a>(&self, py: Python<'a>, position: u64) -> PyResult<&'a PyAny> {
         let player = self.clone();
 
         pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -192,44 +155,31 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "queue")]
-    fn queue_py<'a>(
-        &self,
-        track: PyTrackInQueue,
-    ) -> PyResult<()> {
+    fn queue_py<'a>(&self, track: PyTrackInQueue) -> PyResult<()> {
         self.queue(track)?;
         Ok(())
     }
 
     #[pyo3(name = "close")]
-    fn close_py<'a>(
-        &self,
-    ) -> PyResult<()> {
+    fn close_py<'a>(&self) -> PyResult<()> {
         self.clone().close()?;
         Ok(())
     }
 
     #[pyo3(name = "skip")]
-    fn skip_py<'a>(
-        &self,
-    ) -> PyResult<()> {
+    fn skip_py<'a>(&self) -> PyResult<()> {
         self.skip()?;
         Ok(())
     }
 
     #[pyo3(name = "finish")]
-    fn finish_py<'a>(
-        &self,
-        should_continue: bool,
-    ) -> PyResult<()> {
+    fn finish_py<'a>(&self, should_continue: bool) -> PyResult<()> {
         self.finish(should_continue)?;
         Ok(())
     }
 
     #[pyo3(name = "update_player_data")]
-    fn update_player_data_py<'a>(
-        &self,
-        player: Player
-    ) -> PyResult<()> {
+    fn update_player_data_py<'a>(&self, player: Player) -> PyResult<()> {
         self.update_player_data(player)?;
         Ok(())
     }

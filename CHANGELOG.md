@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.0-beta.4
+
+- Implement events in python.
+- Update dependencies.
+
 ## 0.10.0-beta.3
 
 - Initial Python implementation.

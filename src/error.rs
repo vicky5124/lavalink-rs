@@ -4,9 +4,10 @@ use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 
 use async_tungstenite::tungstenite::error::Error as TungsteniteError;
+use http::header::InvalidHeaderValue;
 use http::Error as HttpError;
 use oneshot::RecvError;
-use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
+use reqwest::Error as ReqwestError;
 use tokio::sync::mpsc::error::SendError;
 use url::ParseError;
 

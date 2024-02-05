@@ -24,8 +24,7 @@ async fn test(ctx: Context<'_>) -> Result<(), Error> {
 
     ctx.say("AAAAAAAAAAA").await?;
 
-    let guild = ctx.guild().unwrap();
-    let guild_id = guild.id;
+    let guild_id = ctx.guild_id().unwrap();
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -56,12 +55,11 @@ async fn test(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Error> {
     std::env::set_var("RUST_LOG", "info,lavalink_rs=trace");
     tracing_subscriber::fmt::init();
 
     let framework = poise::Framework::builder()
-        .client_settings(|c| c.register_songbird())
         .options(poise::FrameworkOptions {
             commands: vec![
                 music_basic::play(),
@@ -84,8 +82,6 @@ async fn main() {
             },
             ..Default::default()
         })
-        .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
-        .intents(serenity::GatewayIntents::all())
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
@@ -101,7 +97,7 @@ async fn main() {
                     is_ssl: false,
                     events: events::Events::default(),
                     password: env!("LAVALINK_PASSWORD").to_string(),
-                    user_id: ctx.cache.current_user_id().into(),
+                    user_id: ctx.cache.current_user().id.into(),
                     session_id: None,
                 };
 
@@ -111,7 +107,18 @@ async fn main() {
 
                 Ok(Data { lavalink: client })
             })
-        });
+        })
+        .build();
 
-    framework.run().await.unwrap();
+    let mut client = serenity::ClientBuilder::new(
+        std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"),
+        serenity::GatewayIntents::all(),
+    )
+    .register_songbird()
+    .framework(framework)
+    .await?;
+
+    client.start().await?;
+
+    Ok(())
 }

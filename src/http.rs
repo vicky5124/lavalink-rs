@@ -1,8 +1,8 @@
 use crate::error::LavalinkResult;
 use crate::model::*;
 
-use ::http::Method;
 use reqwest::Client as ReqwestClient;
+use reqwest::Method;
 use url::Url;
 
 #[derive(Debug, Clone)]
