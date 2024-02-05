@@ -8,7 +8,7 @@ name: CI
 on:
   push:
     branches:
-      - gh-action
+      - gh-actions
     tags:
       - '*'
   pull_request:
