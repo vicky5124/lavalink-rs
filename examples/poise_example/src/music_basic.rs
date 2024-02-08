@@ -45,6 +45,11 @@ async fn _join(
                 lava_client
                     // The turbofish here is Optional, but it helps to figure out what type to
                     // provide in `PlayerContext::data()`
+                    //
+                    // While a tuple is used here as an example, you are free to use a custom
+                    // public structure with whatever data you wish.
+                    // This custom data is also present in the Client if you wish to have the
+                    // shared data be more global, rather than centralized to each player.
                     .create_player_context_with_data::<(ChannelId, std::sync::Arc<Http>)>(
                         guild_id,
                         connection_info,
