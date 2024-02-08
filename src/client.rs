@@ -1,4 +1,4 @@
-use crate::error::LavalinkResult;
+use crate::error::{LavalinkError, LavalinkResult};
 use crate::model::*;
 use crate::node;
 use crate::player_context::*;
@@ -11,16 +11,14 @@ use arc_swap::ArcSwap;
 use dashmap::DashMap;
 use reqwest::{header::HeaderMap, Client as ReqwestClient};
 
-#[derive(Clone)]
-#[cfg_attr(not(feature = "user-data"), derive(Debug))]
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 /// The main client, where everything gets done, from events to requests to management.
 pub struct LavalinkClient {
     pub nodes: Arc<Vec<node::Node>>,
     pub players: Arc<DashMap<GuildId, PlayerContext>>,
     pub events: events::Events,
-    #[cfg(feature = "user-data")]
-    pub user_data: Arc<parking_lot::RwLock<typemap_rev::TypeMap>>,
+    user_data: Arc<dyn std::any::Any + Send + Sync>,
 }
 
 impl LavalinkClient {
@@ -31,6 +29,21 @@ impl LavalinkClient {
     /// - `events`: The lavalink event handler.
     /// - `nodes`: List of nodes to connect to.
     pub fn new(events: events::Events, nodes: Vec<node::NodeBuilder>) -> LavalinkClient {
+        Self::new_with_data(events, nodes, Arc::new(()))
+    }
+
+    /// Create a new Lavalink Client with custom user data.
+    ///
+    /// # Parameters
+    ///
+    /// - `events`: The lavalink event handler.
+    /// - `nodes`: List of nodes to connect to.
+    /// - `user_data`: Set the data that will be accessible from anywhere with the client.
+    pub fn new_with_data<Data: std::any::Any + Send + Sync>(
+        events: events::Events,
+        nodes: Vec<node::NodeBuilder>,
+        user_data: Arc<Data>,
+    ) -> LavalinkClient {
         let mut built_nodes = Vec::new();
 
         for (idx, i) in nodes.into_iter().enumerate() {
@@ -106,8 +119,7 @@ impl LavalinkClient {
             nodes: Arc::new(built_nodes),
             players: Arc::new(DashMap::new()),
             events,
-            #[cfg(feature = "user-data")]
-            user_data: Arc::new(parking_lot::RwLock::new(typemap_rev::TypeMap::new())),
+            user_data,
         }
     }
 
@@ -190,6 +202,19 @@ impl LavalinkClient {
         guild_id: impl Into<GuildId>,
         connection_info: impl Into<player::ConnectionInfo>,
     ) -> LavalinkResult<PlayerContext> {
+        self.create_player_context_with_data(guild_id, connection_info, Arc::new(()))
+            .await
+    }
+
+    /// Creates a new player with context with custom user data.
+    ///
+    /// Calling this method is required to create the initial player, and be able to use the built-in queue.
+    pub async fn create_player_context_with_data<Data: std::any::Any + Send + Sync>(
+        &self,
+        guild_id: impl Into<GuildId>,
+        connection_info: impl Into<player::ConnectionInfo>,
+        user_data: Arc<Data>,
+    ) -> LavalinkResult<PlayerContext> {
         let guild_id = guild_id.into();
         let mut connection_info = connection_info.into();
         connection_info.fix();
@@ -219,8 +244,7 @@ impl LavalinkClient {
             guild_id,
             client: self.clone(),
             tx,
-            #[cfg(feature = "user-data")]
-            user_data: Arc::new(parking_lot::RwLock::new(typemap_rev::TypeMap::new())),
+            user_data,
         };
 
         let player_context = PlayerContextInner {
@@ -407,5 +431,17 @@ impl LavalinkClient {
         let result = node.http.get_players(&node.session_id.load()).await?;
 
         Ok(result)
+    }
+
+    /// Get the custom data provided when creating the client.
+    ///
+    /// # Errors
+    /// Returns `LavalinkError::InvalidDataType` if the type argument provided does not match the type of the data provided,
+    /// or if no data was provided when creating the client.
+    pub fn data<Data: Send + Sync + 'static>(&self) -> LavalinkResult<std::sync::Arc<Data>> {
+        self.user_data
+            .clone()
+            .downcast()
+            .map_err(|_| LavalinkError::InvalidDataType)
     }
 }

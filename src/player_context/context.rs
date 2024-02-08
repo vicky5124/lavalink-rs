@@ -1,5 +1,5 @@
 use crate::client::LavalinkClient;
-use crate::error::LavalinkResult;
+use crate::error::{LavalinkError, LavalinkResult};
 use crate::model::*;
 
 use std::collections::VecDeque;
@@ -7,16 +7,14 @@ use std::collections::VecDeque;
 use reqwest::Method;
 use tokio::sync::mpsc::UnboundedSender;
 
-#[derive(Clone)]
-#[cfg_attr(not(feature = "user-data"), derive(Debug))]
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 /// The player context.
 pub struct PlayerContext {
     pub guild_id: GuildId,
     pub client: LavalinkClient,
     pub(crate) tx: UnboundedSender<super::PlayerMessage>,
-    #[cfg(feature = "user-data")]
-    pub user_data: std::sync::Arc<parking_lot::RwLock<typemap_rev::TypeMap>>,
+    pub(crate) user_data: std::sync::Arc<dyn std::any::Any + Send + Sync>,
 }
 
 impl PlayerContext {
@@ -210,5 +208,17 @@ impl PlayerContext {
             true,
         )
         .await
+    }
+
+    /// Get the custom data provided when creating the player context.
+    ///
+    /// # Errors
+    /// Returns `LavalinkError::InvalidDataType` if the type argument provided does not match the type of the data provided,
+    /// or if no data was provided when creating the player context.
+    pub fn data<Data: Send + Sync + 'static>(&self) -> LavalinkResult<std::sync::Arc<Data>> {
+        self.user_data
+            .clone()
+            .downcast()
+            .map_err(|_| LavalinkError::InvalidDataType)
     }
 }

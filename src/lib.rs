@@ -31,10 +31,6 @@ pub mod player_context;
 /// Re-exports of all the most common types.
 pub mod prelude;
 
-#[cfg(feature = "user-data")]
-/// Re-export of typemap_rev for user data.
-pub use typemap_rev;
-
 #[cfg(feature = "python")]
 use pyo3::{prelude::*, types::PyDict, wrap_pymodule};
 

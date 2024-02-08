@@ -27,6 +27,7 @@ An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord cra
 - [x] Load balancer node selection method
 - [x] Lavasnek (PyO3)
 - [x] Lavasnek events
+- [x] Remove third party dependency for custom user data.
 
 ## Links to download stuff you will need
 
@@ -76,7 +77,6 @@ maturin develop --target x86_64-unknown-linux-gnu
 
 ### Features
 
-- `user-data` - **default feature** - Allows the client and player context to store custom user data.
 - `rustls`: **default feature** - Use rustls.
 - `native-tls` Use the system native tls.
 - `serenity-rustls` for [serenity](https://lib.rs/crates/serenity) with rustls support.

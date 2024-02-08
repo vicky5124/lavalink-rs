@@ -6,7 +6,7 @@ use std::ops::Deref;
 use lavalink_rs::prelude::*;
 
 use poise::serenity_prelude as serenity;
-use serenity::Mentionable;
+use serenity::{model::id::ChannelId, Http, Mentionable};
 
 async fn _join(
     ctx: &Context<'_>,
@@ -43,7 +43,16 @@ async fn _join(
         match handler {
             Ok((connection_info, _)) => {
                 lava_client
-                    .create_player_context(guild_id, connection_info)
+                    // The turbofish here is Optional, but it helps to figure out what type to
+                    // provide in `PlayerContext::data()`
+                    .create_player_context_with_data::<(ChannelId, std::sync::Arc<Http>)>(
+                        guild_id,
+                        connection_info,
+                        std::sync::Arc::new((
+                            ctx.channel_id(),
+                            ctx.serenity_context().http.clone(),
+                        )),
+                    )
                     .await?;
 
                 ctx.say(format!("Joined {}", connect_to.mention())).await?;

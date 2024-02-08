@@ -61,6 +61,7 @@ pub enum LavalinkError {
     ResponseError(ResponseError),
     NoSessionPresent,
     TrackError(TrackError),
+    InvalidDataType,
 }
 
 impl Error for LavalinkError {}
@@ -111,6 +112,9 @@ impl Display for LavalinkError {
             }
             LavalinkError::TrackError(why) => {
                 write!(f, "Error loading tracks: {:?}", why)
+            }
+            LavalinkError::InvalidDataType => {
+                write!(f, "The value type provided does not match the data type id, or no data was ever provided.")
             }
         }
     }

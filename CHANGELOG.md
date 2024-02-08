@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.0
+
+- Remove typemap_rev and parking_lot dependencies.
+- Remove user-data feature.
+- Move user-data to a standard rust implementation inspired by 0.13 serenity.
+
 ## 0.10.0
 
 - Implement events in python.
