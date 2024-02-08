@@ -26,10 +26,7 @@ default = ["rustls"]
 
 songbird = ["songbird-dep"]
 twilight = ["twilight-model"]
-
 serenity = ["serenity-dep"]
-serenity-rustls = ["serenity", "serenity-dep/rustls_backend"]
-serenity-native = ["serenity", "serenity-dep/native_tls_backend"]
 
 rustls = ["reqwest/rustls-tls", "async-tungstenite/tokio-rustls-webpki-roots"]
 native-tls = ["reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
@@ -37,7 +34,7 @@ native-tls = ["reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
 python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute"]
 
 [package.metadata.docs.rs]
-features = ["rustls", "twilight", "serenity-rustls", "songbird"]
+features = ["rustls", "twilight", "serenity", "songbird"]
 
 [dependencies]
 arc-swap = "1"
@@ -76,7 +73,6 @@ optional = true
 package = "serenity"
 version = "0.12"
 default-features = false
-features = ["model"]
 optional = true
 
 [dependencies.twilight-model]

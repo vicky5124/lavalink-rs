@@ -32,4 +32,4 @@ git = "https://github.com/arqunis/hook"
 [dependencies.lavalink-rs]
 path = "../../"
 default-features = false
-features = ["songbird", "serenity-native", "native-tls"]
+features = ["songbird", "serenity", "native-tls"]

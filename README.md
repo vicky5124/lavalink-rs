@@ -79,8 +79,7 @@ maturin develop --target x86_64-unknown-linux-gnu
 
 - `rustls`: **default feature** - Use rustls.
 - `native-tls` Use the system native tls.
-- `serenity-rustls` for [serenity](https://lib.rs/crates/serenity) with rustls support.
-- `serenity-native` for [serenity](https://lib.rs/crates/serenity) with native-tls support.
+- `serenity` for [serenity](https://lib.rs/crates/serenity) support.
 - `songbird` for [songbird](https://lib.rs/crates/songbird) support.
 - `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) support.
 - `python` for python3.8+ support.
