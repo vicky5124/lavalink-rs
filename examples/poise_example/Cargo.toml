@@ -26,10 +26,7 @@ features = ["gateway", "serenity", "native"]
 version = "1"
 features = ["rt-multi-thread", "macros"]
 
-[dependencies.hook]
-git = "https://github.com/arqunis/hook"
-
 [dependencies.lavalink-rs]
 path = "../../"
 default-features = false
-features = ["songbird", "serenity", "native-tls"]
+features = ["songbird", "serenity", "native-tls", "macros"]

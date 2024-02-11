@@ -20,21 +20,24 @@ crate-type = ["cdylib", "rlib"]
 
 [workspace]
 exclude = ["examples/poise_example"]
+members = ["macros"]
 
 [features]
-default = ["rustls"]
+default = ["rustls", "macros"]
 
 songbird = ["songbird-dep"]
 twilight = ["twilight-model"]
 serenity = ["serenity-dep"]
 
-rustls = ["reqwest/rustls-tls", "tokio-tungstenite/tokio-rustls-webpki-roots"]
-native-tls = ["reqwest/native-tls", "tokio-tungstenite/tokio-native-tls"]
+macros = ["macros-dep"]
+
+rustls = ["reqwest/rustls-tls", "tokio-tungstenite/rustls-tls-webpki-roots"]
+native-tls = ["reqwest/native-tls", "tokio-tungstenite/native-tls"]
 
 python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute"]
 
 [package.metadata.docs.rs]
-features = ["rustls", "twilight", "serenity", "songbird"]
+features = ["rustls", "twilight", "serenity", "songbird", "macros"]
 
 [dependencies]
 arc-swap = "1"
@@ -104,6 +107,12 @@ optional = true
 [dependencies.macro_rules_attribute]
 version = "0.2"
 optional = true
+
+[dependencies.macros-dep]
+package = "macros"
+path = "./macros"
+optional = true
+
 
 [build-dependencies]
 version_check = "0.9"

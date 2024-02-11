@@ -8,6 +8,7 @@
 - Merged `serenity-native` and `serenity-rustls` into a single `serenity` feature.
 - Implement `PlayerContext::play()`
 - Switched from `async-tungstenite` to `tokio-tungstenite`
+- Move the hook macro inside the library.
 
 ## 0.10.0
 

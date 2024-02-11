@@ -79,6 +79,7 @@ maturin develop --target x86_64-unknown-linux-gnu
 
 ### Features
 
+- `macros`: **default feature** - Adds procedural macros for ease of use.
 - `rustls`: **default feature** - Use rustls.
 - `native-tls` Use the system native tls.
 - `serenity` for [serenity](https://lib.rs/crates/serenity) support.
