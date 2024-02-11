@@ -2,6 +2,8 @@
 
 An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord crates or `asyncio` based discord python libraries.
 
+If you have questions, you can get support in the [serenity](https://discord.gg/serenity-rs) or [lavalink](https://discord.gg/2rpnXNfRRU) discord servers, or by opening an issue in the [gitlab repository](https://gitlab.com/vicky5124/lavalink-rs).
+
 ## To-Do
 
 - [ ] Streamable queue reader
@@ -31,7 +33,7 @@ An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord cra
 
 ## Links to download stuff you will need
 
-To install Lavalink, you can follow their [getting started guide](https://lavalink.dev/getting-started.html).
+To install Lavalink, you can follow their [getting started guide](https://lavalink.dev/getting-started/index.html).
 
 ## How to use
 
@@ -58,10 +60,10 @@ git = "https://gitlab.com/vicky5124/lavalink-rs/"
 branch = "main"
 ```
 
-If you wish to use a development version of songbird, add the following to the Cargo.toml:
+If you wish to use a development version of songbird (or any other library), add the following to the Cargo.toml:
 
 ```toml
-[patch.crates-io.serenity]
+[patch.crates-io.songbird]
 git = "https://github.com/serenity-rs/songbird"
 branch = "next"
 ```
@@ -83,3 +85,7 @@ maturin develop --target x86_64-unknown-linux-gnu
 - `songbird` for [songbird](https://lib.rs/crates/songbird) support.
 - `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) support.
 - `python` for python3.8+ support.
+
+## Contributing
+
+To contribute to the project, fork the [gitlab repository](https://gitlab.com/vicky5124/lavalink-rs) and create a merge request over there. Make sure to update the changelog with whatever update you did to the library.
