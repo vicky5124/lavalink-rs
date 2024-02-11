@@ -113,6 +113,20 @@ impl PlayerContext {
         Ok(result)
     }
 
+    /// Try and play a track. Does not change tracks if one is already playing.
+    ///
+    /// NOTE: Does not modify the queue.
+    pub async fn play(&self, track: &track::TrackData) -> LavalinkResult<player::Player> {
+        self.update_player(
+            &http::UpdatePlayer {
+                encoded_track: Some(track.encoded.to_string()),
+                ..Default::default()
+            },
+            true,
+        )
+        .await
+    }
+
     /// Force play a track, replacing the current track.
     ///
     /// NOTE: Does not modify the queue.
