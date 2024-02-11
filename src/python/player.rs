@@ -84,6 +84,21 @@ impl crate::player_context::PlayerContext {
         })
     }
 
+    #[pyo3(name = "play")]
+    fn play_py<'a>(
+        &self,
+        py: Python<'a>,
+        track: crate::model::track::TrackData,
+    ) -> PyResult<&'a PyAny> {
+        let player = self.clone();
+
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            player.play(&track).await?;
+
+            Ok(Python::with_gil(|py| py.None()))
+        })
+    }
+
     #[pyo3(name = "play_now")]
     fn play_now_py<'a>(
         &self,
