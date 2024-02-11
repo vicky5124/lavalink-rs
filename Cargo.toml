@@ -8,7 +8,7 @@ description = "Lavalink API wrapper for discord audio playing"
 readme = "README.md"
 homepage = "https://gitlab.com/vicky5124/lavalink-rs/"
 repository =  "https://gitlab.com/vicky5124/lavalink-rs/"
-keywords = ["lavalink", "discord", "serenity", "songbird", "tokio"]
+keywords = ["lavalink", "discord", "serenity", "twilight", "songbird", "tokio"]
 categories = ["multimedia"]
 documentation = "https://docs.rs/lavalink-rs"
 
@@ -28,8 +28,8 @@ songbird = ["songbird-dep"]
 twilight = ["twilight-model"]
 serenity = ["serenity-dep"]
 
-rustls = ["reqwest/rustls-tls", "async-tungstenite/tokio-rustls-webpki-roots"]
-native-tls = ["reqwest/native-tls", "async-tungstenite/tokio-native-tls"]
+rustls = ["reqwest/rustls-tls", "tokio-tungstenite/tokio-rustls-webpki-roots"]
+native-tls = ["reqwest/native-tls", "tokio-tungstenite/tokio-native-tls"]
 
 python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute"]
 
@@ -47,8 +47,8 @@ url = "2"
 oneshot = "0.1"
 serde_qs = "0.12"
 
-[dependencies.async-tungstenite]
-version = "0.24"
+[dependencies.tokio-tungstenite]
+version = "0.21"
 
 [dependencies.tokio]
 version = "1"

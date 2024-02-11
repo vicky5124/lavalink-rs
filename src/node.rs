@@ -6,11 +6,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use arc_swap::ArcSwap;
-use async_tungstenite::tungstenite::Message as TungsteniteMessage;
-use async_tungstenite::{tokio::connect_async, tungstenite::handshake::client::generate_key};
 use futures::stream::StreamExt;
 use http::HeaderMap;
 use http::Request;
+use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
+use tokio_tungstenite::{connect_async, tungstenite::handshake::client::generate_key};
 
 #[derive(Debug, Clone)]
 #[cfg_attr(not(feature = "python"), derive(Hash, Default))]

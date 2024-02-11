@@ -7,6 +7,7 @@
 - Move user-data to a standard rust implementation inspired by 0.13 serenity.
 - Merged `serenity-native` and `serenity-rustls` into a single `serenity` feature.
 - Implement `PlayerContext::play()`
+- Switched from `async-tungstenite` to `tokio-tungstenite`
 
 ## 0.10.0
 
