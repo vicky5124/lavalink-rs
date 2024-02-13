@@ -543,6 +543,19 @@ impl LavalinkClient {
                     loop {
                         match tokio::time::timeout(timeout, inner_rx.recv()).await {
                             Err(x) => {
+                                if let Some((Some(token), Some(endpoint), Some(session_id))) =
+                                    data.get(&guild_id).map(|x| x.value().clone())
+                                {
+                                    {
+                                        let _ = sender.send(Ok(player::ConnectionInfo {
+                                            token: token.to_string(),
+                                            endpoint: endpoint.to_string(),
+                                            session_id: session_id.to_string(),
+                                        }));
+                                        continue 'outer;
+                                    }
+                                }
+
                                 let _ = sender.send(Err(x));
                                 continue 'outer;
                             }
