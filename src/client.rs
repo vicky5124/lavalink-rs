@@ -10,6 +10,7 @@ use std::sync::Arc;
 use arc_swap::ArcSwap;
 use dashmap::DashMap;
 use reqwest::{header::HeaderMap, Client as ReqwestClient};
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "python", pyo3::pyclass)]
@@ -18,32 +19,50 @@ pub struct LavalinkClient {
     pub nodes: Arc<Vec<node::Node>>,
     pub players: Arc<DashMap<GuildId, PlayerContext>>,
     pub events: events::Events,
+    tx: UnboundedSender<ClientMessage>,
+    user_id: UserId,
     user_data: Arc<dyn std::any::Any + Send + Sync>,
+}
+
+enum ClientMessage {
+    GetConnectionInfo(
+        GuildId,
+        std::time::Duration,
+        oneshot::Sender<Result<player::ConnectionInfo, tokio::time::error::Elapsed>>,
+    ),
+    ServerUpdate(GuildId, String, Option<String>), // guild_id, token, endpoint
+    StateUpdate(GuildId, Option<ChannelId>, UserId, String), // guild_id, channel_id, user_id, session_id
 }
 
 impl LavalinkClient {
     /// Create a new Lavalink Client.
+    /// It also establish the connection(s) and start listening for events.
     ///
     /// # Parameters
     ///
     /// - `events`: The lavalink event handler.
     /// - `nodes`: List of nodes to connect to.
-    pub fn new(events: events::Events, nodes: Vec<node::NodeBuilder>) -> LavalinkClient {
-        Self::new_with_data(events, nodes, Arc::new(()))
+    pub async fn new(events: events::Events, nodes: Vec<node::NodeBuilder>) -> LavalinkClient {
+        Self::new_with_data(events, nodes, Arc::new(())).await
     }
 
     /// Create a new Lavalink Client with custom user data.
+    /// It also establish the connection(s) and start listening for events.
     ///
     /// # Parameters
     ///
     /// - `events`: The lavalink event handler.
     /// - `nodes`: List of nodes to connect to.
     /// - `user_data`: Set the data that will be accessible from anywhere with the client.
-    pub fn new_with_data<Data: std::any::Any + Send + Sync>(
+    pub async fn new_with_data<Data: std::any::Any + Send + Sync>(
         events: events::Events,
         nodes: Vec<node::NodeBuilder>,
         user_data: Arc<Data>,
     ) -> LavalinkClient {
+        if nodes.is_empty() {
+            panic!("At least one node must be provided.");
+        }
+
         let mut built_nodes = Vec::new();
 
         for (idx, i) in nodes.into_iter().enumerate() {
@@ -115,23 +134,26 @@ impl LavalinkClient {
             built_nodes.push(node);
         }
 
-        LavalinkClient {
+        let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+
+        let client = LavalinkClient {
+            user_id: built_nodes[0].user_id,
             nodes: Arc::new(built_nodes),
             players: Arc::new(DashMap::new()),
             events,
+            tx,
             user_data,
-        }
-    }
+        };
 
-    /// Establish the connection(s) and start listening for events.
-    pub async fn start(&self) {
-        for node in &*self.nodes {
-            if let Err(why) = node.connect(self.clone()).await {
+        for node in &*client.nodes {
+            if let Err(why) = node.connect(client.clone()).await {
                 error!("Failed to connect to the lavalink websocket: {}", why);
             }
         }
 
-        let lavalink_client = self.clone();
+        tokio::spawn(LavalinkClient::handle_connection_info(client.clone(), rx));
+
+        let lavalink_client = client.clone();
 
         tokio::spawn(async move {
             loop {
@@ -146,6 +168,8 @@ impl LavalinkClient {
                 }
             }
         });
+
+        client
     }
 
     /// Get the node assigned to a guild.
@@ -443,5 +467,143 @@ impl LavalinkClient {
             .clone()
             .downcast()
             .map_err(|_| LavalinkError::InvalidDataType)
+    }
+
+    /// Method to handle the VOICE_SERVER_UPDATE event.
+    pub fn handle_voice_server_update(
+        &self,
+        guild_id: impl Into<GuildId>,
+        token: String,
+        endpoint: Option<String>,
+    ) {
+        let _ = self.tx.send(ClientMessage::ServerUpdate(
+            guild_id.into(),
+            token,
+            endpoint,
+        ));
+    }
+
+    /// Method to handle the VOICE_STATE_UPDATE event.
+    pub fn handle_voice_state_update(
+        &self,
+        guild_id: impl Into<GuildId>,
+        channel_id: Option<impl Into<ChannelId>>,
+        user_id: impl Into<UserId>,
+        session_id: String,
+    ) {
+        let _ = self.tx.send(ClientMessage::StateUpdate(
+            guild_id.into(),
+            channel_id.map(|x| x.into()),
+            user_id.into(),
+            session_id,
+        ));
+    }
+
+    /// Returns the connection information needed for creating a player.
+    ///
+    /// This methods requires that `handle_voice_server_update` and `handle_voice_state_update` be
+    /// defined and handled inside their respective discord events.
+    ///
+    /// # Errors
+    /// If the custom timeout was reached. This can happen if the bot never connected to the voice
+    /// channel, or the events were not handled correctly, or the timeout was too short.
+    pub async fn get_connection_info(
+        &self,
+        guild_id: impl Into<GuildId>,
+        timeout: std::time::Duration,
+    ) -> LavalinkResult<player::ConnectionInfo> {
+        let (tx, rx) = oneshot::channel();
+
+        let _ = self.tx.send(ClientMessage::GetConnectionInfo(
+            guild_id.into(),
+            timeout,
+            tx,
+        ));
+
+        rx.await?.map_err(|_| LavalinkError::Timeout)
+    }
+
+    async fn handle_connection_info(self, mut rx: UnboundedReceiver<ClientMessage>) {
+        let data: DashMap<GuildId, (Option<String>, Option<String>, Option<String>)> =
+            DashMap::new();
+        let channels: DashMap<GuildId, (UnboundedSender<()>, UnboundedReceiver<()>)> =
+            DashMap::new();
+
+        'outer: while let Some(x) = rx.recv().await {
+            use ClientMessage::*;
+
+            match x {
+                GetConnectionInfo(guild_id, timeout, sender) => {
+                    channels
+                        .entry(guild_id)
+                        .or_insert(tokio::sync::mpsc::unbounded_channel());
+
+                    let inner_rx = &mut channels.get_mut(&guild_id).unwrap().1;
+
+                    loop {
+                        match tokio::time::timeout(timeout, inner_rx.recv()).await {
+                            Err(x) => {
+                                let _ = sender.send(Err(x));
+                                continue 'outer;
+                            }
+                            Ok(x) => {
+                                if x.is_none() {
+                                    continue 'outer;
+                                };
+
+                                if let Some((Some(token), Some(endpoint), Some(session_id))) =
+                                    data.get(&guild_id).map(|x| x.value().clone())
+                                {
+                                    {
+                                        let _ = sender.send(Ok(player::ConnectionInfo {
+                                            token: token.to_string(),
+                                            endpoint: endpoint.to_string(),
+                                            session_id: session_id.to_string(),
+                                        }));
+                                        continue 'outer;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                ServerUpdate(guild_id, token, endpoint) => {
+                    channels
+                        .entry(guild_id)
+                        .or_insert(tokio::sync::mpsc::unbounded_channel());
+
+                    let inner_tx = &mut channels.get_mut(&guild_id).unwrap().0;
+
+                    let mut entry = data.entry(guild_id).or_insert((None, None, None));
+                    let session_id = entry.value().2.clone();
+                    *entry.value_mut() = (Some(token), endpoint, session_id);
+
+                    let _ = inner_tx.send(());
+                }
+                StateUpdate(guild_id, channel_id, user_id, session_id) => {
+                    channels
+                        .entry(guild_id)
+                        .or_insert(tokio::sync::mpsc::unbounded_channel());
+
+                    let inner_tx = &mut channels.get_mut(&guild_id).unwrap().0;
+
+                    if user_id != self.user_id {
+                        continue 'outer;
+                    }
+                    if channel_id.is_none() {
+                        data.remove(&guild_id);
+                        channels.remove(&guild_id);
+                        continue 'outer;
+                    }
+
+                    let mut entry = data.entry(guild_id).or_insert((None, None, None));
+                    let token = entry.value().0.clone();
+                    let endpoint = entry.value().1.clone();
+                    *entry.value_mut() = (token, endpoint, Some(session_id));
+
+                    let _ = inner_tx.send(());
+                }
+            }
+        }
     }
 }

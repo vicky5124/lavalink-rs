@@ -62,6 +62,7 @@ pub enum LavalinkError {
     NoSessionPresent,
     TrackError(TrackError),
     InvalidDataType,
+    Timeout,
 }
 
 impl Error for LavalinkError {}
@@ -115,6 +116,9 @@ impl Display for LavalinkError {
             }
             LavalinkError::InvalidDataType => {
                 write!(f, "The value type provided does not match the data type id, or no data was ever provided.")
+            }
+            LavalinkError::Timeout => {
+                write!(f, "Timeout reached while waiting for response.")
             }
         }
     }

@@ -10,6 +10,7 @@
 - Switched from `async-tungstenite` to `tokio-tungstenite`
 - Move the hook macro inside the library.
 - Implement user data in lavasnek.
+- Implement discord voice event handling and `ConnectionInfo` creation utilities.
 
 ## 0.10.0
 

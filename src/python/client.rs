@@ -20,13 +20,14 @@ fn raw_event(
 
 #[pymethods]
 impl crate::client::LavalinkClient {
-    #[new]
-    fn new_py(
-        py: Python<'_>,
+    #[pyo3(name = "new")]
+    #[staticmethod]
+    fn new_py<'a>(
+        py: Python<'a>,
         nodes: Vec<crate::node::NodeBuilder>,
         events: PyObject,
         user_data: Option<PyObject>,
-    ) -> PyResult<Self> {
+    ) -> PyResult<&'a PyAny> {
         let current_loop = pyo3_asyncio::get_running_loop(py)?;
         let loop_ref = PyObject::from(current_loop);
 
@@ -41,30 +42,27 @@ impl crate::client::LavalinkClient {
             ..Default::default()
         };
 
-        if let Some(data) = user_data {
-            Ok(crate::client::LavalinkClient::new_with_data(
-                events,
-                nodes,
-                std::sync::Arc::new(RwLock::new(data)),
-            ))
-        } else {
-            Ok(crate::client::LavalinkClient::new_with_data(
-                events,
-                nodes,
-                std::sync::Arc::new(RwLock::new(py.None())),
-            ))
-        }
-    }
-
-    #[pyo3(name = "start")]
-    fn start_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
-        let client = self.clone();
-
-        pyo3_asyncio::tokio::future_into_py(py, async move {
-            client.start().await;
-
-            Ok(Python::with_gil(|py| py.None()))
-        })
+        pyo3_asyncio::tokio::future_into_py_with_locals(
+            py,
+            pyo3_asyncio::tokio::get_current_locals(py)?,
+            async move {
+                if let Some(data) = user_data {
+                    Ok(crate::client::LavalinkClient::new_with_data(
+                        events,
+                        nodes,
+                        std::sync::Arc::new(RwLock::new(data)),
+                    )
+                    .await)
+                } else {
+                    Ok(crate::client::LavalinkClient::new_with_data(
+                        events,
+                        nodes,
+                        std::sync::Arc::new(RwLock::new(Python::with_gil(|py| py.None()))),
+                    )
+                    .await)
+                }
+            },
+        )
     }
 
     #[pyo3(name = "create_player_context")]
@@ -350,5 +348,43 @@ impl crate::client::LavalinkClient {
         *client.data::<RwLock<PyObject>>()?.write() = user_data;
 
         Ok(())
+    }
+
+    #[pyo3(name = "handle_voice_server_update", signature = (guild_id, token, endpoint))]
+    fn handle_voice_server_update_py(
+        &self,
+        guild_id: super::model::PyGuildId,
+        token: String,
+        endpoint: Option<String>,
+    ) {
+        self.handle_voice_server_update(guild_id, token, endpoint);
+    }
+
+    #[pyo3(name = "handle_voice_state_update", signature = (guild_id, channel_id, user_id, session_id))]
+    fn handle_voice_state_update_py(
+        &self,
+        guild_id: super::model::PyGuildId,
+        channel_id: Option<super::model::PyChannelId>,
+        user_id: super::model::PyUserId,
+        session_id: String,
+    ) {
+        self.handle_voice_state_update(guild_id, channel_id, user_id, session_id);
+    }
+
+    #[pyo3(name = "get_connection_info")]
+    fn get_connection_info_py<'a>(
+        &self,
+        py: Python<'a>,
+        guild_id: super::model::PyGuildId,
+        timeout: u64,
+    ) -> PyResult<&'a PyAny> {
+        let timeout = std::time::Duration::from_millis(timeout);
+        let client = self.clone();
+
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            let connection_info = client.get_connection_info(guild_id, timeout).await?;
+
+            Ok(connection_info)
+        })
     }
 }

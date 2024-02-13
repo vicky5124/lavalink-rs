@@ -28,6 +28,12 @@ pub struct UserId(pub u64);
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 /// A discord Guild ID.
 pub struct GuildId(pub u64);
+#[derive(
+    Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize,
+)]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
+/// A discord Channel ID.
+pub struct ChannelId(pub u64);
 
 impl FromStr for UserId {
     type Err = ParseIntError;
@@ -45,6 +51,14 @@ impl FromStr for GuildId {
     }
 }
 
+impl FromStr for ChannelId {
+    type Err = ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        u64::from_str(s).map(Self)
+    }
+}
+
 impl From<u64> for UserId {
     fn from(i: u64) -> Self {
         Self(i)
@@ -52,6 +66,12 @@ impl From<u64> for UserId {
 }
 
 impl From<u64> for GuildId {
+    fn from(i: u64) -> Self {
+        Self(i)
+    }
+}
+
+impl From<u64> for ChannelId {
     fn from(i: u64) -> Self {
         Self(i)
     }
@@ -89,7 +109,9 @@ where
 }
 
 #[cfg(feature = "serenity")]
-use serenity_dep::model::id::{GuildId as SerenityGuildId, UserId as SerenityUserId};
+use serenity_dep::model::id::{
+    ChannelId as SerenityChannelId, GuildId as SerenityGuildId, UserId as SerenityUserId,
+};
 
 #[cfg(feature = "serenity")]
 impl From<SerenityUserId> for UserId {
@@ -105,9 +127,16 @@ impl From<SerenityGuildId> for GuildId {
     }
 }
 
+#[cfg(feature = "serenity")]
+impl From<SerenityChannelId> for ChannelId {
+    fn from(id: SerenityChannelId) -> ChannelId {
+        ChannelId(id.get().into())
+    }
+}
+
 #[cfg(feature = "twilight")]
 use twilight_model::id::{
-    marker::{GuildMarker, UserMarker},
+    marker::{ChannelMarker, GuildMarker, UserMarker},
     Id,
 };
 
@@ -125,8 +154,17 @@ impl From<Id<GuildMarker>> for GuildId {
     }
 }
 
+#[cfg(feature = "twilight")]
+impl From<Id<ChannelMarker>> for ChannelId {
+    fn from(id: Id<ChannelMarker>) -> ChannelId {
+        ChannelId(id.get())
+    }
+}
+
 #[cfg(feature = "songbird")]
-use songbird_dep::id::{GuildId as SongbirdGuildId, UserId as SongbirdUserId};
+use songbird_dep::id::{
+    ChannelId as SongbirdChannelId, GuildId as SongbirdGuildId, UserId as SongbirdUserId,
+};
 
 #[cfg(feature = "songbird")]
 impl From<SongbirdUserId> for UserId {
@@ -139,5 +177,12 @@ impl From<SongbirdUserId> for UserId {
 impl From<SongbirdGuildId> for GuildId {
     fn from(id: SongbirdGuildId) -> GuildId {
         GuildId(id.0.into())
+    }
+}
+
+#[cfg(feature = "songbird")]
+impl From<SongbirdChannelId> for ChannelId {
+    fn from(id: SongbirdChannelId) -> ChannelId {
+        ChannelId(id.0.into())
     }
 }

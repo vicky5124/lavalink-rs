@@ -12,6 +12,7 @@ use pyo3::wrap_pymodule;
 pub fn model(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<crate::model::UserId>()?;
     m.add_class::<crate::model::GuildId>()?;
+    m.add_class::<crate::model::ChannelId>()?;
 
     m.add_wrapped(wrap_pymodule!(self::events::events))?;
     m.add_wrapped(wrap_pymodule!(self::http::http))?;
@@ -68,6 +69,25 @@ impl crate::model::GuildId {
     }
 }
 
+#[pymethods]
+impl crate::model::ChannelId {
+    #[new]
+    fn new_py(channel_id: u64) -> Self {
+        channel_id.into()
+    }
+
+    #[getter]
+    fn get_inner(&self) -> pyo3::PyResult<u64> {
+        Ok(self.0)
+    }
+
+    #[setter]
+    fn set_inner(&mut self, id: u64) -> pyo3::PyResult<()> {
+        self.0 = id;
+        Ok(())
+    }
+}
+
 #[derive(FromPyObject)]
 pub enum PyUserId {
     #[pyo3(transparent, annotation = "UserId")]
@@ -97,6 +117,23 @@ impl Into<crate::model::GuildId> for PyGuildId {
     fn into(self) -> crate::model::GuildId {
         match self {
             Self::GuildId(x) => x,
+            Self::Int(x) => x.into(),
+        }
+    }
+}
+
+#[derive(FromPyObject)]
+pub enum PyChannelId {
+    #[pyo3(transparent, annotation = "ChannelId")]
+    ChannelId(crate::model::ChannelId),
+    #[pyo3(transparent, annotation = "int")]
+    Int(u64),
+}
+
+impl Into<crate::model::ChannelId> for PyChannelId {
+    fn into(self) -> crate::model::ChannelId {
+        match self {
+            Self::ChannelId(x) => x,
             Self::Int(x) => x.into(),
         }
     }

@@ -60,10 +60,9 @@ async def on_starting(_event: hikari.StartingEvent) -> None:
         os.environ["LAVALINK_PASSWORD"],
         601749512456896522,  # Bot ID
     )
-    lavalink_client = lavalink_rs.LavalinkClient(
+    lavalink_client = await lavalink_rs.LavalinkClient.new(
         [node], Events(), 123
     )  # 123 is any python object, 123 is used as an exaple in user data.
-    await lavalink_client.start()
     bot.data.lavalink_client = lavalink_client
 
 
