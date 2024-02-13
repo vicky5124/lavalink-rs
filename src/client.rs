@@ -524,61 +524,62 @@ impl LavalinkClient {
     }
 
     async fn handle_connection_info(self, mut rx: UnboundedReceiver<ClientMessage>) {
-        let data: DashMap<GuildId, (Option<String>, Option<String>, Option<String>)> =
-            DashMap::new();
-        let channels: DashMap<GuildId, (UnboundedSender<()>, UnboundedReceiver<()>)> =
-            DashMap::new();
+        let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>)>> =
+            Arc::new(DashMap::new());
+        let channels: Arc<DashMap<GuildId, (UnboundedSender<()>, UnboundedReceiver<()>)>> =
+            Arc::new(DashMap::new());
 
-        'outer: while let Some(x) = rx.recv().await {
+        while let Some(x) = rx.recv().await {
             use ClientMessage::*;
 
             match x {
                 GetConnectionInfo(guild_id, timeout, sender) => {
-                    channels
-                        .entry(guild_id)
-                        .or_insert(tokio::sync::mpsc::unbounded_channel());
+                    let data = data.clone();
+                    let channels = channels.clone();
 
-                    let inner_rx = &mut channels.get_mut(&guild_id).unwrap().1;
+                    tokio::spawn(async move {
+                        channels
+                            .entry(guild_id)
+                            .or_insert(tokio::sync::mpsc::unbounded_channel());
 
-                    loop {
-                        match tokio::time::timeout(timeout, inner_rx.recv()).await {
-                            Err(x) => {
-                                if let Some((Some(token), Some(endpoint), Some(session_id))) =
-                                    data.get(&guild_id).map(|x| x.value().clone())
-                                {
+                        let inner_rx = &mut channels.get_mut(&guild_id).unwrap().1;
+
+                        loop {
+                            match tokio::time::timeout(timeout, inner_rx.recv()).await {
+                                Err(x) => {
+                                    if let Some((Some(token), Some(endpoint), Some(session_id))) =
+                                        data.get(&guild_id).map(|x| x.value().clone())
                                     {
                                         let _ = sender.send(Ok(player::ConnectionInfo {
                                             token: token.to_string(),
                                             endpoint: endpoint.to_string(),
                                             session_id: session_id.to_string(),
                                         }));
-                                        continue 'outer;
+                                        return;
                                     }
+
+                                    let _ = sender.send(Err(x));
+                                    return;
                                 }
+                                Ok(x) => {
+                                    if x.is_none() {
+                                        return;
+                                    };
 
-                                let _ = sender.send(Err(x));
-                                continue 'outer;
-                            }
-                            Ok(x) => {
-                                if x.is_none() {
-                                    continue 'outer;
-                                };
-
-                                if let Some((Some(token), Some(endpoint), Some(session_id))) =
-                                    data.get(&guild_id).map(|x| x.value().clone())
-                                {
+                                    if let Some((Some(token), Some(endpoint), Some(session_id))) =
+                                        data.get(&guild_id).map(|x| x.value().clone())
                                     {
                                         let _ = sender.send(Ok(player::ConnectionInfo {
                                             token: token.to_string(),
                                             endpoint: endpoint.to_string(),
                                             session_id: session_id.to_string(),
                                         }));
-                                        continue 'outer;
+                                        return;
                                     }
                                 }
                             }
                         }
-                    }
+                    });
                 }
                 ServerUpdate(guild_id, token, endpoint) => {
                     channels
@@ -601,12 +602,12 @@ impl LavalinkClient {
                     let inner_tx = &mut channels.get_mut(&guild_id).unwrap().0;
 
                     if user_id != self.user_id {
-                        continue 'outer;
+                        continue;
                     }
                     if channel_id.is_none() {
                         data.remove(&guild_id);
                         channels.remove(&guild_id);
-                        continue 'outer;
+                        continue;
                     }
 
                     let mut entry = data.entry(guild_id).or_insert((None, None, None));
