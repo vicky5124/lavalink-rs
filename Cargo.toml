@@ -37,7 +37,7 @@ native-tls = ["reqwest/native-tls", "tokio-tungstenite/native-tls"]
 python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute", "parking_lot"]
 
 [package.metadata.docs.rs]
-features = ["rustls", "twilight", "serenity", "songbird", "macros"]
+features = ["rustls", "twilight", "serenity", "songbird", "macros", "python"]
 
 [dependencies]
 arc-swap = "1"

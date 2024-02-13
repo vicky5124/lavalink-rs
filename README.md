@@ -60,10 +60,14 @@ git = "https://gitlab.com/vicky5124/lavalink-rs/"
 branch = "main"
 ```
 
-If you wish to use a development version of songbird (or any other library), add the following to the Cargo.toml:
+If you wish to use a development version of songbird (or serenity, or twilight-model), add the following to the Cargo.toml:
 
 ```toml
 [patch.crates-io.songbird]
+git = "https://github.com/serenity-rs/songbird"
+branch = "next"
+
+[dependencies.songbird]
 git = "https://github.com/serenity-rs/songbird"
 branch = "next"
 ```

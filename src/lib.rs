@@ -30,13 +30,22 @@ pub mod node;
 pub mod player_context;
 /// Re-exports of all the most common types.
 pub mod prelude;
+/// Macros that abstract annoying stuff.
+#[cfg(feature = "macros")]
+pub mod macros {
+    /// A macro that transforms `async` functions (and closures) into plain functions, whose return
+    /// type is a boxed [`Future`].
+    ///
+    /// [`Future`]: std::future::Future
+    pub use macros_dep::hook;
+}
 
+#[cfg(feature = "macros")]
 /// A macro that transforms `async` functions (and closures) into plain functions, whose return
 /// type is a boxed [`Future`].
 ///
 /// [`Future`]: std::future::Future
-#[cfg(feature = "macros")]
-pub use macros_dep::hook;
+pub use macros::hook;
 
 #[cfg(feature = "python")]
 use pyo3::{prelude::*, types::PyDict, wrap_pymodule};
