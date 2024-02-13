@@ -9,6 +9,7 @@
 - Implement `PlayerContext::play()`
 - Switched from `async-tungstenite` to `tokio-tungstenite`
 - Move the hook macro inside the library.
+- Implement user data in lavasnek.
 
 ## 0.10.0
 

@@ -4,6 +4,7 @@ use crate::model::player::ConnectionInfo;
 use crate::prelude::PlayerContext;
 
 use futures::future::BoxFuture;
+use parking_lot::RwLock;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
@@ -24,6 +25,7 @@ impl crate::client::LavalinkClient {
         py: Python<'_>,
         nodes: Vec<crate::node::NodeBuilder>,
         events: PyObject,
+        user_data: Option<PyObject>,
     ) -> PyResult<Self> {
         let current_loop = pyo3_asyncio::get_running_loop(py)?;
         let loop_ref = PyObject::from(current_loop);
@@ -39,7 +41,19 @@ impl crate::client::LavalinkClient {
             ..Default::default()
         };
 
-        Ok(crate::client::LavalinkClient::new(events, nodes))
+        if let Some(data) = user_data {
+            Ok(crate::client::LavalinkClient::new_with_data(
+                events,
+                nodes,
+                std::sync::Arc::new(RwLock::new(data)),
+            ))
+        } else {
+            Ok(crate::client::LavalinkClient::new_with_data(
+                events,
+                nodes,
+                std::sync::Arc::new(RwLock::new(py.None())),
+            ))
+        }
     }
 
     #[pyo3(name = "start")]
@@ -61,23 +75,41 @@ impl crate::client::LavalinkClient {
         endpoint: String,
         token: String,
         session_id: String,
+        user_data: Option<PyObject>,
     ) -> PyResult<&'a PyAny> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
-            let player = client
-                .create_player_context(
-                    guild_id,
-                    ConnectionInfo {
-                        endpoint,
-                        token,
-                        session_id,
-                    },
-                )
-                .await?;
-
-            Ok(player)
-        })
+        pyo3_asyncio::tokio::future_into_py_with_locals(
+            py,
+            pyo3_asyncio::tokio::get_current_locals(py)?,
+            async move {
+                if let Some(data) = user_data {
+                    Ok(client
+                        .create_player_context_with_data(
+                            guild_id,
+                            ConnectionInfo {
+                                endpoint,
+                                token,
+                                session_id,
+                            },
+                            std::sync::Arc::new(RwLock::new(data)),
+                        )
+                        .await?)
+                } else {
+                    Ok(client
+                        .create_player_context_with_data(
+                            guild_id,
+                            ConnectionInfo {
+                                endpoint,
+                                token,
+                                session_id,
+                            },
+                            std::sync::Arc::new(RwLock::new(Python::with_gil(|py| py.None()))),
+                        )
+                        .await?)
+                }
+            },
+        )
     }
 
     #[pyo3(name = "create_player")]
@@ -298,5 +330,25 @@ impl crate::client::LavalinkClient {
 
             Ok(players)
         })
+    }
+
+    #[getter]
+    #[pyo3(name = "data")]
+    fn get_data_py<'a>(&self, py: Python<'a>) -> PyResult<PyObject> {
+        let client = self.clone();
+
+        let data = client.data::<RwLock<PyObject>>()?.read().clone_ref(py);
+
+        Ok(data)
+    }
+
+    #[setter]
+    #[pyo3(name = "data")]
+    fn set_data_py(&self, user_data: PyObject) -> PyResult<()> {
+        let client = self.clone();
+
+        *client.data::<RwLock<PyObject>>()?.write() = user_data;
+
+        Ok(())
     }
 }

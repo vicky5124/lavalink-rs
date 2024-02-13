@@ -9,6 +9,7 @@ use crate::{
     player_context::{QueueMessage, TrackInQueue},
 };
 
+use parking_lot::RwLock;
 use pyo3::prelude::*;
 
 #[pymethods]
@@ -196,6 +197,26 @@ impl crate::player_context::PlayerContext {
     #[pyo3(name = "update_player_data")]
     fn update_player_data_py<'a>(&self, player: Player) -> PyResult<()> {
         self.update_player_data(player)?;
+        Ok(())
+    }
+
+    #[getter]
+    #[pyo3(name = "data")]
+    fn get_data_py<'a>(&self, py: Python<'a>) -> PyResult<PyObject> {
+        let player = self.clone();
+
+        let data = player.data::<RwLock<PyObject>>()?.read().clone_ref(py);
+
+        Ok(data)
+    }
+
+    #[setter]
+    #[pyo3(name = "data")]
+    fn set_data_py(&self, user_data: PyObject) -> PyResult<()> {
+        let player = self.clone();
+
+        *player.data::<RwLock<PyObject>>()?.write() = user_data;
+
         Ok(())
     }
 }

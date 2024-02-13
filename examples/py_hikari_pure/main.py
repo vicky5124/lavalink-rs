@@ -26,11 +26,25 @@ class Bot(hikari.GatewayBot):
 
 
 class Events:
-    async def ready(self, client: lavalink_rs.LavalinkClient, session_id: str, event: events.Ready):
+    async def ready(
+        self, client: lavalink_rs.LavalinkClient, session_id: str, event: events.Ready
+    ):
         logging.info("HOLY READY")
 
-    async def track_start(self, client: lavalink_rs.LavalinkClient, session_id: str, event: events.TrackStart):
-        logging.info(f"Started track {event.track.info.author} - {event.track.info.title} in {event.guild_id.inner}")
+    async def track_start(
+        self,
+        client: lavalink_rs.LavalinkClient,
+        session_id: str,
+        event: events.TrackStart,
+    ):
+        logging.info(
+            f"Started track {event.track.info.author} - {event.track.info.title} in {event.guild_id.inner}"
+        )
+        player_ctx = client.get_player_context(event.guild_id.inner)
+        await bot.rest.create_message(
+            player_ctx.data,
+            f"Started playing `{event.track.info.author} - {event.track.info.title}`",
+        )
 
 
 bot = Bot(token=os.environ["DISCORD_TOKEN"], intents=hikari.intents.Intents.ALL)
@@ -42,11 +56,13 @@ logging.getLogger().setLevel(logging.DEBUG)
 async def on_starting(_event: hikari.StartingEvent) -> None:
     node = lavalink_rs.NodeBuilder(
         "localhost:2333",
-        False, # is the server SSL?
+        False,  # is the server SSL?
         os.environ["LAVALINK_PASSWORD"],
-        601749512456896522, # Bot ID
+        601749512456896522,  # Bot ID
     )
-    lavalink_client = lavalink_rs.LavalinkClient([node], Events())
+    lavalink_client = lavalink_rs.LavalinkClient(
+        [node], Events(), 123
+    )  # 123 is any python object, 123 is used as an exaple in user data.
     await lavalink_client.start()
     bot.data.lavalink_client = lavalink_client
 
@@ -58,7 +74,15 @@ async def on_message(event: hikari.GuildMessageCreateEvent) -> None:
         return None
 
     if event.message.content.startswith(",test"):
-        await event.message.respond("AAAAAAAAAAAAAAA")
+        voice = bot.voice.connections.get(event.guild_id)
+
+        if not voice:
+            await event.message.respond(f"Not in a voice channel.")
+            return None
+
+        # Custom user data can be accessessed via the data getter and setter of the client.
+        voice.lavalink_client.data += 1
+        await event.message.respond(f"Test data {voice.lavalink_client.data}")
 
     elif event.message.content.startswith(",leave"):
         voice = bot.voice.connections.get(event.guild_id)
@@ -90,6 +114,10 @@ async def on_message(event: hikari.GuildMessageCreateEvent) -> None:
             await event.message.respond(f"Joined <#{channel_id}>")
 
         player_ctx = voice.player
+
+        # Just like with the client, you can add custom data to the player context either
+        # with an argument in `create_player_context` or using the data setter.
+        player_ctx.data = event.message.channel_id
 
         query = event.message.content.replace(",play ", "")
 

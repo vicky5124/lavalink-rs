@@ -34,7 +34,7 @@ macros = ["macros-dep"]
 rustls = ["reqwest/rustls-tls", "tokio-tungstenite/rustls-tls-webpki-roots"]
 native-tls = ["reqwest/native-tls", "tokio-tungstenite/native-tls"]
 
-python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute"]
+python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute", "parking_lot"]
 
 [package.metadata.docs.rs]
 features = ["rustls", "twilight", "serenity", "songbird", "macros"]
@@ -99,6 +99,11 @@ optional = true
 [dependencies.log]
 version = "0.4"
 optional = true
+
+[dependencies.parking_lot]
+version = "0.12"
+optional = true
+#features = ["deadlock_detection"]
 
 [dependencies.paste]
 version = "1"
