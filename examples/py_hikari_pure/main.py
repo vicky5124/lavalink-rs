@@ -7,7 +7,8 @@ from lavalink_voice import LavalinkVoice
 import hikari
 import lavalink_rs
 from lavalink_rs.model.track import TrackData, PlaylistData
-from lavalink_rs.model import events
+from lavalink_rs.model.client import NodeDistributionStrategy
+from lavalink_rs.model import events, GuildId
 
 
 class Data:
@@ -52,6 +53,12 @@ bot = Bot(token=os.environ["DISCORD_TOKEN"], intents=hikari.intents.Intents.ALL)
 logging.getLogger().setLevel(logging.DEBUG)
 
 
+# Make your own node selection algorythm, and return the index of that node.
+# The index is the same as when they were added to the client initially.
+# async def custom(client: lavalink_rs.LavalinkClient, guild_id: GuildId) -> int:
+#    return 0
+
+
 @bot.listen()
 async def on_starting(_event: hikari.StartingEvent) -> None:
     node = lavalink_rs.NodeBuilder(
@@ -61,8 +68,13 @@ async def on_starting(_event: hikari.StartingEvent) -> None:
         601749512456896522,  # Bot ID
     )
     lavalink_client = await lavalink_rs.LavalinkClient.new(
-        [node], Events(), 123
-    )  # 123 is any python object, 123 is used as an exaple in user data.
+        [node],
+        Events(),
+        # NodeDistributionStrategy.custom(custom),
+        NodeDistributionStrategy.sharded(),
+        # 123 is any python object, "123" is used as an exaple in user data with `,test`.
+        123,
+    )
     bot.data.lavalink_client = lavalink_client
 
 

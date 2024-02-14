@@ -14,74 +14,82 @@ pub struct EventHandler {
 
 #[pymethods]
 impl EventHandler {
-    #[pyo3(text_signature = "($self, client, event, /)")]
+    #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Periodic event that returns the statistics of the server.
     ///
     /// Positional Arguments:
-    /// - `client` : `Lavalink`
+    /// - `client` : `LavalinkClient`
+    /// - `session_id` : `str`
     /// - `event` : `Stats`
     ///
     /// Returns: `Future<None>`
     fn stats(&self) {}
-    #[pyo3(text_signature = "($self, client, event, /)")]
+    #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Event that triggers when a player updates.
     ///
     /// Positional Arguments:
-    /// - `client` : `Lavalink`
+    /// - `client` : `LavalinkClient`
+    /// - `session_id` : `str`
     /// - `event` : `PlayerUpdate`
     ///
     /// Returns: `Future<None>`
     fn player_update(&self) {}
-    #[pyo3(text_signature = "($self, client, event, /)")]
+    #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Event that triggers when a track starts playing.
     ///
     /// Positional Arguments:
-    /// - `client` : `Lavalink`
+    /// - `client` : `LavalinkClient`
+    /// - `session_id` : `str`
     /// - `event` : `TrackStart`
     ///
     /// Returns: `Future<None>`
     fn track_start(&self) {}
-    #[pyo3(text_signature = "($self, client, event, /)")]
+    #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Event that triggers when a track finishes playing.
     ///
     /// Positional Arguments:
-    /// - `client` : `Lavalink`
+    /// - `client` : `LavalinkClient`
+    /// - `session_id` : `str`
     /// - `event` : `TrackEnd`
     ///
     /// Returns: `Future<None>`
     fn track_end(&self) {}
-    #[pyo3(text_signature = "($self, client, event, /)")]
+    #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Event that triggers when a track raises an exception on the Lavalink server.
     ///
     /// Positional Arguments:
-    /// - `client` : `Lavalink`
+    /// - `client` : `LavalinkClient`
+    /// - `session_id` : `str`
     /// - `event` : `TrackException`
     ///
     /// Returns: `Future<None>`
     fn track_exception(&self) {}
-    #[pyo3(text_signature = "($self, client, event, /)")]
+    #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Event that triggers when a track gets stuck while playing.
     ///
     /// Positional Arguments:
-    /// - `client` : `Lavalink`
+    /// - `client` : `LavalinkClient`
+    /// - `session_id` : `str`
     /// - `event` : `TrackStuck`
     ///
     /// Returns: `Future<None>`
     fn track_stuck(&self) {}
-    #[pyo3(text_signature = "($self, client, event, /)")]
+    #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Event that triggers when the websocket connection to the voice channel closes.
     ///
     /// Positional Arguments:
-    /// - `client` : `Lavalink`
+    /// - `client` : `LavalinkClient`
+    /// - `session_id` : `str`
     /// - `event` : `WebSocketClosed`
     ///
     /// Returns: `Future<None>`
     fn websocket_closed(&self) {}
-    #[pyo3(text_signature = "($self, client, event, /)")]
+    #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Event that triggers when the connection is ready.
     ///
     /// Positional Arguments:
-    /// - `client` : `Lavalink`
+    /// - `client` : `LavalinkClient`
+    /// - `session_id` : `str`
     /// - `event` : `Ready`
     ///
     /// Returns: `Future<None>`

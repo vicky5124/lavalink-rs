@@ -1,3 +1,4 @@
+pub mod client;
 pub mod events;
 pub mod http;
 pub mod player;
@@ -14,6 +15,7 @@ pub fn model(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<crate::model::GuildId>()?;
     m.add_class::<crate::model::ChannelId>()?;
 
+    m.add_wrapped(wrap_pymodule!(self::client::client))?;
     m.add_wrapped(wrap_pymodule!(self::events::events))?;
     m.add_wrapped(wrap_pymodule!(self::http::http))?;
     m.add_wrapped(wrap_pymodule!(self::player::player))?;
@@ -22,6 +24,7 @@ pub fn model(py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
     let sys = PyModule::import(py, "sys")?;
     let sys_modules: &PyDict = sys.getattr("modules")?.downcast()?;
+    sys_modules.set_item("lavalink_rs.model.client", m.getattr("client")?)?;
     sys_modules.set_item("lavalink_rs.model.events", m.getattr("events")?)?;
     sys_modules.set_item("lavalink_rs.model.http", m.getattr("http")?)?;
     sys_modules.set_item("lavalink_rs.model.player", m.getattr("player")?)?;

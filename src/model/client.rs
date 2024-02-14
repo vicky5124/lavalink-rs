@@ -3,6 +3,9 @@ use std::sync::Arc;
 
 use super::*;
 
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+
 pub(crate) enum ClientMessage {
     GetConnectionInfo(
         GuildId,
@@ -23,6 +26,8 @@ pub enum NodeDistributionStrategy {
     HighestFreeMemory,
     //ByRegion(...),
     Custom(fn(&'_ crate::client::LavalinkClient, GuildId) -> BoxFuture<Arc<crate::node::Node>>),
+    #[cfg(feature = "python")]
+    CustomPython(PyObject),
 }
 
 impl NodeDistributionStrategy {
@@ -52,7 +57,7 @@ impl NodeDistributionStrategy {
 
     pub fn custom(
         func: fn(&'_ crate::client::LavalinkClient, GuildId) -> BoxFuture<Arc<crate::node::Node>>,
-    ) -> Self {
-        Self::Custom(func)
+    ) -> NodeDistributionStrategy {
+        NodeDistributionStrategy::Custom(func)
     }
 }

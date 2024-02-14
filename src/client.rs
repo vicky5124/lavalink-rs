@@ -238,6 +238,58 @@ impl LavalinkClient {
                 .unwrap()
                 .clone(),
             Custom(func) => func(self, guild_id).await,
+            #[cfg(feature = "python")]
+            CustomPython(func) => {
+                use pyo3::prelude::*;
+                let client = self.clone();
+                let (tx, rx) = oneshot::channel();
+
+                Python::with_gil(|py| {
+                    let func = func.into_py(py);
+                    let current_loop = pyo3_asyncio::tokio::get_current_loop(py).unwrap();
+
+                    let client = client.clone();
+
+                    pyo3_asyncio::tokio::future_into_py_with_locals(
+                        py,
+                        pyo3_asyncio::TaskLocals::new(current_loop),
+                        async move {
+                            let future = Python::with_gil(|py| {
+                                let coro = func
+                                    .call(py, (client.into_py(py), guild_id.into_py(py)), None)
+                                    .unwrap();
+
+                                pyo3_asyncio::tokio::into_future(coro.downcast(py).unwrap())
+                            })
+                            .unwrap();
+
+                            match future.await {
+                                Err(e) => {
+                                    Python::with_gil(|py| {
+                                        e.print_and_set_sys_last_vars(py);
+                                    });
+                                    let _ = tx.send(0);
+                                }
+                                Ok(x) => {
+                                    let _ = tx.send(Python::with_gil(|py| {
+                                        x.extract::<usize>(py).unwrap_or(0)
+                                    }));
+                                }
+                            }
+
+                            Ok(())
+                        },
+                    )
+                    .unwrap();
+                });
+
+                let idx = rx.await.unwrap();
+
+                client.get_node_by_index(idx).unwrap_or_else(|| {
+                    error!("Index provided does not lead to any node, defaulting to 0.");
+                    client.get_node_by_index(0).unwrap()
+                })
+            }
         }
     }
 

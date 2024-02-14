@@ -1,4 +1,3 @@
-use crate::model::client::NodeDistributionStrategy;
 use crate::model::events::Events;
 use crate::model::http::UpdatePlayer;
 use crate::model::player::ConnectionInfo;
@@ -27,6 +26,7 @@ impl crate::client::LavalinkClient {
         py: Python<'a>,
         nodes: Vec<crate::node::NodeBuilder>,
         events: PyObject,
+        strategy: super::model::client::NodeDistributionStrategyPy,
         user_data: Option<PyObject>,
     ) -> PyResult<&'a PyAny> {
         let current_loop = pyo3_asyncio::get_running_loop(py)?;
@@ -51,7 +51,7 @@ impl crate::client::LavalinkClient {
                     Ok(crate::client::LavalinkClient::new_with_data(
                         events,
                         nodes,
-                        NodeDistributionStrategy::Sharded,
+                        strategy.inner,
                         std::sync::Arc::new(RwLock::new(data)),
                     )
                     .await)
@@ -59,7 +59,7 @@ impl crate::client::LavalinkClient {
                     Ok(crate::client::LavalinkClient::new_with_data(
                         events,
                         nodes,
-                        NodeDistributionStrategy::Sharded,
+                        strategy.inner,
                         std::sync::Arc::new(RwLock::new(Python::with_gil(|py| py.None()))),
                     )
                     .await)
