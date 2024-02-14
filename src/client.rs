@@ -532,8 +532,9 @@ impl LavalinkClient {
     async fn handle_connection_info(self, mut rx: UnboundedReceiver<ClientMessage>) {
         let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>)>> =
             Arc::new(DashMap::new());
-        let channels: Arc<DashMap<GuildId, (UnboundedSender<()>, Mutex<UnboundedReceiver<()>>)>> =
-            Arc::new(DashMap::new());
+        let channels: Arc<
+            DashMap<GuildId, (UnboundedSender<()>, Arc<Mutex<UnboundedReceiver<()>>>)>,
+        > = Arc::new(DashMap::new());
 
         while let Some(x) = rx.recv().await {
             use ClientMessage::*;
@@ -544,12 +545,14 @@ impl LavalinkClient {
                     let channels = channels.clone();
 
                     tokio::spawn(async move {
-                        channels.entry(guild_id).or_insert({
-                            let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-                            (tx, Mutex::new(rx))
-                        });
+                        {
+                            channels.entry(guild_id).or_insert({
+                                let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+                                (tx, Arc::new(Mutex::new(rx)))
+                            });
+                        }
 
-                        let inner_lock = channels.get(&guild_id).unwrap();
+                        let inner_lock = { channels.get(&guild_id).unwrap().clone() };
                         let mut inner_rx = inner_lock.1.lock().await;
 
                         loop {
@@ -590,10 +593,12 @@ impl LavalinkClient {
                     });
                 }
                 ServerUpdate(guild_id, token, endpoint) => {
-                    channels.entry(guild_id).or_insert({
-                        let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-                        (tx, Mutex::new(rx))
-                    });
+                    {
+                        channels.entry(guild_id).or_insert({
+                            let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+                            (tx, Arc::new(Mutex::new(rx)))
+                        });
+                    }
 
                     let inner_tx = &channels.get(&guild_id).unwrap().0;
 
@@ -604,10 +609,12 @@ impl LavalinkClient {
                     let _ = inner_tx.send(());
                 }
                 StateUpdate(guild_id, channel_id, user_id, session_id) => {
-                    channels.entry(guild_id).or_insert({
-                        let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-                        (tx, Mutex::new(rx))
-                    });
+                    {
+                        channels.entry(guild_id).or_insert({
+                            let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+                            (tx, Arc::new(Mutex::new(rx)))
+                        });
+                    }
 
                     let inner_tx = &channels.get(&guild_id).unwrap().0;
 

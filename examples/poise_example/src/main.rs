@@ -20,17 +20,52 @@ pub type Context<'a> = poise::Context<'a, Data, Error>;
 /// Test
 #[poise::command(prefix_command)]
 async fn test(ctx: Context<'_>) -> Result<(), Error> {
-    //use std::time::Duration;
+    use std::time::Duration;
+
+    //let guild_id = ctx.guild_id().unwrap();
+    let lava_client = ctx.data().lavalink.clone();
+    let lava_client2 = lava_client.clone();
+    let ctx2 = ctx.serenity_context().clone();
 
     ctx.say("AAAAAAAAAAA").await?;
 
-    let guild_id = ctx.guild_id().unwrap();
+    tokio::spawn(async move {
+        serenity::model::id::ChannelId::from(702161938012045383)
+            .say(
+                &ctx2,
+                format!(
+                    "{:?}",
+                    lava_client2
+                        .get_connection_info(124, Duration::from_secs(5))
+                        .await
+                ),
+            )
+            .await
+            .unwrap();
+        serenity::model::id::ChannelId::from(702161938012045383)
+            .say(
+                &ctx2,
+                format!(
+                    "{:?}",
+                    lava_client2
+                        .get_connection_info(123, Duration::from_secs(5))
+                        .await
+                ),
+            )
+            .await
+            .unwrap();
+    });
 
-    let lava_client = ctx.data().lavalink.clone();
+    let test_string = "aaa".to_string();
 
-    let player = lava_client.get_player_context(guild_id).unwrap();
-    player.skip()?;
+    lava_client.handle_voice_server_update(123, test_string.clone(), Some(test_string.clone()));
+    lava_client.handle_voice_state_update(123, Some(123), 601749512456896522, test_string.clone());
 
+    lava_client.handle_voice_server_update(124, test_string.clone(), Some(test_string.clone()));
+    lava_client.handle_voice_state_update(124, Some(123), 601749512456896522, test_string.clone());
+
+    //let player = lava_client.get_player_context(guild_id).unwrap();
+    //player.skip()?;
     //dbg!(lava_client.info(guild_id).await?);
     //dbg!(lava_client.stats(guild_id).await?);
     //dbg!(lava_client.version(guild_id).await?);
