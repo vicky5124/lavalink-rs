@@ -11,6 +11,12 @@
 - Move the hook macro inside the library.
 - Implement user data in lavasnek.
 - Implement discord voice event handling and `ConnectionInfo` creation utilities.
+- Implemented node selection methods:
+ - Round-Robin.
+ - Main and fallback.
+ - Lowest CPU load.
+ - Most memory free.
+ - Custom method.
 
 ## 0.10.0
 
