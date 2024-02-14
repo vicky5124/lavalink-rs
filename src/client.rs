@@ -7,7 +7,7 @@ use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
-use arc_swap::ArcSwap;
+use arc_swap::{ArcSwap, ArcSwapOption};
 use dashmap::DashMap;
 use reqwest::{header::HeaderMap, Client as ReqwestClient};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
@@ -526,8 +526,9 @@ impl LavalinkClient {
     async fn handle_connection_info(self, mut rx: UnboundedReceiver<ClientMessage>) {
         let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>)>> =
             Arc::new(DashMap::new());
-        let channels: Arc<DashMap<GuildId, (UnboundedSender<()>, UnboundedReceiver<()>)>> =
-            Arc::new(DashMap::new());
+        let channels: Arc<
+            DashMap<GuildId, (UnboundedSender<()>, ArcSwapOption<UnboundedReceiver<()>>)>,
+        > = Arc::new(DashMap::new());
 
         while let Some(x) = rx.recv().await {
             use ClientMessage::*;
@@ -538,11 +539,13 @@ impl LavalinkClient {
                     let channels = channels.clone();
 
                     tokio::spawn(async move {
-                        channels
-                            .entry(guild_id)
-                            .or_insert(tokio::sync::mpsc::unbounded_channel());
+                        channels.entry(guild_id).or_insert({
+                            let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+                            (tx, ArcSwapOption::new(Some(Arc::new(rx))))
+                        });
 
-                        let inner_rx = &mut channels.get_mut(&guild_id).unwrap().1;
+                        let mut inner_arc = channels.get(&guild_id).unwrap().1.swap(None).unwrap();
+                        let inner_rx = &mut Arc::get_mut(&mut inner_arc).unwrap();
 
                         loop {
                             match tokio::time::timeout(timeout, inner_rx.recv()).await {
@@ -582,11 +585,12 @@ impl LavalinkClient {
                     });
                 }
                 ServerUpdate(guild_id, token, endpoint) => {
-                    channels
-                        .entry(guild_id)
-                        .or_insert(tokio::sync::mpsc::unbounded_channel());
+                    channels.entry(guild_id).or_insert({
+                        let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+                        (tx, ArcSwapOption::new(Some(Arc::new(rx))))
+                    });
 
-                    let inner_tx = &mut channels.get_mut(&guild_id).unwrap().0;
+                    let inner_tx = &channels.get(&guild_id).unwrap().0;
 
                     let mut entry = data.entry(guild_id).or_insert((None, None, None));
                     let session_id = entry.value().2.clone();
@@ -595,11 +599,12 @@ impl LavalinkClient {
                     let _ = inner_tx.send(());
                 }
                 StateUpdate(guild_id, channel_id, user_id, session_id) => {
-                    channels
-                        .entry(guild_id)
-                        .or_insert(tokio::sync::mpsc::unbounded_channel());
+                    channels.entry(guild_id).or_insert({
+                        let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+                        (tx, ArcSwapOption::new(Some(Arc::new(rx))))
+                    });
 
-                    let inner_tx = &mut channels.get_mut(&guild_id).unwrap().0;
+                    let inner_tx = &channels.get(&guild_id).unwrap().0;
 
                     if user_id != self.user_id {
                         continue;
