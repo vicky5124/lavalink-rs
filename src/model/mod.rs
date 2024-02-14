@@ -5,6 +5,8 @@ use std::str::FromStr;
 pub use futures::future::BoxFuture;
 use serde::{de, Deserialize, Deserializer};
 
+/// Models related to the lavalink client.
+pub(crate) mod client;
 /// Models related to the lavalink events.
 pub mod events;
 /// Models related to the lavalink REST API.

@@ -20,19 +20,9 @@ pub struct LavalinkClient {
     pub nodes: Arc<Vec<node::Node>>,
     pub players: Arc<DashMap<GuildId, PlayerContext>>,
     pub events: events::Events,
-    tx: UnboundedSender<ClientMessage>,
+    tx: UnboundedSender<client::ClientMessage>,
     user_id: UserId,
     user_data: Arc<dyn std::any::Any + Send + Sync>,
-}
-
-enum ClientMessage {
-    GetConnectionInfo(
-        GuildId,
-        std::time::Duration,
-        oneshot::Sender<Result<player::ConnectionInfo, tokio::time::error::Elapsed>>,
-    ),
-    ServerUpdate(GuildId, String, Option<String>), // guild_id, token, endpoint
-    StateUpdate(GuildId, Option<ChannelId>, UserId, String), // guild_id, channel_id, user_id, session_id
 }
 
 impl LavalinkClient {
@@ -477,7 +467,7 @@ impl LavalinkClient {
         token: String,
         endpoint: Option<String>,
     ) {
-        let _ = self.tx.send(ClientMessage::ServerUpdate(
+        let _ = self.tx.send(client::ClientMessage::ServerUpdate(
             guild_id.into(),
             token,
             endpoint,
@@ -492,7 +482,7 @@ impl LavalinkClient {
         user_id: impl Into<UserId>,
         session_id: String,
     ) {
-        let _ = self.tx.send(ClientMessage::StateUpdate(
+        let _ = self.tx.send(client::ClientMessage::StateUpdate(
             guild_id.into(),
             channel_id.map(|x| x.into()),
             user_id.into(),
@@ -520,7 +510,7 @@ impl LavalinkClient {
     ) -> LavalinkResult<player::ConnectionInfo> {
         let (tx, rx) = oneshot::channel();
 
-        let _ = self.tx.send(ClientMessage::GetConnectionInfo(
+        let _ = self.tx.send(client::ClientMessage::GetConnectionInfo(
             guild_id.into(),
             timeout,
             tx,
@@ -529,7 +519,7 @@ impl LavalinkClient {
         rx.await?.map_err(|_| LavalinkError::Timeout)
     }
 
-    async fn handle_connection_info(self, mut rx: UnboundedReceiver<ClientMessage>) {
+    async fn handle_connection_info(self, mut rx: UnboundedReceiver<client::ClientMessage>) {
         let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>)>> =
             Arc::new(DashMap::new());
         let channels: Arc<
@@ -537,7 +527,7 @@ impl LavalinkClient {
         > = Arc::new(DashMap::new());
 
         while let Some(x) = rx.recv().await {
-            use ClientMessage::*;
+            use client::ClientMessage::*;
 
             match x {
                 GetConnectionInfo(guild_id, timeout, sender) => {
