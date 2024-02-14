@@ -221,7 +221,7 @@ pub async fn clear(ctx: Context<'_>) -> Result<(), Error> {
 
     player.set_queue(QueueMessage::Clear)?;
 
-    ctx.say("Quueue cleared successfully").await?;
+    ctx.say("Queue cleared successfully").await?;
 
     Ok(())
 }

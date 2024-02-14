@@ -12,7 +12,7 @@ async fn _join(
     ctx: &Context<'_>,
     guild_id: serenity::GuildId,
     channel_id: Option<serenity::ChannelId>,
-) -> Result<(), Error> {
+) -> Result<bool, Error> {
     let lava_client = ctx.data().lavalink.clone();
 
     let manager = songbird::get(ctx.serenity_context()).await.unwrap().clone();
@@ -62,7 +62,7 @@ async fn _join(
 
                 ctx.say(format!("Joined {}", connect_to.mention())).await?;
 
-                return Ok(());
+                return Ok(true);
             }
             Err(why) => {
                 ctx.say(format!("Error joining the channel: {}", why))
@@ -72,7 +72,7 @@ async fn _join(
         }
     }
 
-    Ok(())
+    Ok(false)
 }
 
 /// Play a song in the voice channel you are connected in.
@@ -81,11 +81,11 @@ pub async fn play(
     ctx: Context<'_>,
     #[description = "Search term or URL"]
     #[rest]
-    term: String,
+    term: Option<String>,
 ) -> Result<(), Error> {
     let guild_id = ctx.guild_id().unwrap();
 
-    _join(&ctx, guild_id, None).await?;
+    let has_joined = _join(&ctx, guild_id, None).await?;
 
     let lava_client = ctx.data().lavalink.clone();
 
@@ -94,10 +94,23 @@ pub async fn play(
         return Ok(());
     };
 
-    let query = if term.starts_with("http") {
-        term
+    let query = if let Some(term) = term {
+        if term.starts_with("http") {
+            term
+        } else {
+            SearchEngines::YouTube.to_query(&term)?
+        }
     } else {
-        SearchEngines::YouTube.to_query(&term)?
+        if let Ok(player_data) = player.get_player().await {
+            if player_data.track.is_none() && player.get_queue().await.is_ok_and(|x| !x.is_empty())
+            {
+                player.skip()?;
+            } else {
+                ctx.say("The queue is empty.").await?;
+            }
+        }
+
+        return Ok(());
     };
 
     let loaded_tracks = lava_client.load_tracks(guild_id, &query).await?;
@@ -142,7 +155,10 @@ pub async fn play(
     player.set_queue(QueueMessage::Append(tracks.into()))?;
 
     if let Ok(player_data) = player.get_player().await {
-        if player_data.track.is_none() && player.get_queue().await.is_ok_and(|x| !x.is_empty()) {
+        if player_data.track.is_none()
+            && player.get_queue().await.is_ok_and(|x| !x.is_empty())
+            && !has_joined
+        {
             player.skip()?;
         }
     }
