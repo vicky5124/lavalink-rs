@@ -95,7 +95,7 @@ impl PlayerContext {
         update_player: &http::UpdatePlayer,
         no_replace: bool,
     ) -> LavalinkResult<player::Player> {
-        let node = self.client.get_node_for_guild(self.guild_id);
+        let node = self.client.get_node_for_guild(self.guild_id).await;
 
         let result = node
             .http
@@ -145,7 +145,7 @@ impl PlayerContext {
     ///
     /// This does not continue playback of the queue.
     pub async fn stop_now(&self) -> LavalinkResult<player::Player> {
-        let node = self.client.get_node_for_guild(self.guild_id);
+        let node = self.client.get_node_for_guild(self.guild_id).await;
 
         let path = format!(
             "/v4/sessions/{}/players/{}",

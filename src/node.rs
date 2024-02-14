@@ -59,6 +59,8 @@ pub struct Node {
     pub is_running: AtomicBool,
     pub password: String,
     pub user_id: UserId,
+    pub cpu: ArcSwap<crate::model::events::Cpu>,
+    pub memory: ArcSwap<crate::model::events::Memory>,
 }
 
 #[derive(Copy, Clone)]
@@ -127,7 +129,7 @@ impl Node {
 
         let (_write, mut read) = ws_stream.split();
 
-        self.is_running.store(true, Ordering::Relaxed);
+        self.is_running.store(true, Ordering::SeqCst);
 
         let self_node_id = self.id;
 
@@ -231,6 +233,9 @@ impl Node {
                             {
                                 let event: events::Stats = serde_json::from_str(&x).unwrap();
                                 let session_id = self_node.session_id.load_full();
+
+                                self_node.cpu.store(Arc::new(event.cpu.clone()));
+                                self_node.memory.store(Arc::new(event.memory.clone()));
 
                                 if let Some(handler) = &self_node.events.event_handler {
                                     handler
@@ -456,7 +461,7 @@ impl Node {
             }
 
             let self_node = lavalink_client.nodes.get(self_node_id).unwrap();
-            self_node.is_running.store(false, Ordering::Relaxed);
+            self_node.is_running.store(false, Ordering::SeqCst);
             error!("Connection Closed.");
         });
 

@@ -9,12 +9,13 @@ If you have questions, you can get support in the [serenity](https://discord.gg/
 - [ ] Streamable queue reader
 - [ ] Improve documentation with examples, better formatting, and fill in missing data
 - [ ] Expand event logging
-- [ ] Examples
+- [ ] hikari-lightbulb example
+- [ ] discord.py example
+- [ ] hata example
+- [ ] twilight-rs example
 - [ ] Gitlab CI Tests
 - [ ] Implement abstractions for ease of use
-- [ ] Round-Robin node selection method
 - [ ] Region based node selection method
-- [ ] Main and fallback node selection method
 
 ### Done
 
@@ -30,6 +31,11 @@ If you have questions, you can get support in the [serenity](https://discord.gg/
 - [x] Lavasnek (PyO3)
 - [x] Lavasnek events
 - [x] Remove third party dependency for custom user data.
+- [x] Round-Robin node selection method
+- [x] Main and fallback node selection method
+- [x] CPU Load based node selection method
+- [x] Memory usage based node selection method
+- [x] Custom node selection method
 
 ## Links to download stuff you will need
 

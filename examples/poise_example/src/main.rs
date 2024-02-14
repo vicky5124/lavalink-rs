@@ -137,7 +137,12 @@ async fn main() -> Result<(), Error> {
                     session_id: None,
                 };
 
-                let client = LavalinkClient::new(events, vec![node_local]).await;
+                let client = LavalinkClient::new(
+                    events,
+                    vec![node_local],
+                    NodeDistributionStrategy::round_robin(),
+                )
+                .await;
 
                 Ok(Data { lavalink: client })
             })

@@ -7,7 +7,7 @@ use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
-use arc_swap::ArcSwap;
+use arc_swap::{ArcSwap, ArcSwapOption};
 use dashmap::DashMap;
 use reqwest::{header::HeaderMap, Client as ReqwestClient};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
@@ -17,12 +17,13 @@ use tokio::sync::Mutex;
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 /// The main client, where everything gets done, from events to requests to management.
 pub struct LavalinkClient {
-    pub nodes: Arc<Vec<node::Node>>,
-    pub players: Arc<DashMap<GuildId, PlayerContext>>,
+    pub nodes: Vec<Arc<node::Node>>,
+    pub players: Arc<DashMap<GuildId, (ArcSwapOption<PlayerContext>, Arc<node::Node>)>>,
     pub events: events::Events,
     tx: UnboundedSender<client::ClientMessage>,
     user_id: UserId,
     user_data: Arc<dyn std::any::Any + Send + Sync>,
+    strategy: client::NodeDistributionStrategy,
 }
 
 impl LavalinkClient {
@@ -33,8 +34,12 @@ impl LavalinkClient {
     ///
     /// - `events`: The lavalink event handler.
     /// - `nodes`: List of nodes to connect to.
-    pub async fn new(events: events::Events, nodes: Vec<node::NodeBuilder>) -> LavalinkClient {
-        Self::new_with_data(events, nodes, Arc::new(())).await
+    pub async fn new(
+        events: events::Events,
+        nodes: Vec<node::NodeBuilder>,
+        strategy: client::NodeDistributionStrategy,
+    ) -> LavalinkClient {
+        Self::new_with_data(events, nodes, strategy, Arc::new(())).await
     }
 
     /// Create a new Lavalink Client with custom user data.
@@ -48,6 +53,7 @@ impl LavalinkClient {
     pub async fn new_with_data<Data: std::any::Any + Send + Sync>(
         events: events::Events,
         nodes: Vec<node::NodeBuilder>,
+        strategy: client::NodeDistributionStrategy,
         user_data: Arc<Data>,
     ) -> LavalinkClient {
         if nodes.is_empty() {
@@ -98,6 +104,8 @@ impl LavalinkClient {
                     } else {
                         idx.to_string().into()
                     }),
+                    cpu: ArcSwap::new(Default::default()),
+                    memory: ArcSwap::new(Default::default()),
                 }
             } else {
                 let http = crate::http::Http {
@@ -119,21 +127,24 @@ impl LavalinkClient {
                     } else {
                         idx.to_string().into()
                     }),
+                    cpu: ArcSwap::new(Default::default()),
+                    memory: ArcSwap::new(Default::default()),
                 }
             };
 
-            built_nodes.push(node);
+            built_nodes.push(Arc::new(node));
         }
 
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
         let client = LavalinkClient {
             user_id: built_nodes[0].user_id,
-            nodes: Arc::new(built_nodes),
+            nodes: built_nodes,
             players: Arc::new(DashMap::new()),
             events,
             tx,
             user_data,
+            strategy,
         };
 
         for node in &*client.nodes {
@@ -151,7 +162,7 @@ impl LavalinkClient {
                 tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
                 for node in &*lavalink_client.nodes {
-                    if !node.is_running.load(Ordering::Relaxed) {
+                    if !node.is_running.load(Ordering::SeqCst) {
                         if let Err(why) = node.connect(lavalink_client.clone()).await {
                             error!("Failed to connect to the lavalink websocket: {}", why);
                         }
@@ -163,20 +174,82 @@ impl LavalinkClient {
         client
     }
 
+    // Get a node based on the vector index when insrted into the client initially.
+    pub fn get_node_by_index(&self, idx: usize) -> Option<Arc<node::Node>> {
+        self.nodes.get(idx).cloned()
+    }
+
     /// Get the node assigned to a guild.
-    pub fn get_node_for_guild(&self, guild_id: impl Into<GuildId>) -> &node::Node {
+    pub async fn get_node_for_guild(&self, guild_id: impl Into<GuildId>) -> Arc<node::Node> {
         let guild_id = guild_id.into();
 
-        self.nodes
-            .get(guild_id.0 as usize % self.nodes.len())
-            .unwrap()
+        if let Some(node) = self.players.get(&guild_id) {
+            trace!("Node already selected for guild {:?}", guild_id);
+            return node.1.clone();
+        }
+
+        debug!("First time selecting node for guild {:?}", guild_id);
+
+        use client::NodeDistributionStrategy::*;
+
+        match &self.strategy {
+            Sharded => self
+                .get_node_by_index(guild_id.0 as usize % self.nodes.len())
+                .unwrap(),
+            RoundRobin(x) => {
+                let mut idx = x.fetch_add(1, Ordering::SeqCst);
+                if idx == self.nodes.len() {
+                    x.store(1, Ordering::SeqCst);
+                    idx = 0;
+                }
+
+                self.get_node_by_index(idx).unwrap()
+            }
+            MainFallback => {
+                for node in &*self.nodes {
+                    if node.is_running.load(Ordering::SeqCst) {
+                        return node.clone();
+                    }
+                }
+
+                warn!("No nodes are currently running, waiting 5 seconds and trying again...");
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
+                for node in &*self.nodes {
+                    if node.is_running.load(Ordering::SeqCst) {
+                        return node.clone();
+                    }
+                }
+
+                warn!("No nodes are currently running, returning first node.");
+
+                self.get_node_by_index(0).unwrap()
+            }
+            LowestLoad => self
+                .nodes
+                .iter()
+                .min_by_key(|x| x.cpu.load().system_load.abs() as u8)
+                .unwrap()
+                .clone(),
+            HighestFreeMemory => self
+                .nodes
+                .iter()
+                .min_by_key(|x| x.memory.load().free)
+                .unwrap()
+                .clone(),
+            Custom(func) => func(self, guild_id).await,
+        }
     }
 
     /// Get the player context for a guild, if it exists.
     pub fn get_player_context(&self, guild_id: impl Into<GuildId>) -> Option<PlayerContext> {
         let guild_id = guild_id.into();
 
-        self.players.get(&guild_id).map(|x| x.clone())
+        if let Some(x) = self.players.get(&guild_id) {
+            x.0.load().clone().map(|x| (*x).clone())
+        } else {
+            None
+        }
     }
 
     /// Creates a new player without a context.
@@ -191,7 +264,7 @@ impl LavalinkClient {
         let mut connection_info = connection_info.into();
         connection_info.fix();
 
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let player = node
             .http
@@ -205,6 +278,10 @@ impl LavalinkClient {
                 true,
             )
             .await?;
+
+        self.players
+            .entry(guild_id)
+            .or_insert((ArcSwapOption::new(None), node));
 
         Ok(player)
     }
@@ -234,10 +311,12 @@ impl LavalinkClient {
         let mut connection_info = connection_info.into();
         connection_info.fix();
 
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         if let Some(x) = self.players.get(&guild_id) {
-            return Ok(x.clone());
+            if let Some(x) = &*x.0.load() {
+                return Ok((**x).clone());
+            }
         }
 
         let player = node
@@ -272,7 +351,10 @@ impl LavalinkClient {
 
         player_context.start(rx).await;
 
-        self.players.insert(guild_id, player_dummy.clone());
+        self.players.insert(
+            guild_id,
+            (ArcSwapOption::new(Some(player_dummy.clone().into())), node),
+        );
 
         Ok(player_dummy)
     }
@@ -280,10 +362,12 @@ impl LavalinkClient {
     /// Deletes and closes a specific player context, if it exists.
     pub async fn delete_player(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
-        if let Some((_, player)) = self.players.remove(&guild_id) {
-            player.close()?;
+        if let Some((_, (player, _))) = self.players.remove(&guild_id) {
+            if let Some(x) = &*player.load() {
+                (**x).clone().close()?;
+            }
         }
 
         node.http
@@ -298,7 +382,12 @@ impl LavalinkClient {
     /// This is useful to put on the ready event, to close already open players in case the
     /// Lavalink server restarts.
     pub async fn delete_all_player_contexts(&self) -> LavalinkResult<()> {
-        for guild_id in self.players.iter().map(|i| i.guild_id).collect::<Vec<_>>() {
+        for guild_id in self
+            .players
+            .iter()
+            .filter_map(|i| i.0.load().clone().map(|x| x.guild_id))
+            .collect::<Vec<_>>()
+        {
             self.delete_player(guild_id).await?;
         }
 
@@ -313,7 +402,7 @@ impl LavalinkClient {
         no_replace: bool,
     ) -> LavalinkResult<player::Player> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node
             .http
@@ -341,7 +430,7 @@ impl LavalinkClient {
         identifier: &str,
     ) -> LavalinkResult<track::Track> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node.http.load_tracks(identifier).await?;
 
@@ -359,7 +448,7 @@ impl LavalinkClient {
         track: &str,
     ) -> LavalinkResult<track::TrackData> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node.http.decode_track(track).await?;
 
@@ -377,7 +466,7 @@ impl LavalinkClient {
         tracks: &[String],
     ) -> LavalinkResult<Vec<track::TrackData>> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node.http.decode_tracks(tracks).await?;
 
@@ -387,7 +476,7 @@ impl LavalinkClient {
     /// Request Lavalink server version.
     pub async fn request_version(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<String> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node.http.version().await?;
 
@@ -402,7 +491,7 @@ impl LavalinkClient {
         guild_id: impl Into<GuildId>,
     ) -> LavalinkResult<events::Stats> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node.http.stats().await?;
 
@@ -412,7 +501,7 @@ impl LavalinkClient {
     /// Request Lavalink server information.
     pub async fn request_info(&self, guild_id: impl Into<GuildId>) -> LavalinkResult<http::Info> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node.http.info().await?;
 
@@ -425,7 +514,7 @@ impl LavalinkClient {
         guild_id: impl Into<GuildId>,
     ) -> LavalinkResult<player::Player> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node
             .http
@@ -441,7 +530,7 @@ impl LavalinkClient {
         guild_id: impl Into<GuildId>,
     ) -> LavalinkResult<Vec<player::Player>> {
         let guild_id = guild_id.into();
-        let node = self.get_node_for_guild(guild_id);
+        let node = self.get_node_for_guild(guild_id).await;
 
         let result = node.http.get_players(&node.session_id.load()).await?;
 

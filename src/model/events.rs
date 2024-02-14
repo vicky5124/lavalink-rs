@@ -78,7 +78,7 @@ pub struct Stats {
     pub frame_stats: Option<FrameStats>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct Cpu {
@@ -87,7 +87,7 @@ pub struct Cpu {
     pub lavalink_load: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct Memory {
     pub free: u64,

@@ -1,3 +1,4 @@
+use crate::model::client::NodeDistributionStrategy;
 use crate::model::events::Events;
 use crate::model::http::UpdatePlayer;
 use crate::model::player::ConnectionInfo;
@@ -50,6 +51,7 @@ impl crate::client::LavalinkClient {
                     Ok(crate::client::LavalinkClient::new_with_data(
                         events,
                         nodes,
+                        NodeDistributionStrategy::Sharded,
                         std::sync::Arc::new(RwLock::new(data)),
                     )
                     .await)
@@ -57,6 +59,7 @@ impl crate::client::LavalinkClient {
                     Ok(crate::client::LavalinkClient::new_with_data(
                         events,
                         nodes,
+                        NodeDistributionStrategy::Sharded,
                         std::sync::Arc::new(RwLock::new(Python::with_gil(|py| py.None()))),
                     )
                     .await)

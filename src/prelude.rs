@@ -1,5 +1,6 @@
 pub use crate::client::LavalinkClient;
 pub use crate::error::LavalinkResult;
+pub use crate::model::client::NodeDistributionStrategy;
 pub use crate::model::search::SearchEngines;
 pub use crate::model::track::TrackLoadData;
 pub use crate::model::GuildId;
