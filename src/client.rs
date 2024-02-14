@@ -608,6 +608,7 @@ impl LavalinkClient {
         rx.await?.map_err(|_| LavalinkError::Timeout)
     }
 
+    #[cfg_attr(not(feature = "python"), tracing::instrument)]
     async fn handle_connection_info(self, mut rx: UnboundedReceiver<client::ClientMessage>) {
         let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>)>> =
             Arc::new(DashMap::new());
@@ -624,6 +625,8 @@ impl LavalinkClient {
                     let channels = channels.clone();
 
                     tokio::spawn(async move {
+                        trace!("Requested connection information for guild {:?}", guild_id);
+
                         {
                             channels.entry(guild_id).or_insert({
                                 let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
@@ -634,12 +637,19 @@ impl LavalinkClient {
                         let inner_lock = { channels.get(&guild_id).unwrap().clone() };
                         let mut inner_rx = inner_lock.1.lock().await;
 
+                        trace!("Waiting for events in guild {:?}", guild_id);
+
                         loop {
                             match tokio::time::timeout(timeout, inner_rx.recv()).await {
                                 Err(x) => {
                                     if let Some((Some(token), Some(endpoint), Some(session_id))) =
                                         data.get(&guild_id).map(|x| x.value().clone())
                                     {
+                                        trace!(
+                                            "Connection information requested in {:?} but no changes since the previous request were received.",
+                                            guild_id
+                                        );
+
                                         let _ = sender.send(Ok(player::ConnectionInfo {
                                             token: token.to_string(),
                                             endpoint: endpoint.to_string(),
@@ -648,17 +658,27 @@ impl LavalinkClient {
                                         return;
                                     }
 
+                                    trace!("Timeout reached in guild {:?}", guild_id);
+
                                     let _ = sender.send(Err(x));
                                     return;
                                 }
                                 Ok(x) => {
                                     if x.is_none() {
+                                        trace!("Connection removed in guild {:?}", guild_id);
                                         return;
                                     };
+
+                                    trace!("Event received in guild {:?}", guild_id);
 
                                     if let Some((Some(token), Some(endpoint), Some(session_id))) =
                                         data.get(&guild_id).map(|x| x.value().clone())
                                     {
+                                        trace!(
+                                            "Both events have been received in guild {:?}",
+                                            guild_id
+                                        );
+
                                         let _ = sender.send(Ok(player::ConnectionInfo {
                                             token: token.to_string(),
                                             endpoint: endpoint.to_string(),
@@ -672,6 +692,11 @@ impl LavalinkClient {
                     });
                 }
                 ServerUpdate(guild_id, token, endpoint) => {
+                    trace!(
+                        "Started handling ServerUpdate event for guild {:?}",
+                        guild_id
+                    );
+
                     {
                         channels.entry(guild_id).or_insert({
                             let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
@@ -686,8 +711,18 @@ impl LavalinkClient {
                     *entry.value_mut() = (Some(token), endpoint, session_id);
 
                     let _ = inner_tx.send(());
+
+                    trace!(
+                        "Finished handling ServerUpdate event for guild {:?}",
+                        guild_id
+                    );
                 }
                 StateUpdate(guild_id, channel_id, user_id, session_id) => {
+                    trace!(
+                        "Started handling StateUpdate event for guild {:?}",
+                        guild_id
+                    );
+
                     {
                         channels.entry(guild_id).or_insert({
                             let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
@@ -712,6 +747,10 @@ impl LavalinkClient {
                     *entry.value_mut() = (token, endpoint, Some(session_id));
 
                     let _ = inner_tx.send(());
+                    trace!(
+                        "Finished handling StateUpdate event for guild {:?}",
+                        guild_id
+                    );
                 }
             }
         }
