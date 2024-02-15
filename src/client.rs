@@ -686,8 +686,8 @@ impl LavalinkClient {
                             });
                         }
 
-                        let inner_lock = { channels.get(&guild_id).unwrap().clone() };
-                        let mut inner_rx = inner_lock.1.lock().await;
+                        let inner_lock = channels.get(&guild_id).unwrap().1.clone();
+                        let mut inner_rx = inner_lock.lock().await;
 
                         trace!("Waiting for events in guild {:?}", guild_id);
 
@@ -756,13 +756,14 @@ impl LavalinkClient {
                         });
                     }
 
-                    let inner_tx = &channels.get(&guild_id).unwrap().0;
-
                     let mut entry = data.entry(guild_id).or_insert((None, None, None));
                     let session_id = entry.value().2.clone();
                     *entry.value_mut() = (Some(token), endpoint, session_id);
 
-                    let _ = inner_tx.send(());
+                    {
+                        let inner_tx = &channels.get(&guild_id).unwrap().0;
+                        let _ = inner_tx.send(());
+                    }
 
                     trace!(
                         "Finished handling ServerUpdate event for guild {:?}",
@@ -786,8 +787,6 @@ impl LavalinkClient {
                         });
                     }
 
-                    let inner_tx = &channels.get(&guild_id).unwrap().0;
-
                     if channel_id.is_none() {
                         trace!("Bot disconnected from voice in the guild {:?}", guild_id);
                         data.remove(&guild_id);
@@ -800,7 +799,11 @@ impl LavalinkClient {
                     let endpoint = entry.value().1.clone();
                     *entry.value_mut() = (token, endpoint, Some(session_id));
 
-                    let _ = inner_tx.send(());
+                    {
+                        let inner_tx = &channels.get(&guild_id).unwrap().0;
+                        let _ = inner_tx.send(());
+                    }
+
                     trace!(
                         "Finished handling StateUpdate event for guild {:?}",
                         guild_id
