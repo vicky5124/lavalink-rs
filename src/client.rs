@@ -592,8 +592,8 @@ impl LavalinkClient {
     /// Get the custom data provided when creating the client.
     ///
     /// # Errors
-    /// Returns `LavalinkError::InvalidDataType` if the type argument provided does not match the type of the data provided,
-    /// or if no data was provided when creating the client.
+    /// Returns `LavalinkError::InvalidDataType` if the type argument provided does not match
+    /// the type of the data provided, or if no data was provided when creating the client.
     pub fn data<Data: Send + Sync + 'static>(&self) -> LavalinkResult<std::sync::Arc<Data>> {
         self.user_data
             .clone()
@@ -770,6 +770,10 @@ impl LavalinkClient {
                     );
                 }
                 StateUpdate(guild_id, channel_id, user_id, session_id) => {
+                    if user_id != self.user_id {
+                        continue;
+                    }
+
                     trace!(
                         "Started handling StateUpdate event for guild {:?}",
                         guild_id
@@ -784,10 +788,8 @@ impl LavalinkClient {
 
                     let inner_tx = &channels.get(&guild_id).unwrap().0;
 
-                    if user_id != self.user_id {
-                        continue;
-                    }
                     if channel_id.is_none() {
+                        trace!("Bot disconnected from voice in the guild {:?}", guild_id);
                         data.remove(&guild_id);
                         channels.remove(&guild_id);
                         continue;
