@@ -8,7 +8,7 @@ description = "Lavalink API wrapper for discord audio playing"
 readme = "README.md"
 homepage = "https://gitlab.com/vicky5124/lavalink-rs/"
 repository =  "https://gitlab.com/vicky5124/lavalink-rs/"
-keywords = ["lavalink", "discord", "serenity", "twilight", "songbird", "tokio"]
+keywords = ["lavalink", "discord", "serenity", "twilight", "songbird"]
 categories = ["multimedia"]
 documentation = "https://docs.rs/lavalink-rs"
 
