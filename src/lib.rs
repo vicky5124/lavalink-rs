@@ -64,14 +64,16 @@ fn lavalink_rs(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     // Some time in the future when logging changes, reset the caches:
     handle.reset();
 
-    m.add_function(wrap_pyfunction!(python::test, m)?)?;
-
     m.add_class::<client::LavalinkClient>()?;
     m.add_class::<player_context::PlayerContext>()?;
+
+    m.add_class::<python::event::EventHandler>()?;
     m.add_class::<node::NodeBuilder>()?;
-    m.add_class::<node::Node>()?;
+    m.add_class::<python::model::client::NodeDistributionStrategyPy>()?;
+    m.add_class::<player_context::TrackInQueue>()?;
 
     m.add_class::<model::UserId>()?;
+    m.add_class::<model::ChannelId>()?;
     m.add_class::<model::GuildId>()?;
 
     m.add_wrapped(wrap_pymodule!(python::model::model))?;

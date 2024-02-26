@@ -8,6 +8,13 @@ use parking_lot::RwLock;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
+#[pymodule]
+pub fn client(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_class::<crate::client::LavalinkClient>()?;
+
+    Ok(())
+}
+
 fn raw_event(
     _: crate::client::LavalinkClient,
     session_id: String,
@@ -24,8 +31,8 @@ impl crate::client::LavalinkClient {
     #[staticmethod]
     fn new_py<'a>(
         py: Python<'a>,
-        nodes: Vec<crate::node::NodeBuilder>,
         events: PyObject,
+        nodes: Vec<crate::node::NodeBuilder>,
         strategy: super::model::client::NodeDistributionStrategyPy,
         user_data: Option<PyObject>,
     ) -> PyResult<&'a PyAny> {

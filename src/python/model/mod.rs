@@ -15,10 +15,10 @@ pub fn model(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<crate::model::GuildId>()?;
     m.add_class::<crate::model::ChannelId>()?;
 
-    m.add_wrapped(wrap_pymodule!(self::client::client))?;
+    self::client::client(py, m)?;
     m.add_wrapped(wrap_pymodule!(self::events::events))?;
     m.add_wrapped(wrap_pymodule!(self::http::http))?;
-    m.add_wrapped(wrap_pymodule!(self::player::player))?;
+    self::player::player(py, m)?;
     m.add_wrapped(wrap_pymodule!(self::search::search))?;
     m.add_wrapped(wrap_pymodule!(self::track::track))?;
 

@@ -2,6 +2,13 @@ use crate::model::events::Events;
 
 use pyo3::prelude::*;
 
+#[pymodule]
+pub fn node(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_class::<crate::node::NodeBuilder>()?;
+
+    Ok(())
+}
+
 #[apply(super::with_getter_setter)]
 #[pymethods]
 impl crate::node::NodeBuilder {

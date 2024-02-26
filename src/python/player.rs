@@ -12,6 +12,14 @@ use crate::{
 use parking_lot::RwLock;
 use pyo3::prelude::*;
 
+#[pymodule]
+pub fn player(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_class::<crate::player_context::PlayerContext>()?;
+    m.add_class::<crate::player_context::TrackInQueue>()?;
+
+    Ok(())
+}
+
 #[pymethods]
 impl crate::player_context::PlayerContext {
     fn set_queue_push_to_back<'a>(&self, track: PyTrackInQueue) -> PyResult<()> {

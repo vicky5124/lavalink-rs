@@ -48,7 +48,6 @@ pub struct NodeBuilder {
 }
 
 #[derive(Debug)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// A Lavalink server node.
 pub struct Node {
     pub id: usize,

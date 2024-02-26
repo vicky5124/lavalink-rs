@@ -5,17 +5,18 @@ import typing as t
 from lavalink_voice import LavalinkVoice
 
 import hikari
+
 import lavalink_rs
+from lavalink_rs import LavalinkClient, NodeDistributionStrategy
 from lavalink_rs.model.track import TrackData, PlaylistData
-from lavalink_rs.model.client import NodeDistributionStrategy
-from lavalink_rs.model import events, GuildId
+from lavalink_rs.model import events  # , GuildId
 
 
 class Data:
     """Global data shared across the entire bot, used to store dashboard values."""
 
     def __init__(self) -> None:
-        self.lavalink: lavalink_rs.Lavalink
+        self.lavalink: LavalinkClient
 
 
 class Bot(hikari.GatewayBot):
@@ -28,20 +29,24 @@ class Bot(hikari.GatewayBot):
 
 class Events:
     async def ready(
-        self, client: lavalink_rs.LavalinkClient, session_id: str, event: events.Ready
-    ):
+        self, client: LavalinkClient, session_id: str, event: events.Ready
+    ) -> None:
         logging.info("HOLY READY")
 
     async def track_start(
         self,
-        client: lavalink_rs.LavalinkClient,
+        client: LavalinkClient,
         session_id: str,
         event: events.TrackStart,
-    ):
+    ) -> None:
         logging.info(
             f"Started track {event.track.info.author} - {event.track.info.title} in {event.guild_id.inner}"
         )
+
         player_ctx = client.get_player_context(event.guild_id.inner)
+        assert player_ctx
+        assert player_ctx.data
+
         await bot.rest.create_message(
             player_ctx.data,
             f"Started playing `{event.track.info.author} - {event.track.info.title}`",
@@ -53,9 +58,9 @@ bot = Bot(token=os.environ["DISCORD_TOKEN"], intents=hikari.intents.Intents.ALL)
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-# Make your own node selection algorythm, and return the index of that node.
+# You can make your own node selection algorythm, and return the index of that node.
 # The index is the same as when they were added to the client initially.
-# async def custom(client: lavalink_rs.LavalinkClient, guild_id: GuildId) -> int:
+# async def custom(client: LavalinkClient, guild_id: GuildId) -> int:
 #    return 0
 
 
@@ -67,15 +72,18 @@ async def on_starting(_event: hikari.StartingEvent) -> None:
         os.environ["LAVALINK_PASSWORD"],
         601749512456896522,  # Bot ID
     )
-    lavalink_client = await lavalink_rs.LavalinkClient.new(
+
+    lavalink_events = t.cast(lavalink_rs.EventHandler, Events())
+
+    lavalink_client = await LavalinkClient.new(
+        lavalink_events,
         [node],
-        Events(),
         # NodeDistributionStrategy.custom(custom),
         NodeDistributionStrategy.sharded(),
         # 123 is any python object, "123" is used as an exaple in user data with `,test`.
         123,
     )
-    bot.data.lavalink_client = lavalink_client
+    bot.data.lavalink = lavalink_client
 
 
 @bot.listen()
@@ -86,26 +94,29 @@ async def on_message(event: hikari.GuildMessageCreateEvent) -> None:
 
     if event.message.content.startswith(",test"):
         voice = bot.voice.connections.get(event.guild_id)
+        assert isinstance(voice, LavalinkVoice)
 
         if not voice:
-            await event.message.respond(f"Not in a voice channel.")
+            await event.message.respond("Not in a voice channel.")
             return None
 
         # Custom user data can be accessessed via the data getter and setter of the client.
-        voice.lavalink_client.data += 1
-        await event.message.respond(f"Test data {voice.lavalink_client.data}")
+        assert voice.lavalink.data
+        voice.lavalink.data += 1
+        await event.message.respond(f"Test data {voice.lavalink.data}")
 
     elif event.message.content.startswith(",leave"):
         voice = bot.voice.connections.get(event.guild_id)
+        assert isinstance(voice, LavalinkVoice)
 
         if not voice:
-            await event.message.respond(f"Not in a voice channel.")
+            await event.message.respond("Not in a voice channel.")
             return None
 
-        await voice.lavalink_client.delete_player(event.guild_id)
+        await voice.lavalink.delete_player(event.guild_id)
         await voice.disconnect()
 
-        await event.message.respond(f"Left voice channel.")
+        await event.message.respond("Left voice channel.")
 
     elif event.message.content.startswith(",play"):
         if not (voice_state := bot.cache.get_voice_state(event.guild_id, event.author)):
@@ -120,9 +131,11 @@ async def on_message(event: hikari.GuildMessageCreateEvent) -> None:
 
         if not voice:
             voice = await LavalinkVoice.connect(
-                bot.data.lavalink_client, bot, event.guild_id, channel_id
+                bot.data.lavalink, bot, event.guild_id, channel_id
             )
             await event.message.respond(f"Joined <#{channel_id}>")
+
+        assert isinstance(voice, LavalinkVoice)
 
         player_ctx = voice.player
 
@@ -139,9 +152,7 @@ async def on_message(event: hikari.GuildMessageCreateEvent) -> None:
             await event.message.respond("Nothing to play.")
             return None
 
-        loaded_tracks = await bot.data.lavalink_client.load_tracks(
-            event.guild_id, query
-        )
+        loaded_tracks = await bot.data.lavalink.load_tracks(event.guild_id, query)
 
         # Single track
         if isinstance(loaded_tracks, TrackData):

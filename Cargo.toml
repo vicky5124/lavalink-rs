@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.10.0"
+version = "0.11.0"
 edition = "2021"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 license = "MPL-2.0"
@@ -19,7 +19,7 @@ name = "lavalink_rs"
 crate-type = ["cdylib", "rlib"]
 
 [workspace]
-exclude = ["examples/poise_example"]
+exclude = ["examples", "docs"]
 members = ["macros"]
 
 [features]

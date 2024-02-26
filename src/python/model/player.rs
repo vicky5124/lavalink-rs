@@ -2,20 +2,23 @@ use crate::model::player::*;
 
 use pyo3::prelude::*;
 
-#[pymodule]
-pub fn player(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_class::<Player>()?;
-    m.add_class::<State>()?;
-    m.add_class::<ConnectionInfo>()?;
-    m.add_class::<Filters>()?;
-    m.add_class::<ChannelMix>()?;
-    m.add_class::<Distortion>()?;
-    m.add_class::<Equalizer>()?;
-    m.add_class::<Karaoke>()?;
-    m.add_class::<LowPass>()?;
-    m.add_class::<Rotation>()?;
-    m.add_class::<Timescale>()?;
-    m.add_class::<TremoloVibrato>()?;
+pub fn player(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    let player = PyModule::new(py, "player")?;
+
+    player.add_class::<Player>()?;
+    player.add_class::<State>()?;
+    player.add_class::<ConnectionInfo>()?;
+    player.add_class::<Filters>()?;
+    player.add_class::<ChannelMix>()?;
+    player.add_class::<Distortion>()?;
+    player.add_class::<Equalizer>()?;
+    player.add_class::<Karaoke>()?;
+    player.add_class::<LowPass>()?;
+    player.add_class::<Rotation>()?;
+    player.add_class::<Timescale>()?;
+    player.add_class::<TremoloVibrato>()?;
+
+    m.add_submodule(player)?;
 
     Ok(())
 }

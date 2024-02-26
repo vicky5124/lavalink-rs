@@ -1,23 +1,30 @@
+import typing as t
+
 import hikari
 from hikari import snowflakes, GatewayBot
 from hikari.api import VoiceConnection, VoiceComponent
 
+from lavalink_rs import LavalinkClient, PlayerContext
+
 
 class LavalinkVoice(VoiceConnection):
+    lavalink: LavalinkClient
+    player: PlayerContext
+
     def __init__(
         self,
-        player,
-        lavalink_client,
+        player: PlayerContext,
+        lavalink_client: LavalinkClient,
         *,
         channel_id: snowflakes.Snowflake,
         guild_id: snowflakes.Snowflake,
         is_alive: bool,
         shard_id: int,
         owner: VoiceComponent,
-        on_close,
+        on_close: t.Any,
     ) -> None:
         self.player = player
-        self.lavalink_client = lavalink_client
+        self.lavalink = lavalink_client
 
         self.__channel_id = channel_id
         self.__guild_id = guild_id
@@ -54,7 +61,7 @@ class LavalinkVoice(VoiceConnection):
     async def disconnect(self) -> None:
         """Signal the process to shut down."""
         self.__is_alive = False
-        # await self.player.()
+        await self.lavalink.delete_player(self.__guild_id)
         await self.__on_close(self)
 
     async def join(self) -> None:
@@ -66,11 +73,11 @@ class LavalinkVoice(VoiceConnection):
     @classmethod
     async def connect(
         cls,
-        lavalink_client,
+        lavalink_client: LavalinkClient,
         client: GatewayBot,
         guild_id: snowflakes.Snowflake,
         channel_id: snowflakes.Snowflake,
-    ):
+    ) -> VoiceConnection:
         return await client.voice.connect_to(
             guild_id,
             channel_id,
@@ -85,23 +92,23 @@ class LavalinkVoice(VoiceConnection):
         channel_id: snowflakes.Snowflake,
         endpoint: str,
         guild_id: snowflakes.Snowflake,
-        on_close,
+        on_close: t.Any,
         owner: VoiceComponent,
         session_id: str,
         shard_id: int,
         token: str,
         user_id: snowflakes.Snowflake,
-        **kwargs,
-    ):
-        lavalink_client = kwargs["lavalink_client"]
+        **kwargs: t.Any,
+    ) -> t.Self:
+        lavalink = kwargs["lavalink_client"]
 
-        player = await lavalink_client.create_player_context(
+        player = await lavalink.create_player_context(
             guild_id, endpoint, token, session_id
         )
 
         self = LavalinkVoice(
             player,
-            lavalink_client,
+            lavalink,
             channel_id=channel_id,
             guild_id=guild_id,
             is_alive=True,

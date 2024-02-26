@@ -20,3 +20,4 @@ dev_*
 __pycache__
 
 .vimspector.json
+site/

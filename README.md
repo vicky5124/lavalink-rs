@@ -6,6 +6,19 @@ If you have questions, you can get support in the [serenity](https://discord.gg/
 
 ## To-Do
 
+### 0.11
+
+- [ ] Basic Twilight 0.16 support
+- [ ] Hide password from logs
+
+### Future
+
+- [ ] RoutePlanner API
+- [ ] Switch from reqwests to hyper
+- [ ] native and webpki roots for rustls feature separation
+- [ ] Support `tokio-websockets`
+- [ ] Expose Http and methods to python
+- [ ] Implement search utilities to python
 - [ ] Streamable queue reader
 - [ ] Improve documentation with examples, better formatting, and fill in missing data
 - [ ] Expand event logging
@@ -36,6 +49,7 @@ If you have questions, you can get support in the [serenity](https://discord.gg/
 - [x] CPU Load based node selection method
 - [x] Memory usage based node selection method
 - [x] Custom node selection method
+- [x] Python stubs
 
 ## Links to download stuff you will need
 
@@ -46,12 +60,12 @@ To install Lavalink, you can follow their [getting started guide](https://lavali
 Install the version from crates.io:
 
 ```toml
-lavalink-rs = "0.10"
+lavalink-rs = "0.11"
 
 # or
 
 [dependencies.lavalink-rs]
-version = "0.10.0"
+version = "0.11"
 ```
 
 Or the development release:

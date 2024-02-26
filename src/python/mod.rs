@@ -4,13 +4,6 @@ pub mod model;
 pub mod node;
 pub mod player;
 
-use pyo3::prelude::*;
-
-#[pyfunction]
-pub fn test(_user_id: model::PyUserId) -> PyResult<String> {
-    Ok("a".to_string())
-}
-
 macro_rules! with_getter_setter {
     (
         #[pymethods]
