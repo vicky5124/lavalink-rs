@@ -26,8 +26,9 @@ members = ["macros"]
 default = ["rustls", "macros"]
 
 songbird = ["songbird-dep"]
-twilight = ["twilight-model"]
 serenity = ["serenity-dep"]
+twilight = ["twilight-model"]
+twilight16 = ["twilight-model-16"]
 
 macros = ["macros-dep"]
 
@@ -80,6 +81,11 @@ optional = true
 
 [dependencies.twilight-model]
 version = "0.15"
+optional = true
+
+[dependencies.twilight-model-16]
+package = "twilight-model"
+version = "0.16.0-rc"
 optional = true
 
 [dependencies.pyo3]

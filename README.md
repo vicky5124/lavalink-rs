@@ -8,7 +8,6 @@ If you have questions, you can get support in the [serenity](https://discord.gg/
 
 ### 0.11
 
-- [ ] Basic Twilight 0.16 support
 - [ ] Hide password from logs
 
 ### Future
@@ -50,6 +49,7 @@ If you have questions, you can get support in the [serenity](https://discord.gg/
 - [x] Memory usage based node selection method
 - [x] Custom node selection method
 - [x] Python stubs
+- [x] Basic Twilight 0.16 support
 
 ## Links to download stuff you will need
 
@@ -108,7 +108,8 @@ maturin develop --target x86_64-unknown-linux-gnu
 - `native-tls` Use the system native tls.
 - `serenity` for [serenity](https://lib.rs/crates/serenity) support.
 - `songbird` for [songbird](https://lib.rs/crates/songbird) support.
-- `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) support.
+- `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) v0.15 support.
+- `twilight16` for [twilight-model](https://lib.rs/crates/twilight-model) v0.16-rc support.
 - `python` for python3.8+ support.
 
 ## Contributing
