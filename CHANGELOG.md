@@ -16,11 +16,11 @@
 - Support twilight-model 0.16
 - Hide passwords from logs.
 - Implemented node selection methods:
- - Round-Robin.
- - Main and fallback.
- - Lowest CPU load.
- - Most memory free.
- - Custom method.
+  - Round-Robin.
+  - Main and fallback.
+  - Lowest CPU load.
+  - Most memory free.
+  - Custom method.
 
 ## 0.10.0
 

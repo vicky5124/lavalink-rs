@@ -20,7 +20,7 @@ crate-type = ["cdylib", "rlib"]
 
 [workspace]
 exclude = ["examples", "docs"]
-members = ["macros"]
+members = ["lavalink_rs_macros"]
 
 [features]
 default = ["rustls", "macros"]
@@ -120,8 +120,9 @@ version = "0.2"
 optional = true
 
 [dependencies.macros-dep]
-package = "macros"
-path = "./macros"
+package = "lavalink_rs_macros"
+version = "0.1"
+#path = "./macros"
 optional = true
 
 
