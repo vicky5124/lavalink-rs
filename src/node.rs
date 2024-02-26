@@ -1,6 +1,6 @@
 use crate::client::LavalinkClient;
 use crate::error::LavalinkError;
-use crate::model::{events, BoxFuture, UserId};
+use crate::model::{events, BoxFuture, Secret, UserId};
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -56,7 +56,7 @@ pub struct Node {
     pub http: crate::http::Http,
     pub events: events::Events,
     pub is_running: AtomicBool,
-    pub password: String,
+    pub(crate) password: Secret,
     pub user_id: UserId,
     pub cpu: ArcSwap<crate::model::events::Cpu>,
     pub memory: ArcSwap<crate::model::events::Memory>,
@@ -109,7 +109,7 @@ impl Node {
             let ref_headers = url.headers_mut();
 
             let mut headers = HeaderMap::new();
-            headers.insert("Authorization", self.password.parse()?);
+            headers.insert("Authorization", self.password.0.parse()?);
             headers.insert("User-Id", self.user_id.0.to_string().parse()?);
             headers.insert("Session-Id", self.session_id.to_string().parse()?);
             headers.insert(

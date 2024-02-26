@@ -6,18 +6,18 @@ If you have questions, you can get support in the [serenity](https://discord.gg/
 
 ## To-Do
 
-### 0.11
+### 0.12
 
-- [ ] Hide password from logs
-
-### Future
-
+- [ ] Implement some const methods
 - [ ] RoutePlanner API
 - [ ] Switch from reqwests to hyper
 - [ ] native and webpki roots for rustls feature separation
 - [ ] Support `tokio-websockets`
 - [ ] Expose Http and methods to python
 - [ ] Implement search utilities to python
+
+### Future
+
 - [ ] Streamable queue reader
 - [ ] Improve documentation with examples, better formatting, and fill in missing data
 - [ ] Expand event logging
@@ -50,6 +50,7 @@ If you have questions, you can get support in the [serenity](https://discord.gg/
 - [x] Custom node selection method
 - [x] Python stubs
 - [x] Basic Twilight 0.16 support
+- [x] Hide password from logs
 
 ## Links to download stuff you will need
 

@@ -96,7 +96,7 @@ impl LavalinkClient {
                     websocket_address: format!("wss://{}/v4/websocket", i.hostname),
                     http,
                     events: i.events,
-                    password: i.password,
+                    password: Secret(i.password.into()),
                     user_id: i.user_id,
                     is_running: AtomicBool::new(false),
                     session_id: ArcSwap::new(if let Some(id) = i.session_id {
@@ -119,7 +119,7 @@ impl LavalinkClient {
                     websocket_address: format!("ws://{}/v4/websocket", i.hostname),
                     http,
                     events: i.events,
-                    password: i.password,
+                    password: Secret(i.password.into()),
                     user_id: i.user_id,
                     is_running: AtomicBool::new(false),
                     session_id: ArcSwap::new(if let Some(id) = i.session_id {

@@ -18,6 +18,15 @@ pub mod search;
 /// Models related to the tracks.
 pub mod track;
 
+#[derive(Clone, Default)]
+pub(crate) struct Secret(pub(crate) Box<str>);
+
+impl std::fmt::Debug for Secret {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("<hidden>")
+    }
+}
+
 #[derive(
     Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone, Default, Serialize, Deserialize,
 )]
