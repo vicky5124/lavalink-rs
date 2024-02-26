@@ -2,7 +2,7 @@
 
 ## 0.11.0
 
-- Remove typemap_rev and parking_lot dependencies.
+- Remove the typemap_rev dependency.
 - Remove user-data feature.
 - Move user-data to a standard rust implementation inspired by 0.13 serenity.
 - Merged `serenity-native` and `serenity-rustls` into a single `serenity` feature.
@@ -11,6 +11,10 @@
 - Move the hook macro inside the library.
 - Implement user data in lavasnek.
 - Implement discord voice event handling and `ConnectionInfo` creation utilities.
+- Implement python stubs.
+- Create python documentation.
+- Support twilight-model 0.16
+- Hide passwords from logs.
 - Implemented node selection methods:
  - Round-Robin.
  - Main and fallback.
