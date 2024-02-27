@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.11.0"
+version = "0.11.1"
 edition = "2021"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 license = "MPL-2.0"

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.1
+
+- Fix python version limit upper bound to include every 3.12 version
+
 ## 0.11.0
 
 - Remove the typemap_rev dependency.
