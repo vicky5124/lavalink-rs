@@ -2,7 +2,10 @@
 
 An API Wrapper for `lavalink`. Compatible with all `tokio 1.x` based discord crates or `asyncio` based discord python libraries.
 
-If you have questions, you can get support in the [serenity](https://discord.gg/serenity-rs) or [lavalink](https://discord.gg/2rpnXNfRRU) discord servers, or by opening an issue in the [gitlab repository](https://gitlab.com/vicky5124/lavalink-rs).
+If you have questions, you can get support in the [serenity](https://discord.gg/serenity-rs), [lavalink](https://discord.gg/2rpnXNfRRU) or [hikari](https://discord.gg/hikari)
+discord servers, or by opening an issue in the [gitlab repository](https://gitlab.com/vicky5124/lavalink-rs).
+
+Documentation for the library can be found [here for rust](https://docs.rs/lavalink-rs) or [here for python](https://vicky5124.github.io/lavalink-rs/lavalink_rs.html).
 
 ## To-Do
 
@@ -58,7 +61,11 @@ To install Lavalink, you can follow their [getting started guide](https://lavali
 
 ## How to use
 
-Install the version from crates.io:
+This is how you can install the library to be used.
+
+### Rust
+
+You can install the latest version from crates.io:
 
 ```toml
 lavalink-rs = "0.11"
@@ -93,7 +100,29 @@ git = "https://github.com/serenity-rs/songbird"
 branch = "next"
 ```
 
-To build for python, you can use maturin.
+### Python
+
+You can install the latest version from [pypi](https://pypi.org/project/lavalink_rs/) by using `python3 -m pip install lavalink_rs`.
+
+OS | Arch | Python Versions | Supported?
+-|-|-|-
+Windows | x86 | 3.8-3.12 | ✅
+Windows | x64 | 3.8-3.12 | ✅
+Windows | aarch64 | - | ❌
+Mac OS | x86_64 | 3.8-3.12 | ✅
+Mac OS | aarch64 | 3.8-3.12 | ✅
+Linux | x86 | 3.8-3.12 | ✅
+Linux | x86_64 | 3.8-3.12 | ✅
+Linux | armv7 | 3.8-3.12 | ✅
+Linux | aarch64 | 3.8-3.12 | ✅
+Linux | ppc64le | 3.8-3.12 | ✅
+Linux | s390x | 3.8-3.12 | ✅
+
+## Building the library
+
+You can build the library using `cargo build`
+
+To build for python, you can use maturin instead.
 
 ```
 python3 -m venv .venv
@@ -102,7 +131,7 @@ python3 -m pip install maturin
 maturin develop --target x86_64-unknown-linux-gnu
 ```
 
-### Features
+## Features
 
 - `macros`: **default feature** - Adds procedural macros for ease of use.
 - `rustls`: **default feature** - Use rustls.

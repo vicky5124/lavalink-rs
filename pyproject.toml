@@ -3,7 +3,7 @@ requires = ["maturin>=1,<2"]
 build-backend = "maturin"
 
 [project]
-name = "lavasnek-rs"
+name = "lavalink_rs"
 requires-python = ">=3.8,<3.13"
 #classifiers = [
 #    "Programming Language :: Rust",
