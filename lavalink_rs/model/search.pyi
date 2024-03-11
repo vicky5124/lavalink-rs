@@ -47,7 +47,6 @@ class SpotifyRecommendedParameters:
     max_valence: float
     target_valence: float
 
-
 class FloweryTTSParameters:
     voice: str
     translate: bool

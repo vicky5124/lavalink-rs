@@ -23,6 +23,23 @@ pub fn player(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
+#[pymethods]
+impl ConnectionInfo {
+    #[new]
+    fn new_py(endpoint: String, token: String, session_id: String) -> ConnectionInfo {
+        ConnectionInfo {
+            endpoint,
+            token,
+            session_id,
+        }
+    }
+
+    #[pyo3(name = "fix")]
+    fn fix_py(&mut self) {
+        self.fix()
+    }
+}
+
 #[apply(crate::python::with_getter_setter)]
 #[pymethods]
 impl Filters {

@@ -98,7 +98,8 @@ pub async fn play(
         if term.starts_with("http") {
             term
         } else {
-            SearchEngines::YouTube.to_query(&term)?
+            //SearchEngines::YouTube.to_query(&term)?
+            SearchEngines::Deezer.to_query(&term)?
         }
     } else {
         if let Ok(player_data) = player.get_player().await {

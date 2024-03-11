@@ -3,7 +3,6 @@ import typing as t
 from lavalink_rs import GuildId
 from lavalink_rs.model.track import TrackData
 
-
 class Player:
     track: t.Optional[TrackData]
     volume: int
@@ -13,19 +12,19 @@ class Player:
     state: State
     filters: t.Optional[Filters]
 
-
 class State:
     connected: bool
     time: int
     position: int
     ping: t.Optional[int]
 
-
 class ConnectionInfo:
     session_id: str
     token: str
     endpoint: str
 
+    def __new__(cls, endpoint: str, token: str, session_id: str) -> ConnectionInfo: ...
+    def fix(self) -> None: ...
 
 class Filters:
     tremolo: t.Optional[TremoloVibrato]
@@ -39,13 +38,11 @@ class Filters:
     timescale: t.Optional[Timescale]
     channel_mix: t.Optional[ChannelMix]
 
-
 class ChannelMix:
     right_to_left: t.Optional[float]
     right_to_right: t.Optional[float]
     left_to_right: t.Optional[float]
     left_to_left: t.Optional[float]
-
 
 class Distortion:
     sin_offset: t.Optional[float]
@@ -57,11 +54,9 @@ class Distortion:
     cos_scale: t.Optional[float]
     tan_scale: t.Optional[float]
 
-
 class Equalizer:
     gain: float
     band: int
-
 
 class Karaoke:
     filter_band: t.Optional[float]
@@ -69,20 +64,16 @@ class Karaoke:
     filter_width: t.Optional[float]
     mono_level: t.Optional[float]
 
-
 class LowPass:
     smoothing: t.Optional[float]
 
-
 class Rotation:
     rotation_hz: t.Optional[float]
-
 
 class Timescale:
     speed: t.Optional[float]
     pitch: t.Optional[float]
     rate: t.Optional[float]
-
 
 class TremoloVibrato:
     frequency: t.Optional[float]

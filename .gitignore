@@ -15,8 +15,10 @@ dev_*
 
 .venv
 *.so
+*.whl
 
 .mypy_cache
+.ruff_cache
 __pycache__
 
 .vimspector.json

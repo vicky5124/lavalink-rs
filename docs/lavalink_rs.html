@@ -209,16 +209,16 @@
                                 <a class="variable" href="#NodeBuilder.password">password</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.hostname">hostname</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#NodeBuilder.user_id">user_id</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.session_id">session_id</a>
+                                <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
+                                <a class="variable" href="#NodeBuilder.hostname">hostname</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#NodeBuilder.session_id">session_id</a>
                         </li>
                 </ul>
 
@@ -254,19 +254,19 @@
                     <a class="class" href="#TrackInQueue">TrackInQueue</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackInQueue.start_time_ms">start_time_ms</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#TrackInQueue.volume">volume</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInQueue.filters">filters</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInQueue.start_time_ms">start_time_ms</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInQueue.track">track</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.filters">filters</a>
+                                <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
                         </li>
                 </ul>
 
@@ -346,7 +346,7 @@ lavalink_rs    </h1>
                                 <div class="attr function">
             
         <span class="def">async def</span>
-        <span class="name">new</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">events</span><span class="p">:</span> <span class="n"><a href="#EventHandler">lavalink_rs.EventHandler</a></span>,</span><span class="param">	<span class="n">nodes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n"><a href="#NodeBuilder">lavalink_rs.NodeBuilder</a></span><span class="p">]</span>,</span><span class="param">	<span class="n">strategy</span><span class="p">:</span> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>,</span><span class="param">	<span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="o">~</span><span class="n">CD</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="#LavalinkClient">lavalink_rs.LavalinkClient</a></span>:</span></span>
+        <span class="name">new</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">events</span><span class="p">:</span> <span class="n"><a href="#EventHandler">lavalink_rs.EventHandler</a></span>,</span><span class="param">	<span class="n">nodes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n"><a href="#NodeBuilder">lavalink_rs.NodeBuilder</a></span><span class="p">]</span>,</span><span class="param">	<span class="n">strategy</span><span class="p">:</span> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>,</span><span class="param">	<span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="o">~</span><span class="n">__CD</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="#LavalinkClient">lavalink_rs.LavalinkClient</a></span>:</span></span>
 
         
     </div>
@@ -359,7 +359,7 @@ lavalink_rs    </h1>
                                 <div class="attr function">
             
         <span class="def">async def</span>
-        <span class="name">create_player_context</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">guild_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>,</span><span class="param">	<span class="n">connection_info</span><span class="p">:</span> <span class="n">ConnectionInfo</span>,</span><span class="param">	<span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="o">~</span><span class="n">PD</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="#PlayerContext">lavalink_rs.PlayerContext</a></span>:</span></span>
+        <span class="name">create_player_context</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">guild_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>,</span><span class="param">	<span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">token</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="o">~</span><span class="n">__PD</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="#PlayerContext">lavalink_rs.PlayerContext</a></span>:</span></span>
 
         
     </div>
@@ -578,7 +578,7 @@ lavalink_rs    </h1>
                             </div>
                             <div id="LavalinkClient.data" class="classattr">
                                 <div class="attr variable">
-            <span class="name">data</span><span class="annotation">: Optional[~CD]</span>
+            <span class="name">data</span><span class="annotation">: Optional[~__CD]</span>
 
         
     </div>
@@ -890,7 +890,7 @@ lavalink_rs    </h1>
                             </div>
                             <div id="PlayerContext.data" class="classattr">
                                 <div class="attr variable">
-            <span class="name">data</span><span class="annotation">: Optional[~PD]</span>
+            <span class="name">data</span><span class="annotation">: Optional[~__PD]</span>
 
         
     </div>
@@ -1081,17 +1081,6 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.hostname" class="classattr">
-                                <div class="attr variable">
-            <span class="name">hostname</span><span class="annotation">: str</span>
-
-        
-    </div>
-    <a class="headerlink" href="#NodeBuilder.hostname"></a>
-    
-    
-
-                            </div>
                             <div id="NodeBuilder.user_id" class="classattr">
                                 <div class="attr variable">
             <span class="name">user_id</span><span class="annotation">: <a href="#UserId">lavalink_rs.UserId</a></span>
@@ -1103,17 +1092,6 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.session_id" class="classattr">
-                                <div class="attr variable">
-            <span class="name">session_id</span><span class="annotation">: Optional[str]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#NodeBuilder.session_id"></a>
-    
-    
-
-                            </div>
                             <div id="NodeBuilder.is_ssl" class="classattr">
                                 <div class="attr variable">
             <span class="name">is_ssl</span><span class="annotation">: bool</span>
@@ -1121,6 +1099,28 @@ let node_builder = NodeBuilder {
         
     </div>
     <a class="headerlink" href="#NodeBuilder.is_ssl"></a>
+    
+    
+
+                            </div>
+                            <div id="NodeBuilder.hostname" class="classattr">
+                                <div class="attr variable">
+            <span class="name">hostname</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NodeBuilder.hostname"></a>
+    
+    
+
+                            </div>
+                            <div id="NodeBuilder.session_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">session_id</span><span class="annotation">: Optional[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NodeBuilder.session_id"></a>
     
     
 
@@ -1142,7 +1142,7 @@ let node_builder = NodeBuilder {
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">new</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n">Self</span>:</span></span>
+        <span class="name">new</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
 
         
     </div>
@@ -1155,7 +1155,7 @@ let node_builder = NodeBuilder {
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">sharded</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n">Self</span>:</span></span>
+        <span class="name">sharded</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
 
         
     </div>
@@ -1168,7 +1168,7 @@ let node_builder = NodeBuilder {
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">round_robin</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n">Self</span>:</span></span>
+        <span class="name">round_robin</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
 
         
     </div>
@@ -1181,7 +1181,7 @@ let node_builder = NodeBuilder {
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">main_fallback</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n">Self</span>:</span></span>
+        <span class="name">main_fallback</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
 
         
     </div>
@@ -1194,7 +1194,7 @@ let node_builder = NodeBuilder {
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">lowest_load</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n">Self</span>:</span></span>
+        <span class="name">lowest_load</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
 
         
     </div>
@@ -1207,7 +1207,7 @@ let node_builder = NodeBuilder {
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">highest_free_memory</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n">Self</span>:</span></span>
+        <span class="name">highest_free_memory</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
 
         
     </div>
@@ -1220,7 +1220,7 @@ let node_builder = NodeBuilder {
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">custom</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n"><a href="#LavalinkClient">lavalink_rs.LavalinkClient</a></span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="n">Self</span>:</span></span>
+        <span class="name">custom</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n"><a href="#LavalinkClient">lavalink_rs.LavalinkClient</a></span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
 
         
     </div>
@@ -1244,28 +1244,6 @@ let node_builder = NodeBuilder {
 </div>
 
 
-                            <div id="TrackInQueue.start_time_ms" class="classattr">
-                                <div class="attr variable">
-            <span class="name">start_time_ms</span><span class="annotation">: Optional[int]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInQueue.start_time_ms"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackInQueue.end_time_ms" class="classattr">
-                                <div class="attr variable">
-            <span class="name">end_time_ms</span><span class="annotation">: Optional[int]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInQueue.end_time_ms"></a>
-    
-    
-
-                            </div>
                             <div id="TrackInQueue.volume" class="classattr">
                                 <div class="attr variable">
             <span class="name">volume</span><span class="annotation">: Optional[int]</span>
@@ -1273,6 +1251,28 @@ let node_builder = NodeBuilder {
         
     </div>
     <a class="headerlink" href="#TrackInQueue.volume"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackInQueue.filters" class="classattr">
+                                <div class="attr variable">
+            <span class="name">filters</span><span class="annotation">: Optional[Filters]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInQueue.filters"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackInQueue.start_time_ms" class="classattr">
+                                <div class="attr variable">
+            <span class="name">start_time_ms</span><span class="annotation">: Optional[int]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInQueue.start_time_ms"></a>
     
     
 
@@ -1288,13 +1288,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="TrackInQueue.filters" class="classattr">
+                            <div id="TrackInQueue.end_time_ms" class="classattr">
                                 <div class="attr variable">
-            <span class="name">filters</span><span class="annotation">: Optional[Filters]</span>
+            <span class="name">end_time_ms</span><span class="annotation">: Optional[int]</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInQueue.filters"></a>
+    <a class="headerlink" href="#TrackInQueue.end_time_ms"></a>
     
     
 

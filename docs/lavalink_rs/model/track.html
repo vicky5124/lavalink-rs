@@ -69,37 +69,37 @@
                     <a class="class" href="#TrackInfo">TrackInfo</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackInfo.source_name">source_name</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.length">length</a>
+                                <a class="variable" href="#TrackInfo.position">position</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInfo.identifier">identifier</a>
                         </li>
                         <li>
+                                <a class="variable" href="#TrackInfo.isrc">isrc</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#TrackInfo.title">title</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInfo.position">position</a>
+                                <a class="variable" href="#TrackInfo.source_name">source_name</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInfo.uri">uri</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.artwork_url">artwork_url</a>
+                                <a class="variable" href="#TrackInfo.author">author</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInfo.is_stream">is_stream</a>
                         </li>
                         <li>
+                                <a class="variable" href="#TrackInfo.artwork_url">artwork_url</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInfo.length">length</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInfo.uri">uri</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#TrackInfo.is_seekable">is_seekable</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.isrc">isrc</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.author">author</a>
                         </li>
                 </ul>
 
@@ -108,10 +108,10 @@
                     <a class="class" href="#PlaylistData">PlaylistData</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#PlaylistData.tracks">tracks</a>
+                                <a class="variable" href="#PlaylistData.info">info</a>
                         </li>
                         <li>
-                                <a class="variable" href="#PlaylistData.info">info</a>
+                                <a class="variable" href="#PlaylistData.tracks">tracks</a>
                         </li>
                 </ul>
 
@@ -290,28 +290,15 @@
 </div>
 
 
-                            <div id="TrackInfo.source_name" class="classattr">
+                            <div id="TrackInfo.position" class="classattr">
                                 <div class="attr variable">
-            <span class="name">source_name</span><span class="annotation">: str</span>
+            <span class="name">position</span><span class="annotation">: int</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInfo.source_name"></a>
+    <a class="headerlink" href="#TrackInfo.position"></a>
     
-            <div class="docstring"><p>The track source name.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.length" class="classattr">
-                                <div class="attr variable">
-            <span class="name">length</span><span class="annotation">: int</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.length"></a>
-    
-            <div class="docstring"><p>The track length in milliseconds.</p>
+            <div class="docstring"><p>The track starting position in milliseconds.</p>
 </div>
 
 
@@ -329,6 +316,19 @@
 
 
                             </div>
+                            <div id="TrackInfo.isrc" class="classattr">
+                                <div class="attr variable">
+            <span class="name">isrc</span><span class="annotation">: Optional[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.isrc"></a>
+    
+            <div class="docstring"><p>The track "International Standard Recording Code".</p>
+</div>
+
+
+                            </div>
                             <div id="TrackInfo.title" class="classattr">
                                 <div class="attr variable">
             <span class="name">title</span><span class="annotation">: str</span>
@@ -342,80 +342,15 @@
 
 
                             </div>
-                            <div id="TrackInfo.position" class="classattr">
+                            <div id="TrackInfo.source_name" class="classattr">
                                 <div class="attr variable">
-            <span class="name">position</span><span class="annotation">: int</span>
+            <span class="name">source_name</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInfo.position"></a>
+    <a class="headerlink" href="#TrackInfo.source_name"></a>
     
-            <div class="docstring"><p>The track starting position in milliseconds.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.uri" class="classattr">
-                                <div class="attr variable">
-            <span class="name">uri</span><span class="annotation">: Optional[str]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.uri"></a>
-    
-            <div class="docstring"><p>The track uri.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.artwork_url" class="classattr">
-                                <div class="attr variable">
-            <span class="name">artwork_url</span><span class="annotation">: Optional[str]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.artwork_url"></a>
-    
-            <div class="docstring"><p>The track artwork url.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.is_stream" class="classattr">
-                                <div class="attr variable">
-            <span class="name">is_stream</span><span class="annotation">: bool</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.is_stream"></a>
-    
-            <div class="docstring"><p>Whether the track is a stream.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.is_seekable" class="classattr">
-                                <div class="attr variable">
-            <span class="name">is_seekable</span><span class="annotation">: bool</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.is_seekable"></a>
-    
-            <div class="docstring"><p>Whether the track is seekable.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.isrc" class="classattr">
-                                <div class="attr variable">
-            <span class="name">isrc</span><span class="annotation">: Optional[str]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.isrc"></a>
-    
-            <div class="docstring"><p>The track "International Standard Recording Code".</p>
+            <div class="docstring"><p>The track source name.</p>
 </div>
 
 
@@ -433,6 +368,71 @@
 
 
                             </div>
+                            <div id="TrackInfo.is_stream" class="classattr">
+                                <div class="attr variable">
+            <span class="name">is_stream</span><span class="annotation">: bool</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.is_stream"></a>
+    
+            <div class="docstring"><p>Whether the track is a stream.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.artwork_url" class="classattr">
+                                <div class="attr variable">
+            <span class="name">artwork_url</span><span class="annotation">: Optional[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.artwork_url"></a>
+    
+            <div class="docstring"><p>The track artwork url.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.length" class="classattr">
+                                <div class="attr variable">
+            <span class="name">length</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.length"></a>
+    
+            <div class="docstring"><p>The track length in milliseconds.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.uri" class="classattr">
+                                <div class="attr variable">
+            <span class="name">uri</span><span class="annotation">: Optional[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.uri"></a>
+    
+            <div class="docstring"><p>The track uri.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.is_seekable" class="classattr">
+                                <div class="attr variable">
+            <span class="name">is_seekable</span><span class="annotation">: bool</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.is_seekable"></a>
+    
+            <div class="docstring"><p>Whether the track is seekable.</p>
+</div>
+
+
+                            </div>
                 </section>
                 <section id="PlaylistData">
                     <div class="attr class">
@@ -446,17 +446,6 @@
     
     
 
-                            <div id="PlaylistData.tracks" class="classattr">
-                                <div class="attr variable">
-            <span class="name">tracks</span><span class="annotation">: List[<a href="#TrackData">lavalink_rs.model.track.TrackData</a>]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlaylistData.tracks"></a>
-    
-    
-
-                            </div>
                             <div id="PlaylistData.info" class="classattr">
                                 <div class="attr variable">
             <span class="name">info</span><span class="annotation">: <a href="#PlaylistInfo">lavalink_rs.model.track.PlaylistInfo</a></span>
@@ -464,6 +453,17 @@
         
     </div>
     <a class="headerlink" href="#PlaylistData.info"></a>
+    
+    
+
+                            </div>
+                            <div id="PlaylistData.tracks" class="classattr">
+                                <div class="attr variable">
+            <span class="name">tracks</span><span class="annotation">: List[<a href="#TrackData">lavalink_rs.model.track.TrackData</a>]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PlaylistData.tracks"></a>
     
     
 

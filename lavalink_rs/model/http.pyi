@@ -2,7 +2,6 @@ import typing as t
 
 from lavalink_rs.model.player import Filters, ConnectionInfo
 
-
 class UpdatePlayer:
     end_time: t.Optional[int]
     volume: t.Optional[int]
@@ -13,11 +12,9 @@ class UpdatePlayer:
     paused: t.Optional[bool]
     identifier: t.Optional[str]
 
-
 class ResumingState:
     timeout: t.Optional[int]
     resuming: t.Optional[bool]
-
 
 class Info:
     build_time: int
@@ -29,17 +26,14 @@ class Info:
     jvm: str
     lavaplayer: str
 
-
 class Git:
     commit: str
     commit_time: int
     branch: str
 
-
 class Plugin:
     version: str
     name: str
-
 
 class Version:
     pre_release: t.Optional[str]

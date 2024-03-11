@@ -8,7 +8,7 @@ use reqwest::Method;
 use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[cfg_attr(feature = "python", pyo3::pyclass(sequence))]
 /// The player context.
 pub struct PlayerContext {
     pub guild_id: GuildId,

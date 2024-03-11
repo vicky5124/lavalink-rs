@@ -14,7 +14,7 @@ use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::Mutex;
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "python", pyo3::pyclass)]
+#[cfg_attr(feature = "python", pyo3::pyclass(sequence))]
 /// The main client, where everything gets done, from events to requests to management.
 pub struct LavalinkClient {
     pub nodes: Vec<Arc<node::Node>>,

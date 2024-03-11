@@ -12,7 +12,7 @@ pub fn event(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass]
+#[pyclass(subclass, sequence)]
 #[derive(Debug, Clone)]
 pub struct EventHandler {
     pub inner: PyObject,
@@ -21,6 +21,17 @@ pub struct EventHandler {
 
 #[pymethods]
 impl EventHandler {
+    #[new]
+    fn new(py: Python<'_>) -> PyResult<Self> {
+        let current_loop = pyo3_asyncio::get_running_loop(py)?;
+        let loop_ref = PyObject::from(current_loop);
+
+        Ok(Self {
+            current_loop: loop_ref,
+            inner: py.None(),
+        })
+    }
+
     #[pyo3(text_signature = "($self, client, session_id, event, /)")]
     /// Periodic event that returns the statistics of the server.
     fn stats(&self) {}

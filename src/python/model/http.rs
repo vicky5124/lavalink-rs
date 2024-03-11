@@ -13,3 +13,11 @@ pub fn http(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
     Ok(())
 }
+
+#[pymethods]
+impl UpdatePlayer {
+    #[new]
+    fn new_py() -> UpdatePlayer {
+        UpdatePlayer::default()
+    }
+}

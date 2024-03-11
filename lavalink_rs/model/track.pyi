@@ -1,14 +1,11 @@
 import typing as t
 
-
-# class TrackLoadType:
-#    ...
-
+# TODO enum
+class TrackLoadType: ...
 
 class TrackData:
     info: TrackInfo
     encoded: str
-
 
 class TrackInfo:
     identifier: str
@@ -23,16 +20,13 @@ class TrackInfo:
     uri: t.Optional[str]
     length: int
 
-
 class PlaylistData:
     tracks: t.List[TrackData]
     info: PlaylistInfo
 
-
 class PlaylistInfo:
     name: str
     selected_track: t.Optional[int]
-
 
 class TrackError:
     message: str

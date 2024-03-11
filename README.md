@@ -11,6 +11,8 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 ### 0.12
 
+- [x] hikari-lightbulb example
+- [ ] Implement python builders for all model structures
 - [ ] Implement some const methods
 - [ ] RoutePlanner API
 - [ ] Switch from reqwests to hyper
@@ -24,7 +26,6 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 - [ ] Streamable queue reader
 - [ ] Improve documentation with examples, better formatting, and fill in missing data
 - [ ] Expand event logging
-- [ ] hikari-lightbulb example
 - [ ] discord.py example
 - [ ] hata example
 - [ ] twilight-rs example

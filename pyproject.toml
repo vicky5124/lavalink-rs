@@ -14,3 +14,13 @@ requires-python = ">=3.8,<3.13"
 [tool.maturin]
 default-features = false
 features = ["python", "rustls"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+reportPrivateUsage = false
+reportMissingTypeStubs = true
+reportUnnecessaryTypeIgnoreComment = "warning"
+reportUninitializedInstanceVariable = "error"
+reportShadowedImports = "warning"
+include = ["model"]
