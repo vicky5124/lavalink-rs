@@ -24,8 +24,8 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 - [ ] Implement some const methods
 - [ ] RoutePlanner API
 - [ ] Switch from reqwests to hyper
-- [ ] native and webpki roots for rustls feature separation
 - [ ] Support `tokio-websockets`
+- [ ] native and webpki roots for rustls feature separation
 
 ### Future
 
