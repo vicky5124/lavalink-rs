@@ -7,6 +7,7 @@
 - Change code formatting to ruff instead of black.
 - Add @staticmethod flags to the stubs.
 - Become pyright complient.
+- Remove the pure hikari example
 
 ## 0.11.1
 
