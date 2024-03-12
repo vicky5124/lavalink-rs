@@ -1,8 +1,16 @@
 # Changelog
 
+## 0.11.2
+
+- Implement a hikari-lightbulb example.
+- Implement constructors for the structures that should be contructable within python.
+- Change code formatting to ruff instead of black.
+- Add @staticmethod flags to the stubs.
+- Become pyright complient.
+
 ## 0.11.1
 
-- Fix python version limit upper bound to include every 3.12 version
+- Fix python version limit upper bound to include every 3.12 version.
 
 ## 0.11.0
 

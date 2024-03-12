@@ -38,6 +38,8 @@ class Filters:
     timescale: t.Optional[Timescale]
     channel_mix: t.Optional[ChannelMix]
 
+    def __new__(cls) -> Filters: ...
+
 class ChannelMix:
     right_to_left: t.Optional[float]
     right_to_right: t.Optional[float]
@@ -54,9 +56,13 @@ class Distortion:
     cos_scale: t.Optional[float]
     tan_scale: t.Optional[float]
 
+    def __new__(cls) -> Distortion: ...
+
 class Equalizer:
     gain: float
     band: int
+
+    def __new__(cls) -> Equalizer: ...
 
 class Karaoke:
     filter_band: t.Optional[float]
@@ -64,17 +70,27 @@ class Karaoke:
     filter_width: t.Optional[float]
     mono_level: t.Optional[float]
 
+    def __new__(cls) -> Karaoke: ...
+
 class LowPass:
     smoothing: t.Optional[float]
 
+    def __new__(cls) -> LowPass: ...
+
 class Rotation:
     rotation_hz: t.Optional[float]
+
+    def __new__(cls) -> Rotation: ...
 
 class Timescale:
     speed: t.Optional[float]
     pitch: t.Optional[float]
     rate: t.Optional[float]
 
+    def __new__(cls) -> Timescale: ...
+
 class TremoloVibrato:
     frequency: t.Optional[float]
     depth: t.Optional[float]
+
+    def __new__(cls) -> TremoloVibrato: ...

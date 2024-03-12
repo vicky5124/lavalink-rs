@@ -40,6 +40,70 @@ impl ConnectionInfo {
     }
 }
 
+#[pymethods]
+impl ChannelMix {
+    #[new]
+    fn new_py() -> ChannelMix {
+        ChannelMix::default()
+    }
+}
+
+#[pymethods]
+impl Distortion {
+    #[new]
+    fn new_py() -> Distortion {
+        Distortion::default()
+    }
+}
+
+#[pymethods]
+impl Equalizer {
+    #[new]
+    fn new_py() -> Equalizer {
+        Equalizer::default()
+    }
+}
+
+#[pymethods]
+impl Karaoke {
+    #[new]
+    fn new_py() -> Karaoke {
+        Karaoke::default()
+    }
+}
+
+#[pymethods]
+impl LowPass {
+    #[new]
+    fn new_py() -> LowPass {
+        LowPass::default()
+    }
+}
+
+#[pymethods]
+impl Rotation {
+    #[new]
+    fn new_py() -> Rotation {
+        Rotation::default()
+    }
+}
+
+#[pymethods]
+impl Timescale {
+    #[new]
+    fn new_py() -> Timescale {
+        Timescale::default()
+    }
+}
+
+#[pymethods]
+impl TremoloVibrato {
+    #[new]
+    fn new_py() -> TremoloVibrato {
+        TremoloVibrato::default()
+    }
+}
+
 #[apply(crate::python::with_getter_setter)]
 #[pymethods]
 impl Filters {
@@ -55,4 +119,9 @@ impl Filters {
         (channel_mix, Option<ChannelMix>),
         (low_pass, Option<LowPass>),
     );
+
+    #[new]
+    fn new_py() -> Filters {
+        Filters::default()
+    }
 }

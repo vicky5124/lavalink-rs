@@ -9,17 +9,23 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 ## To-Do
 
-### 0.12
+### 0.11.2
 
 - [x] hikari-lightbulb example
-- [ ] Implement python builders for all model structures
+- [x] Implement python builders for all the needed model structures
+
+### 0.11.3
+
+- [ ] Expose Http and methods to python
+- [ ] Implement search utilities to python
+
+### 0.12
+
 - [ ] Implement some const methods
 - [ ] RoutePlanner API
 - [ ] Switch from reqwests to hyper
 - [ ] native and webpki roots for rustls feature separation
 - [ ] Support `tokio-websockets`
-- [ ] Expose Http and methods to python
-- [ ] Implement search utilities to python
 
 ### Future
 

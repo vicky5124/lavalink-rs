@@ -2,8 +2,7 @@ import typing as t
 from lavalink_rs import LavalinkClient, GuildId
 
 class NodeDistributionStrategy:
-    @staticmethod
-    def new() -> NodeDistributionStrategy: ...
+    def __new__(cls) -> NodeDistributionStrategy: ...
     @staticmethod
     def sharded() -> NodeDistributionStrategy: ...
     @staticmethod

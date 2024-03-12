@@ -79,7 +79,7 @@ impl From<SongbirdConnectionInfo> for ConnectionInfo {
     }
 }
 
-#[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct Filters {
@@ -109,7 +109,7 @@ pub struct Filters {
     pub plugin_filters: Option<serde_json::Value>,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Mixes both channels (left and right), with a configurable factor on how much each channel affects the other.
@@ -124,7 +124,7 @@ pub struct ChannelMix {
     pub right_to_right: Option<f64>,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Distortion effect.
@@ -141,7 +141,7 @@ pub struct Distortion {
     pub scale: Option<f64>,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// A fixed band equalizer.
@@ -155,7 +155,7 @@ pub struct Equalizer {
     pub gain: f64,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Uses equalization to eliminate part of a band, usually targeting vocals.
@@ -170,7 +170,7 @@ pub struct Karaoke {
     pub filter_width: Option<f64>,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Higher frequencies get suppressed, while lower frequencies pass through this filter.
@@ -181,7 +181,7 @@ pub struct LowPass {
     pub smoothing: Option<f64>,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Rotates the sound around the stereo channels/user headphones (aka Audio Panning).
@@ -194,7 +194,7 @@ pub struct Rotation {
     pub rotation_hz: Option<f64>,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Changes the speed, pitch, and rate.
@@ -209,7 +209,7 @@ pub struct Timescale {
     pub rate: Option<f64>,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, PartialOrd, Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 /// Tremolo uses amplification to create a shuddering effect, where the volume quickly oscillates.

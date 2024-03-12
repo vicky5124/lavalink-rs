@@ -19,7 +19,7 @@ pub(crate) struct NodeDistributionStrategyPy {
 
 #[pymethods]
 impl NodeDistributionStrategyPy {
-    #[staticmethod]
+    #[new]
     pub fn new() -> Self {
         Self {
             inner: NodeDistributionStrategy::new(),
