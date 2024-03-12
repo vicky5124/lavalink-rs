@@ -206,10 +206,7 @@
                                 <a class="function" href="#NodeBuilder.__init__">NodeBuilder</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.password">password</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#NodeBuilder.user_id">user_id</a>
+                                <a class="variable" href="#NodeBuilder.session_id">session_id</a>
                         </li>
                         <li>
                                 <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
@@ -218,7 +215,10 @@
                                 <a class="variable" href="#NodeBuilder.hostname">hostname</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.session_id">session_id</a>
+                                <a class="variable" href="#NodeBuilder.password">password</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#NodeBuilder.user_id">user_id</a>
                         </li>
                 </ul>
 
@@ -226,9 +226,6 @@
             <li>
                     <a class="class" href="#NodeDistributionStrategy">NodeDistributionStrategy</a>
                             <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#NodeDistributionStrategy.new">new</a>
-                        </li>
                         <li>
                                 <a class="function" href="#NodeDistributionStrategy.sharded">sharded</a>
                         </li>
@@ -1070,24 +1067,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.password" class="classattr">
+                            <div id="NodeBuilder.session_id" class="classattr">
                                 <div class="attr variable">
-            <span class="name">password</span><span class="annotation">: str</span>
+            <span class="name">session_id</span><span class="annotation">: Optional[str]</span>
 
         
     </div>
-    <a class="headerlink" href="#NodeBuilder.password"></a>
-    
-    
-
-                            </div>
-                            <div id="NodeBuilder.user_id" class="classattr">
-                                <div class="attr variable">
-            <span class="name">user_id</span><span class="annotation">: <a href="#UserId">lavalink_rs.UserId</a></span>
-
-        
-    </div>
-    <a class="headerlink" href="#NodeBuilder.user_id"></a>
+    <a class="headerlink" href="#NodeBuilder.session_id"></a>
     
     
 
@@ -1114,13 +1100,24 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.session_id" class="classattr">
+                            <div id="NodeBuilder.password" class="classattr">
                                 <div class="attr variable">
-            <span class="name">session_id</span><span class="annotation">: Optional[str]</span>
+            <span class="name">password</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#NodeBuilder.session_id"></a>
+    <a class="headerlink" href="#NodeBuilder.password"></a>
+    
+    
+
+                            </div>
+                            <div id="NodeBuilder.user_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">user_id</span><span class="annotation">: <a href="#UserId">lavalink_rs.UserId</a></span>
+
+        
+    </div>
+    <a class="headerlink" href="#NodeBuilder.user_id"></a>
     
     
 
@@ -1138,19 +1135,6 @@ let node_builder = NodeBuilder {
     
     
 
-                            <div id="NodeDistributionStrategy.new" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">new</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#NodeDistributionStrategy.new"></a>
-    
-    
-
-                            </div>
                             <div id="NodeDistributionStrategy.sharded" class="classattr">
                                 <div class="attr function">
             

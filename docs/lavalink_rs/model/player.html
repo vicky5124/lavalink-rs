@@ -36,25 +36,25 @@
                     <a class="class" href="#Player">Player</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Player.guild_id">guild_id</a>
+                                <a class="variable" href="#Player.state">state</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Player.voice">voice</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Player.volume">volume</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Player.paused">paused</a>
+                                <a class="variable" href="#Player.track">track</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Player.filters">filters</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Player.state">state</a>
+                                <a class="variable" href="#Player.volume">volume</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Player.track">track</a>
+                                <a class="variable" href="#Player.guild_id">guild_id</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Player.paused">paused</a>
                         </li>
                 </ul>
 
@@ -66,13 +66,13 @@
                                 <a class="variable" href="#State.time">time</a>
                         </li>
                         <li>
-                                <a class="variable" href="#State.position">position</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#State.ping">ping</a>
                         </li>
                         <li>
                                 <a class="variable" href="#State.connected">connected</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#State.position">position</a>
                         </li>
                 </ul>
 
@@ -99,34 +99,34 @@
                     <a class="class" href="#Filters">Filters</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Filters.distortion">distortion</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Filters.volume">volume</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Filters.timescale">timescale</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Filters.rotation">rotation</a>
+                                <a class="variable" href="#Filters.tremolo">tremolo</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Filters.vibrato">vibrato</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Filters.equalizer">equalizer</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Filters.volume">volume</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Filters.low_pass">low_pass</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Filters.tremolo">tremolo</a>
+                                <a class="variable" href="#Filters.distortion">distortion</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Filters.channel_mix">channel_mix</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Filters.equalizer">equalizer</a>
+                                <a class="variable" href="#Filters.karaoke">karaoke</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Filters.karaoke">karaoke</a>
+                                <a class="variable" href="#Filters.rotation">rotation</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Filters.timescale">timescale</a>
                         </li>
                 </ul>
 
@@ -141,10 +141,10 @@
                                 <a class="variable" href="#ChannelMix.left_to_left">left_to_left</a>
                         </li>
                         <li>
-                                <a class="variable" href="#ChannelMix.right_to_left">right_to_left</a>
+                                <a class="variable" href="#ChannelMix.right_to_right">right_to_right</a>
                         </li>
                         <li>
-                                <a class="variable" href="#ChannelMix.right_to_right">right_to_right</a>
+                                <a class="variable" href="#ChannelMix.right_to_left">right_to_left</a>
                         </li>
                 </ul>
 
@@ -152,18 +152,6 @@
             <li>
                     <a class="class" href="#Distortion">Distortion</a>
                             <ul class="memberlist">
-                        <li>
-                                <a class="variable" href="#Distortion.cos_offset">cos_offset</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Distortion.sin_offset">sin_offset</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Distortion.tan_scale">tan_scale</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Distortion.cos_scale">cos_scale</a>
-                        </li>
                         <li>
                                 <a class="variable" href="#Distortion.offset">offset</a>
                         </li>
@@ -174,7 +162,19 @@
                                 <a class="variable" href="#Distortion.sin_scale">sin_scale</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Distortion.sin_offset">sin_offset</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Distortion.cos_offset">cos_offset</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Distortion.cos_scale">cos_scale</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Distortion.scale">scale</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Distortion.tan_scale">tan_scale</a>
                         </li>
                 </ul>
 
@@ -183,10 +183,10 @@
                     <a class="class" href="#Equalizer">Equalizer</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Equalizer.gain">gain</a>
+                                <a class="variable" href="#Equalizer.band">band</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Equalizer.band">band</a>
+                                <a class="variable" href="#Equalizer.gain">gain</a>
                         </li>
                 </ul>
 
@@ -195,10 +195,10 @@
                     <a class="class" href="#Karaoke">Karaoke</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Karaoke.mono_level">mono_level</a>
+                                <a class="variable" href="#Karaoke.filter_band">filter_band</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Karaoke.filter_band">filter_band</a>
+                                <a class="variable" href="#Karaoke.mono_level">mono_level</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Karaoke.level">level</a>
@@ -234,10 +234,10 @@
                                 <a class="variable" href="#Timescale.speed">speed</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Timescale.rate">rate</a>
+                                <a class="variable" href="#Timescale.pitch">pitch</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Timescale.pitch">pitch</a>
+                                <a class="variable" href="#Timescale.rate">rate</a>
                         </li>
                 </ul>
 
@@ -246,10 +246,10 @@
                     <a class="class" href="#TremoloVibrato">TremoloVibrato</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TremoloVibrato.depth">depth</a>
+                                <a class="variable" href="#TremoloVibrato.frequency">frequency</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TremoloVibrato.frequency">frequency</a>
+                                <a class="variable" href="#TremoloVibrato.depth">depth</a>
                         </li>
                 </ul>
 
@@ -289,15 +289,17 @@
 </div>
 
 
-                            <div id="Player.guild_id" class="classattr">
+                            <div id="Player.state" class="classattr">
                                 <div class="attr variable">
-            <span class="name">guild_id</span><span class="annotation">: GuildId</span>
+            <span class="name">state</span><span class="annotation">: <a href="#State">lavalink_rs.model.player.State</a></span>
 
         
     </div>
-    <a class="headerlink" href="#Player.guild_id"></a>
+    <a class="headerlink" href="#Player.state"></a>
     
-    
+            <div class="docstring"><p>The state of the player.</p>
+</div>
+
 
                             </div>
                             <div id="Player.voice" class="classattr">
@@ -313,28 +315,15 @@
 
 
                             </div>
-                            <div id="Player.volume" class="classattr">
+                            <div id="Player.track" class="classattr">
                                 <div class="attr variable">
-            <span class="name">volume</span><span class="annotation">: int</span>
+            <span class="name">track</span><span class="annotation">: Optional[TrackData]</span>
 
         
     </div>
-    <a class="headerlink" href="#Player.volume"></a>
+    <a class="headerlink" href="#Player.track"></a>
     
-            <div class="docstring"><p>The current volume of the player.</p>
-</div>
-
-
-                            </div>
-                            <div id="Player.paused" class="classattr">
-                                <div class="attr variable">
-            <span class="name">paused</span><span class="annotation">: bool</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Player.paused"></a>
-    
-            <div class="docstring"><p>Whether the player is paused or not.</p>
+            <div class="docstring"><p>The currently playing track.</p>
 </div>
 
 
@@ -352,28 +341,39 @@
 
 
                             </div>
-                            <div id="Player.state" class="classattr">
+                            <div id="Player.volume" class="classattr">
                                 <div class="attr variable">
-            <span class="name">state</span><span class="annotation">: <a href="#State">lavalink_rs.model.player.State</a></span>
+            <span class="name">volume</span><span class="annotation">: int</span>
 
         
     </div>
-    <a class="headerlink" href="#Player.state"></a>
+    <a class="headerlink" href="#Player.volume"></a>
     
-            <div class="docstring"><p>The state of the player.</p>
+            <div class="docstring"><p>The current volume of the player.</p>
 </div>
 
 
                             </div>
-                            <div id="Player.track" class="classattr">
+                            <div id="Player.guild_id" class="classattr">
                                 <div class="attr variable">
-            <span class="name">track</span><span class="annotation">: Optional[TrackData]</span>
+            <span class="name">guild_id</span><span class="annotation">: GuildId</span>
 
         
     </div>
-    <a class="headerlink" href="#Player.track"></a>
+    <a class="headerlink" href="#Player.guild_id"></a>
     
-            <div class="docstring"><p>The currently playing track.</p>
+    
+
+                            </div>
+                            <div id="Player.paused" class="classattr">
+                                <div class="attr variable">
+            <span class="name">paused</span><span class="annotation">: bool</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Player.paused"></a>
+    
+            <div class="docstring"><p>Whether the player is paused or not.</p>
 </div>
 
 
@@ -404,19 +404,6 @@
 
 
                             </div>
-                            <div id="State.position" class="classattr">
-                                <div class="attr variable">
-            <span class="name">position</span><span class="annotation">: int</span>
-
-        
-    </div>
-    <a class="headerlink" href="#State.position"></a>
-    
-            <div class="docstring"><p>The current position of the track in milliseconds.</p>
-</div>
-
-
-                            </div>
                             <div id="State.ping" class="classattr">
                                 <div class="attr variable">
             <span class="name">ping</span><span class="annotation">: Optional[int]</span>
@@ -441,6 +428,19 @@
     <a class="headerlink" href="#State.connected"></a>
     
             <div class="docstring"><p>Whether Lavalink is connected to the discord voice gateway.</p>
+</div>
+
+
+                            </div>
+                            <div id="State.position" class="classattr">
+                                <div class="attr variable">
+            <span class="name">position</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#State.position"></a>
+    
+            <div class="docstring"><p>The current position of the track in milliseconds.</p>
 </div>
 
 
@@ -533,46 +533,13 @@
     
     
 
-                            <div id="Filters.distortion" class="classattr">
+                            <div id="Filters.tremolo" class="classattr">
                                 <div class="attr variable">
-            <span class="name">distortion</span><span class="annotation">: Optional[<a href="#Distortion">lavalink_rs.model.player.Distortion</a>]</span>
+            <span class="name">tremolo</span><span class="annotation">: Optional[<a href="#TremoloVibrato">lavalink_rs.model.player.TremoloVibrato</a>]</span>
 
         
     </div>
-    <a class="headerlink" href="#Filters.distortion"></a>
-    
-    
-
-                            </div>
-                            <div id="Filters.volume" class="classattr">
-                                <div class="attr variable">
-            <span class="name">volume</span><span class="annotation">: Optional[int]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Filters.volume"></a>
-    
-    
-
-                            </div>
-                            <div id="Filters.timescale" class="classattr">
-                                <div class="attr variable">
-            <span class="name">timescale</span><span class="annotation">: Optional[<a href="#Timescale">lavalink_rs.model.player.Timescale</a>]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Filters.timescale"></a>
-    
-    
-
-                            </div>
-                            <div id="Filters.rotation" class="classattr">
-                                <div class="attr variable">
-            <span class="name">rotation</span><span class="annotation">: Optional[<a href="#Rotation">lavalink_rs.model.player.Rotation</a>]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Filters.rotation"></a>
+    <a class="headerlink" href="#Filters.tremolo"></a>
     
     
 
@@ -588,6 +555,28 @@
     
 
                             </div>
+                            <div id="Filters.equalizer" class="classattr">
+                                <div class="attr variable">
+            <span class="name">equalizer</span><span class="annotation">: Optional[List[<a href="#Equalizer">lavalink_rs.model.player.Equalizer</a>]]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Filters.equalizer"></a>
+    
+    
+
+                            </div>
+                            <div id="Filters.volume" class="classattr">
+                                <div class="attr variable">
+            <span class="name">volume</span><span class="annotation">: Optional[int]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Filters.volume"></a>
+    
+    
+
+                            </div>
                             <div id="Filters.low_pass" class="classattr">
                                 <div class="attr variable">
             <span class="name">low_pass</span><span class="annotation">: Optional[<a href="#LowPass">lavalink_rs.model.player.LowPass</a>]</span>
@@ -599,13 +588,13 @@
     
 
                             </div>
-                            <div id="Filters.tremolo" class="classattr">
+                            <div id="Filters.distortion" class="classattr">
                                 <div class="attr variable">
-            <span class="name">tremolo</span><span class="annotation">: Optional[<a href="#TremoloVibrato">lavalink_rs.model.player.TremoloVibrato</a>]</span>
+            <span class="name">distortion</span><span class="annotation">: Optional[<a href="#Distortion">lavalink_rs.model.player.Distortion</a>]</span>
 
         
     </div>
-    <a class="headerlink" href="#Filters.tremolo"></a>
+    <a class="headerlink" href="#Filters.distortion"></a>
     
     
 
@@ -621,17 +610,6 @@
     
 
                             </div>
-                            <div id="Filters.equalizer" class="classattr">
-                                <div class="attr variable">
-            <span class="name">equalizer</span><span class="annotation">: Optional[List[<a href="#Equalizer">lavalink_rs.model.player.Equalizer</a>]]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Filters.equalizer"></a>
-    
-    
-
-                            </div>
                             <div id="Filters.karaoke" class="classattr">
                                 <div class="attr variable">
             <span class="name">karaoke</span><span class="annotation">: Optional[<a href="#Karaoke">lavalink_rs.model.player.Karaoke</a>]</span>
@@ -639,6 +617,28 @@
         
     </div>
     <a class="headerlink" href="#Filters.karaoke"></a>
+    
+    
+
+                            </div>
+                            <div id="Filters.rotation" class="classattr">
+                                <div class="attr variable">
+            <span class="name">rotation</span><span class="annotation">: Optional[<a href="#Rotation">lavalink_rs.model.player.Rotation</a>]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Filters.rotation"></a>
+    
+    
+
+                            </div>
+                            <div id="Filters.timescale" class="classattr">
+                                <div class="attr variable">
+            <span class="name">timescale</span><span class="annotation">: Optional[<a href="#Timescale">lavalink_rs.model.player.Timescale</a>]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Filters.timescale"></a>
     
     
 
@@ -684,17 +684,6 @@ All values are (0.0 &lt;= x &lt;= 1.0)</p>
     
 
                             </div>
-                            <div id="ChannelMix.right_to_left" class="classattr">
-                                <div class="attr variable">
-            <span class="name">right_to_left</span><span class="annotation">: Optional[float]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#ChannelMix.right_to_left"></a>
-    
-    
-
-                            </div>
                             <div id="ChannelMix.right_to_right" class="classattr">
                                 <div class="attr variable">
             <span class="name">right_to_right</span><span class="annotation">: Optional[float]</span>
@@ -702,6 +691,17 @@ All values are (0.0 &lt;= x &lt;= 1.0)</p>
         
     </div>
     <a class="headerlink" href="#ChannelMix.right_to_right"></a>
+    
+    
+
+                            </div>
+                            <div id="ChannelMix.right_to_left" class="classattr">
+                                <div class="attr variable">
+            <span class="name">right_to_left</span><span class="annotation">: Optional[float]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ChannelMix.right_to_left"></a>
     
     
 
@@ -723,50 +723,6 @@ All values are (0.0 &lt;= x &lt;= 1.0)</p>
 </div>
 
 
-                            <div id="Distortion.cos_offset" class="classattr">
-                                <div class="attr variable">
-            <span class="name">cos_offset</span><span class="annotation">: Optional[float]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Distortion.cos_offset"></a>
-    
-    
-
-                            </div>
-                            <div id="Distortion.sin_offset" class="classattr">
-                                <div class="attr variable">
-            <span class="name">sin_offset</span><span class="annotation">: Optional[float]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Distortion.sin_offset"></a>
-    
-    
-
-                            </div>
-                            <div id="Distortion.tan_scale" class="classattr">
-                                <div class="attr variable">
-            <span class="name">tan_scale</span><span class="annotation">: Optional[float]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Distortion.tan_scale"></a>
-    
-    
-
-                            </div>
-                            <div id="Distortion.cos_scale" class="classattr">
-                                <div class="attr variable">
-            <span class="name">cos_scale</span><span class="annotation">: Optional[float]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Distortion.cos_scale"></a>
-    
-    
-
-                            </div>
                             <div id="Distortion.offset" class="classattr">
                                 <div class="attr variable">
             <span class="name">offset</span><span class="annotation">: Optional[float]</span>
@@ -800,6 +756,39 @@ All values are (0.0 &lt;= x &lt;= 1.0)</p>
     
 
                             </div>
+                            <div id="Distortion.sin_offset" class="classattr">
+                                <div class="attr variable">
+            <span class="name">sin_offset</span><span class="annotation">: Optional[float]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Distortion.sin_offset"></a>
+    
+    
+
+                            </div>
+                            <div id="Distortion.cos_offset" class="classattr">
+                                <div class="attr variable">
+            <span class="name">cos_offset</span><span class="annotation">: Optional[float]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Distortion.cos_offset"></a>
+    
+    
+
+                            </div>
+                            <div id="Distortion.cos_scale" class="classattr">
+                                <div class="attr variable">
+            <span class="name">cos_scale</span><span class="annotation">: Optional[float]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Distortion.cos_scale"></a>
+    
+    
+
+                            </div>
                             <div id="Distortion.scale" class="classattr">
                                 <div class="attr variable">
             <span class="name">scale</span><span class="annotation">: Optional[float]</span>
@@ -807,6 +796,17 @@ All values are (0.0 &lt;= x &lt;= 1.0)</p>
         
     </div>
     <a class="headerlink" href="#Distortion.scale"></a>
+    
+    
+
+                            </div>
+                            <div id="Distortion.tan_scale" class="classattr">
+                                <div class="attr variable">
+            <span class="name">tan_scale</span><span class="annotation">: Optional[float]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Distortion.tan_scale"></a>
     
     
 
@@ -826,6 +826,19 @@ All values are (0.0 &lt;= x &lt;= 1.0)</p>
 </div>
 
 
+                            <div id="Equalizer.band" class="classattr">
+                                <div class="attr variable">
+            <span class="name">band</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Equalizer.band"></a>
+    
+            <div class="docstring"><p>The band (0 to 14)</p>
+</div>
+
+
+                            </div>
                             <div id="Equalizer.gain" class="classattr">
                                 <div class="attr variable">
             <span class="name">gain</span><span class="annotation">: float</span>
@@ -838,19 +851,6 @@ All values are (0.0 &lt;= x &lt;= 1.0)</p>
 
 <p>-0.25 means the given band is completely muted, and 0.25 means it is doubled.
 Modifying the gain could also change the volume of the output.</p>
-</div>
-
-
-                            </div>
-                            <div id="Equalizer.band" class="classattr">
-                                <div class="attr variable">
-            <span class="name">band</span><span class="annotation">: int</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Equalizer.band"></a>
-    
-            <div class="docstring"><p>The band (0 to 14)</p>
 </div>
 
 
@@ -870,19 +870,6 @@ Modifying the gain could also change the volume of the output.</p>
 </div>
 
 
-                            <div id="Karaoke.mono_level" class="classattr">
-                                <div class="attr variable">
-            <span class="name">mono_level</span><span class="annotation">: Optional[float]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Karaoke.mono_level"></a>
-    
-            <div class="docstring"><p>The mono level (0 to 1.0 where 0.0 is no effect and 1.0 is full effect)</p>
-</div>
-
-
-                            </div>
                             <div id="Karaoke.filter_band" class="classattr">
                                 <div class="attr variable">
             <span class="name">filter_band</span><span class="annotation">: Optional[float]</span>
@@ -892,6 +879,19 @@ Modifying the gain could also change the volume of the output.</p>
     <a class="headerlink" href="#Karaoke.filter_band"></a>
     
             <div class="docstring"><p>The filter band (in Hz)</p>
+</div>
+
+
+                            </div>
+                            <div id="Karaoke.mono_level" class="classattr">
+                                <div class="attr variable">
+            <span class="name">mono_level</span><span class="annotation">: Optional[float]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Karaoke.mono_level"></a>
+    
+            <div class="docstring"><p>The mono level (0 to 1.0 where 0.0 is no effect and 1.0 is full effect)</p>
 </div>
 
 
@@ -1014,19 +1014,6 @@ Modifying the gain could also change the volume of the output.</p>
 
 
                             </div>
-                            <div id="Timescale.rate" class="classattr">
-                                <div class="attr variable">
-            <span class="name">rate</span><span class="annotation">: Optional[float]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Timescale.rate"></a>
-    
-            <div class="docstring"><p>The rate (0.0 &lt;= x)</p>
-</div>
-
-
-                            </div>
                             <div id="Timescale.pitch" class="classattr">
                                 <div class="attr variable">
             <span class="name">pitch</span><span class="annotation">: Optional[float]</span>
@@ -1036,6 +1023,19 @@ Modifying the gain could also change the volume of the output.</p>
     <a class="headerlink" href="#Timescale.pitch"></a>
     
             <div class="docstring"><p>The pitch (0.0 &lt;= x)</p>
+</div>
+
+
+                            </div>
+                            <div id="Timescale.rate" class="classattr">
+                                <div class="attr variable">
+            <span class="name">rate</span><span class="annotation">: Optional[float]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Timescale.rate"></a>
+    
+            <div class="docstring"><p>The rate (0.0 &lt;= x)</p>
 </div>
 
 
@@ -1059,19 +1059,6 @@ Modifying the gain could also change the volume of the output.</p>
 </div>
 
 
-                            <div id="TremoloVibrato.depth" class="classattr">
-                                <div class="attr variable">
-            <span class="name">depth</span><span class="annotation">: Optional[float]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TremoloVibrato.depth"></a>
-    
-            <div class="docstring"><p>For both tremolo and vibrato (0.0 &lt; x &lt;= 1.0)</p>
-</div>
-
-
-                            </div>
                             <div id="TremoloVibrato.frequency" class="classattr">
                                 <div class="attr variable">
             <span class="name">frequency</span><span class="annotation">: Optional[float]</span>
@@ -1082,6 +1069,19 @@ Modifying the gain could also change the volume of the output.</p>
     
             <div class="docstring"><p>For tremolo (0.0 &lt; x)
 For vibrato (0.0 &lt; x &lt;= 14.0)</p>
+</div>
+
+
+                            </div>
+                            <div id="TremoloVibrato.depth" class="classattr">
+                                <div class="attr variable">
+            <span class="name">depth</span><span class="annotation">: Optional[float]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TremoloVibrato.depth"></a>
+    
+            <div class="docstring"><p>For both tremolo and vibrato (0.0 &lt; x &lt;= 1.0)</p>
 </div>
 
 
