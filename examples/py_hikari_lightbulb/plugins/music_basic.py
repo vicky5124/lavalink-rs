@@ -7,7 +7,7 @@ import typing as t
 
 import hikari
 import lightbulb
-from lavalink_rs.model.track import TrackData, PlaylistData
+from lavalink_rs.model.track import TrackData, PlaylistData, TrackLoadType
 
 plugin = Plugin("Music (basic) commands")
 plugin.add_checks(lightbulb.guild_only)
@@ -17,15 +17,20 @@ async def _join(ctx: Context) -> t.Optional[hikari.Snowflake]:
     if not ctx.guild_id:
         return None
 
-    if "channel" not in ctx.options.items():
+    channel_id = None
+
+    for i in ctx.options.items():
+        if i[0] == "channel" and i[1]:
+            channel_id = i[1].id
+            break
+
+    if not channel_id:
         voice_state = ctx.bot.cache.get_voice_state(ctx.guild_id, ctx.author.id)
 
         if not voice_state or not voice_state.channel_id:
             return None
 
         channel_id = voice_state.channel_id
-    else:
-        channel_id = ctx.options.channel.id
 
     voice = ctx.bot.voice.connections.get(ctx.guild_id)
 
@@ -136,14 +141,17 @@ async def play(ctx: Context) -> None:
         query = f"spsearch:{query}"
 
     try:
-        loaded_tracks = await ctx.bot.lavalink.load_tracks(ctx.guild_id, query)
+        tracks = await ctx.bot.lavalink.load_tracks(ctx.guild_id, query)
+        loaded_tracks = tracks.data
+
     except Exception as e:
         logging.error(e)
         await ctx.respond("Error")
         return None
 
-    # Single track
-    if isinstance(loaded_tracks, TrackData):
+    if tracks.load_type == TrackLoadType.Track:
+        assert isinstance(loaded_tracks, TrackData)
+
         player_ctx.queue(loaded_tracks)
 
         if loaded_tracks.info.uri:
@@ -155,8 +163,9 @@ async def play(ctx: Context) -> None:
                 f"Added to queue: `{loaded_tracks.info.author} - {loaded_tracks.info.title}`"
             )
 
-    # Search results
-    elif isinstance(loaded_tracks, list):
+    elif tracks.load_type == TrackLoadType.Search:
+        assert isinstance(loaded_tracks, list)
+
         player_ctx.queue(loaded_tracks[0])
 
         if loaded_tracks[0].info.uri:
@@ -168,8 +177,9 @@ async def play(ctx: Context) -> None:
                 f"Added to queue: `{loaded_tracks[0].info.author} - {loaded_tracks[0].info.title}`"
             )
 
-    # Playlist
-    elif isinstance(loaded_tracks, PlaylistData):
+    elif tracks.load_type == TrackLoadType.Playlist:
+        assert isinstance(loaded_tracks, PlaylistData)
+
         if loaded_tracks.info.selected_track:
             track = loaded_tracks.tracks[loaded_tracks.info.selected_track]
             player_ctx.queue(track)
@@ -186,7 +196,7 @@ async def play(ctx: Context) -> None:
             player_ctx.set_queue_append(loaded_tracks.tracks)
             await ctx.respond(f"Added playlist to queue: `{loaded_tracks.info.name}`")
 
-    # Error or no results
+    # Error or no search results
     else:
         await ctx.respond("No songs found")
         return None

@@ -209,7 +209,7 @@
                                 <a class="variable" href="#NodeBuilder.session_id">session_id</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
+                                <a class="variable" href="#NodeBuilder.user_id">user_id</a>
                         </li>
                         <li>
                                 <a class="variable" href="#NodeBuilder.hostname">hostname</a>
@@ -218,7 +218,7 @@
                                 <a class="variable" href="#NodeBuilder.password">password</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.user_id">user_id</a>
+                                <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
                         </li>
                 </ul>
 
@@ -254,16 +254,16 @@
                                 <a class="variable" href="#TrackInQueue.volume">volume</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.filters">filters</a>
+                                <a class="variable" href="#TrackInQueue.track">track</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInQueue.start_time_ms">start_time_ms</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.track">track</a>
+                                <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
+                                <a class="variable" href="#TrackInQueue.filters">filters</a>
                         </li>
                 </ul>
 
@@ -395,7 +395,7 @@ lavalink_rs    </h1>
                                 <div class="attr function">
             
         <span class="def">async def</span>
-        <span class="name">load_tracks</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">guild_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>,</span><span class="param">	<span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="n">Union</span><span class="p">[</span><span class="n">TrackData</span><span class="p">,</span> <span class="n">PlaylistData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">TrackData</span><span class="p">],</span> <span class="n">TrackError</span><span class="p">,</span> <span class="n">NoneType</span><span class="p">]</span>:</span></span>
+        <span class="name">load_tracks</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">guild_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>,</span><span class="param">	<span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="n">Track</span>:</span></span>
 
         
     </div>
@@ -1078,13 +1078,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.is_ssl" class="classattr">
+                            <div id="NodeBuilder.user_id" class="classattr">
                                 <div class="attr variable">
-            <span class="name">is_ssl</span><span class="annotation">: bool</span>
+            <span class="name">user_id</span><span class="annotation">: <a href="#UserId">lavalink_rs.UserId</a></span>
 
         
     </div>
-    <a class="headerlink" href="#NodeBuilder.is_ssl"></a>
+    <a class="headerlink" href="#NodeBuilder.user_id"></a>
     
     
 
@@ -1111,13 +1111,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.user_id" class="classattr">
+                            <div id="NodeBuilder.is_ssl" class="classattr">
                                 <div class="attr variable">
-            <span class="name">user_id</span><span class="annotation">: <a href="#UserId">lavalink_rs.UserId</a></span>
+            <span class="name">is_ssl</span><span class="annotation">: bool</span>
 
         
     </div>
-    <a class="headerlink" href="#NodeBuilder.user_id"></a>
+    <a class="headerlink" href="#NodeBuilder.is_ssl"></a>
     
     
 
@@ -1239,13 +1239,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="TrackInQueue.filters" class="classattr">
+                            <div id="TrackInQueue.track" class="classattr">
                                 <div class="attr variable">
-            <span class="name">filters</span><span class="annotation">: Optional[Filters]</span>
+            <span class="name">track</span><span class="annotation">: TrackData</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInQueue.filters"></a>
+    <a class="headerlink" href="#TrackInQueue.track"></a>
     
     
 
@@ -1261,17 +1261,6 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="TrackInQueue.track" class="classattr">
-                                <div class="attr variable">
-            <span class="name">track</span><span class="annotation">: TrackData</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInQueue.track"></a>
-    
-    
-
-                            </div>
                             <div id="TrackInQueue.end_time_ms" class="classattr">
                                 <div class="attr variable">
             <span class="name">end_time_ms</span><span class="annotation">: Optional[int]</span>
@@ -1279,6 +1268,17 @@ let node_builder = NodeBuilder {
         
     </div>
     <a class="headerlink" href="#TrackInQueue.end_time_ms"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackInQueue.filters" class="classattr">
+                                <div class="attr variable">
+            <span class="name">filters</span><span class="annotation">: Optional[Filters]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInQueue.filters"></a>
     
     
 

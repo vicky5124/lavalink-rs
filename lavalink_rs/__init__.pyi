@@ -2,7 +2,7 @@ import typing as t
 
 from lavalink_rs.model.player import ConnectionInfo, Player, Filters
 from lavalink_rs.model.http import UpdatePlayer, Info
-from lavalink_rs.model.track import TrackData, PlaylistData, TrackError
+from lavalink_rs.model.track import TrackData, Track
 from lavalink_rs.model.events import (
     Stats,
     PlayerUpdate,
@@ -51,9 +51,7 @@ class LavalinkClient:
     ) -> Player: ...
     async def load_tracks(
         self, guild_id: t.Union[GuildId, int], identifier: str
-    ) -> t.Optional[
-        t.Union[TrackData, PlaylistData, t.List[TrackData], TrackError]
-    ]: ...
+    ) -> Track: ...
     async def decode_track(
         self, guild_id: t.Union[GuildId, int], track: str
     ) -> TrackData: ...

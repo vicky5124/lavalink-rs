@@ -6,7 +6,7 @@ use pyo3::prelude::*;
 pub fn track(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<TrackLoadType>()?;
     //m.add_class::<TrackLoadData>()?;
-    //m.add_class::<Track>()?;
+    m.add_class::<Track>()?;
     m.add_class::<TrackData>()?;
     m.add_class::<TrackInfo>()?;
     m.add_class::<PlaylistData>()?;
@@ -14,6 +14,12 @@ pub fn track(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<TrackError>()?;
 
     Ok(())
+}
+
+#[pyclass(get_all, set_all)]
+pub(crate) struct Track {
+    pub(crate) load_type: TrackLoadType,
+    pub(crate) data: Option<PyObject>,
 }
 
 #[apply(crate::python::with_getter_setter)]

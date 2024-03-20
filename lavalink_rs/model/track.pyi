@@ -1,7 +1,15 @@
 import typing as t
 
-# TODO enum
-class TrackLoadType: ...
+class TrackLoadType:
+    Track = 0
+    Playlist = 1
+    Search = 2
+    Empty = 3
+    Error = 4
+
+class Track:
+    load_type: TrackLoadType
+    data: t.Optional[t.Union[TrackData, PlaylistData, t.List[TrackData], TrackError]]
 
 class TrackData:
     info: TrackInfo

@@ -14,12 +14,14 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 - [x] hikari-lightbulb example
 - [x] Implement python builders for all the needed model structures
 
-### 0.11.3
+### 0.12.0
 
 - [ ] Expose Http and methods to python
 - [ ] Implement search utilities to python
+- [x] load_tracks to return Track in python
+- [ ] Streamable queue reader
 
-### 0.12
+### 0.13
 
 - [ ] Implement some const methods
 - [ ] RoutePlanner API
@@ -29,7 +31,6 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 ### Future
 
-- [ ] Streamable queue reader
 - [ ] Improve documentation with examples, better formatting, and fill in missing data
 - [ ] Expand event logging
 - [ ] discord.py example

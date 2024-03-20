@@ -54,6 +54,18 @@
 
             </li>
             <li>
+                    <a class="class" href="#Track">Track</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#Track.load_type">load_type</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Track.data">data</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#TrackData">TrackData</a>
                             <ul class="memberlist">
                         <li>
@@ -69,22 +81,19 @@
                     <a class="class" href="#TrackInfo">TrackInfo</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackInfo.title">title</a>
+                                <a class="variable" href="#TrackInfo.is_seekable">is_seekable</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInfo.identifier">identifier</a>
                         </li>
                         <li>
+                                <a class="variable" href="#TrackInfo.artwork_url">artwork_url</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInfo.isrc">isrc</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#TrackInfo.uri">uri</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.is_stream">is_stream</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.source_name">source_name</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.is_seekable">is_seekable</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInfo.author">author</a>
@@ -93,13 +102,16 @@
                                 <a class="variable" href="#TrackInfo.length">length</a>
                         </li>
                         <li>
+                                <a class="variable" href="#TrackInfo.is_stream">is_stream</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInfo.title">title</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#TrackInfo.position">position</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInfo.artwork_url">artwork_url</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.isrc">isrc</a>
+                                <a class="variable" href="#TrackInfo.source_name">source_name</a>
                         </li>
                 </ul>
 
@@ -108,10 +120,10 @@
                     <a class="class" href="#PlaylistData">PlaylistData</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#PlaylistData.info">info</a>
+                                <a class="variable" href="#PlaylistData.tracks">tracks</a>
                         </li>
                         <li>
-                                <a class="variable" href="#PlaylistData.tracks">tracks</a>
+                                <a class="variable" href="#PlaylistData.info">info</a>
                         </li>
                 </ul>
 
@@ -132,13 +144,13 @@
                     <a class="class" href="#TrackError">TrackError</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackError.severity">severity</a>
+                                <a class="variable" href="#TrackError.message">message</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackError.cause">cause</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackError.message">message</a>
+                                <a class="variable" href="#TrackError.severity">severity</a>
                         </li>
                 </ul>
 
@@ -239,6 +251,41 @@
 
                             </div>
                 </section>
+                <section id="Track">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Track</span>:
+
+        
+    </div>
+    <a class="headerlink" href="#Track"></a>
+    
+    
+
+                            <div id="Track.load_type" class="classattr">
+                                <div class="attr variable">
+            <span class="name">load_type</span><span class="annotation">: <a href="#TrackLoadType">lavalink_rs.model.track.TrackLoadType</a></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Track.load_type"></a>
+    
+    
+
+                            </div>
+                            <div id="Track.data" class="classattr">
+                                <div class="attr variable">
+            <span class="name">data</span><span class="annotation">: Union[<a href="#TrackData">lavalink_rs.model.track.TrackData</a>, <a href="#PlaylistData">lavalink_rs.model.track.PlaylistData</a>, List[<a href="#TrackData">lavalink_rs.model.track.TrackData</a>], <a href="#TrackError">lavalink_rs.model.track.TrackError</a>, NoneType]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Track.data"></a>
+    
+    
+
+                            </div>
+                </section>
                 <section id="TrackData">
                     <div class="attr class">
             
@@ -290,71 +337,6 @@
 </div>
 
 
-                            <div id="TrackInfo.title" class="classattr">
-                                <div class="attr variable">
-            <span class="name">title</span><span class="annotation">: str</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.title"></a>
-    
-            <div class="docstring"><p>The track title,</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.identifier" class="classattr">
-                                <div class="attr variable">
-            <span class="name">identifier</span><span class="annotation">: str</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.identifier"></a>
-    
-            <div class="docstring"><p>The track identifier.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.uri" class="classattr">
-                                <div class="attr variable">
-            <span class="name">uri</span><span class="annotation">: Optional[str]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.uri"></a>
-    
-            <div class="docstring"><p>The track uri.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.is_stream" class="classattr">
-                                <div class="attr variable">
-            <span class="name">is_stream</span><span class="annotation">: bool</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.is_stream"></a>
-    
-            <div class="docstring"><p>Whether the track is a stream.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.source_name" class="classattr">
-                                <div class="attr variable">
-            <span class="name">source_name</span><span class="annotation">: str</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.source_name"></a>
-    
-            <div class="docstring"><p>The track source name.</p>
-</div>
-
-
-                            </div>
                             <div id="TrackInfo.is_seekable" class="classattr">
                                 <div class="attr variable">
             <span class="name">is_seekable</span><span class="annotation">: bool</span>
@@ -368,41 +350,15 @@
 
 
                             </div>
-                            <div id="TrackInfo.author" class="classattr">
+                            <div id="TrackInfo.identifier" class="classattr">
                                 <div class="attr variable">
-            <span class="name">author</span><span class="annotation">: str</span>
+            <span class="name">identifier</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInfo.author"></a>
+    <a class="headerlink" href="#TrackInfo.identifier"></a>
     
-            <div class="docstring"><p>The track author.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.length" class="classattr">
-                                <div class="attr variable">
-            <span class="name">length</span><span class="annotation">: int</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.length"></a>
-    
-            <div class="docstring"><p>The track length in milliseconds.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.position" class="classattr">
-                                <div class="attr variable">
-            <span class="name">position</span><span class="annotation">: int</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.position"></a>
-    
-            <div class="docstring"><p>The track starting position in milliseconds.</p>
+            <div class="docstring"><p>The track identifier.</p>
 </div>
 
 
@@ -433,6 +389,97 @@
 
 
                             </div>
+                            <div id="TrackInfo.uri" class="classattr">
+                                <div class="attr variable">
+            <span class="name">uri</span><span class="annotation">: Optional[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.uri"></a>
+    
+            <div class="docstring"><p>The track uri.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.author" class="classattr">
+                                <div class="attr variable">
+            <span class="name">author</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.author"></a>
+    
+            <div class="docstring"><p>The track author.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.length" class="classattr">
+                                <div class="attr variable">
+            <span class="name">length</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.length"></a>
+    
+            <div class="docstring"><p>The track length in milliseconds.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.is_stream" class="classattr">
+                                <div class="attr variable">
+            <span class="name">is_stream</span><span class="annotation">: bool</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.is_stream"></a>
+    
+            <div class="docstring"><p>Whether the track is a stream.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.title" class="classattr">
+                                <div class="attr variable">
+            <span class="name">title</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.title"></a>
+    
+            <div class="docstring"><p>The track title,</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.position" class="classattr">
+                                <div class="attr variable">
+            <span class="name">position</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.position"></a>
+    
+            <div class="docstring"><p>The track starting position in milliseconds.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.source_name" class="classattr">
+                                <div class="attr variable">
+            <span class="name">source_name</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.source_name"></a>
+    
+            <div class="docstring"><p>The track source name.</p>
+</div>
+
+
+                            </div>
                 </section>
                 <section id="PlaylistData">
                     <div class="attr class">
@@ -446,17 +493,6 @@
     
     
 
-                            <div id="PlaylistData.info" class="classattr">
-                                <div class="attr variable">
-            <span class="name">info</span><span class="annotation">: <a href="#PlaylistInfo">lavalink_rs.model.track.PlaylistInfo</a></span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlaylistData.info"></a>
-    
-    
-
-                            </div>
                             <div id="PlaylistData.tracks" class="classattr">
                                 <div class="attr variable">
             <span class="name">tracks</span><span class="annotation">: List[<a href="#TrackData">lavalink_rs.model.track.TrackData</a>]</span>
@@ -464,6 +500,17 @@
         
     </div>
     <a class="headerlink" href="#PlaylistData.tracks"></a>
+    
+    
+
+                            </div>
+                            <div id="PlaylistData.info" class="classattr">
+                                <div class="attr variable">
+            <span class="name">info</span><span class="annotation">: <a href="#PlaylistInfo">lavalink_rs.model.track.PlaylistInfo</a></span>
+
+        
+    </div>
+    <a class="headerlink" href="#PlaylistData.info"></a>
     
     
 
@@ -522,15 +569,15 @@
     
     
 
-                            <div id="TrackError.severity" class="classattr">
+                            <div id="TrackError.message" class="classattr">
                                 <div class="attr variable">
-            <span class="name">severity</span><span class="annotation">: str</span>
+            <span class="name">message</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackError.severity"></a>
+    <a class="headerlink" href="#TrackError.message"></a>
     
-            <div class="docstring"><p>The severity of the exception.</p>
+            <div class="docstring"><p>The message of the exception.</p>
 </div>
 
 
@@ -548,15 +595,15 @@
 
 
                             </div>
-                            <div id="TrackError.message" class="classattr">
+                            <div id="TrackError.severity" class="classattr">
                                 <div class="attr variable">
-            <span class="name">message</span><span class="annotation">: str</span>
+            <span class="name">severity</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackError.message"></a>
+    <a class="headerlink" href="#TrackError.severity"></a>
     
-            <div class="docstring"><p>The message of the exception.</p>
+            <div class="docstring"><p>The severity of the exception.</p>
 </div>
 
 

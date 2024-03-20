@@ -171,19 +171,26 @@ impl crate::client::LavalinkClient {
 
             use crate::model::track::TrackLoadData::*;
 
-            Python::with_gil(|py| match tracks.data {
-                Some(Track(x)) => Ok(x.into_py(py)),
-                Some(Playlist(x)) => Ok(x.into_py(py)),
-                Some(Search(x)) => {
-                    let l = PyList::empty(py);
-                    for i in x {
-                        l.append(i.into_py(py))?;
-                    }
+            Python::with_gil(|py| {
+                let track_data = match tracks.data {
+                    Some(Track(x)) => Some(x.into_py(py)),
+                    Some(Playlist(x)) => Some(x.into_py(py)),
+                    Some(Search(x)) => {
+                        let l = PyList::empty(py);
+                        for i in x {
+                            l.append(i.into_py(py))?;
+                        }
 
-                    Ok(l.into_py(py))
-                }
-                Some(Error(x)) => Ok(x.into_py(py)),
-                None => Ok(py.None()),
+                        Some(l.into_py(py))
+                    }
+                    Some(Error(x)) => Some(x.into_py(py)),
+                    None => None,
+                };
+
+                Ok(super::model::track::Track {
+                    load_type: tracks.load_type,
+                    data: track_data,
+                })
             })
         })
     }

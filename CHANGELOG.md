@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.0
+
+- load_tracks in python now returns Track
+
 ## 0.11.2
 
 - Implement a hikari-lightbulb example.
