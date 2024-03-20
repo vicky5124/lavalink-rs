@@ -36,28 +36,28 @@
                     <a class="class" href="#UpdatePlayer">UpdatePlayer</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#UpdatePlayer.end_time">end_time</a>
+                                <a class="variable" href="#UpdatePlayer.paused">paused</a>
                         </li>
                         <li>
                                 <a class="variable" href="#UpdatePlayer.position">position</a>
                         </li>
                         <li>
-                                <a class="variable" href="#UpdatePlayer.volume">volume</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#UpdatePlayer.paused">paused</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#UpdatePlayer.filters">filters</a>
                         </li>
                         <li>
-                                <a class="variable" href="#UpdatePlayer.encoded_track">encoded_track</a>
+                                <a class="variable" href="#UpdatePlayer.identifier">identifier</a>
                         </li>
                         <li>
                                 <a class="variable" href="#UpdatePlayer.voice">voice</a>
                         </li>
                         <li>
-                                <a class="variable" href="#UpdatePlayer.identifier">identifier</a>
+                                <a class="variable" href="#UpdatePlayer.encoded_track">encoded_track</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#UpdatePlayer.end_time">end_time</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#UpdatePlayer.volume">volume</a>
                         </li>
                 </ul>
 
@@ -78,28 +78,28 @@
                     <a class="class" href="#Info">Info</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Info.jvm">jvm</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Info.source_managers">source_managers</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Info.filters">filters</a>
+                                <a class="variable" href="#Info.plugins">plugins</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Info.version">version</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Info.git">git</a>
+                                <a class="variable" href="#Info.jvm">jvm</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Info.lavaplayer">lavaplayer</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Info.git">git</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Info.filters">filters</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Info.build_time">build_time</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Info.plugins">plugins</a>
+                                <a class="variable" href="#Info.source_managers">source_managers</a>
                         </li>
                 </ul>
 
@@ -108,13 +108,13 @@
                     <a class="class" href="#Git">Git</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Git.commit">commit</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#Git.branch">branch</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Git.commit_time">commit_time</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Git.commit">commit</a>
                         </li>
                 </ul>
 
@@ -135,22 +135,22 @@
                     <a class="class" href="#Version">Version</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Version.major">major</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Version.semver">semver</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#Version.patch">patch</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Version.minor">minor</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Version.build">build</a>
+                                <a class="variable" href="#Version.semver">semver</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Version.pre_release">pre_release</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Version.major">major</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Version.build">build</a>
                         </li>
                 </ul>
 
@@ -192,19 +192,15 @@
 </div>
 
 
-                            <div id="UpdatePlayer.end_time" class="classattr">
+                            <div id="UpdatePlayer.paused" class="classattr">
                                 <div class="attr variable">
-            <span class="name">end_time</span><span class="annotation">: Optional[int]</span>
+            <span class="name">paused</span><span class="annotation">: Optional[bool]</span>
 
         
     </div>
-    <a class="headerlink" href="#UpdatePlayer.end_time"></a>
+    <a class="headerlink" href="#UpdatePlayer.paused"></a>
     
-            <div class="docstring"><p>The track end time in milliseconds.</p>
-
-<p>It must be a value above 0 or None.</p>
-
-<p>None resets this if it was set previously.</p>
+            <div class="docstring"><p>Whether the player should be paused.</p>
 </div>
 
 
@@ -224,34 +220,6 @@
 
 
                             </div>
-                            <div id="UpdatePlayer.volume" class="classattr">
-                                <div class="attr variable">
-            <span class="name">volume</span><span class="annotation">: Optional[int]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#UpdatePlayer.volume"></a>
-    
-            <div class="docstring"><p>The player volume.</p>
-
-<p>In percentage, from 0 to 1000.</p>
-</div>
-
-
-                            </div>
-                            <div id="UpdatePlayer.paused" class="classattr">
-                                <div class="attr variable">
-            <span class="name">paused</span><span class="annotation">: Optional[bool]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#UpdatePlayer.paused"></a>
-    
-            <div class="docstring"><p>Whether the player should be paused.</p>
-</div>
-
-
-                            </div>
                             <div id="UpdatePlayer.filters" class="classattr">
                                 <div class="attr variable">
             <span class="name">filters</span><span class="annotation">: Optional[Filters]</span>
@@ -267,17 +235,17 @@
 
 
                             </div>
-                            <div id="UpdatePlayer.encoded_track" class="classattr">
+                            <div id="UpdatePlayer.identifier" class="classattr">
                                 <div class="attr variable">
-            <span class="name">encoded_track</span><span class="annotation">: Optional[str]</span>
+            <span class="name">identifier</span><span class="annotation">: Optional[str]</span>
 
         
     </div>
-    <a class="headerlink" href="#UpdatePlayer.encoded_track"></a>
+    <a class="headerlink" href="#UpdatePlayer.identifier"></a>
     
-            <div class="docstring"><p>The base64 encoded track to play.</p>
+            <div class="docstring"><p>The identifier of the track to play.</p>
 
-<p>Mutually exclusive with <code><a href="#UpdatePlayer.identifier">identifier</a></code>.</p>
+<p>Mutually exclusive with <code><a href="#UpdatePlayer.encoded_track">encoded_track</a></code>.</p>
 </div>
 
 
@@ -297,17 +265,49 @@
 
 
                             </div>
-                            <div id="UpdatePlayer.identifier" class="classattr">
+                            <div id="UpdatePlayer.encoded_track" class="classattr">
                                 <div class="attr variable">
-            <span class="name">identifier</span><span class="annotation">: Optional[str]</span>
+            <span class="name">encoded_track</span><span class="annotation">: Optional[str]</span>
 
         
     </div>
-    <a class="headerlink" href="#UpdatePlayer.identifier"></a>
+    <a class="headerlink" href="#UpdatePlayer.encoded_track"></a>
     
-            <div class="docstring"><p>The identifier of the track to play.</p>
+            <div class="docstring"><p>The base64 encoded track to play.</p>
 
-<p>Mutually exclusive with <code><a href="#UpdatePlayer.encoded_track">encoded_track</a></code>.</p>
+<p>Mutually exclusive with <code><a href="#UpdatePlayer.identifier">identifier</a></code>.</p>
+</div>
+
+
+                            </div>
+                            <div id="UpdatePlayer.end_time" class="classattr">
+                                <div class="attr variable">
+            <span class="name">end_time</span><span class="annotation">: Optional[int]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#UpdatePlayer.end_time"></a>
+    
+            <div class="docstring"><p>The track end time in milliseconds.</p>
+
+<p>It must be a value above 0 or None.</p>
+
+<p>None resets this if it was set previously.</p>
+</div>
+
+
+                            </div>
+                            <div id="UpdatePlayer.volume" class="classattr">
+                                <div class="attr variable">
+            <span class="name">volume</span><span class="annotation">: Optional[int]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#UpdatePlayer.volume"></a>
+    
+            <div class="docstring"><p>The player volume.</p>
+
+<p>In percentage, from 0 to 1000.</p>
 </div>
 
 
@@ -373,41 +373,15 @@ stop, and provide the current <code>session_id</code> when creating the node con
 </div>
 
 
-                            <div id="Info.jvm" class="classattr">
+                            <div id="Info.plugins" class="classattr">
                                 <div class="attr variable">
-            <span class="name">jvm</span><span class="annotation">: str</span>
+            <span class="name">plugins</span><span class="annotation">: List[<a href="#Plugin">lavalink_rs.model.http.Plugin</a>]</span>
 
         
     </div>
-    <a class="headerlink" href="#Info.jvm"></a>
+    <a class="headerlink" href="#Info.plugins"></a>
     
-            <div class="docstring"><p>The JVM version the Lavalink server is running on.</p>
-</div>
-
-
-                            </div>
-                            <div id="Info.source_managers" class="classattr">
-                                <div class="attr variable">
-            <span class="name">source_managers</span><span class="annotation">: List[str]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Info.source_managers"></a>
-    
-            <div class="docstring"><p>The enabled source managers for the Lavalink server.</p>
-</div>
-
-
-                            </div>
-                            <div id="Info.filters" class="classattr">
-                                <div class="attr variable">
-            <span class="name">filters</span><span class="annotation">: List[str]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Info.filters"></a>
-    
-            <div class="docstring"><p>The enabled filters for the Lavalink server.</p>
+            <div class="docstring"><p>The enabled plugins for the Lavalink server.</p>
 </div>
 
 
@@ -425,15 +399,15 @@ stop, and provide the current <code>session_id</code> when creating the node con
 
 
                             </div>
-                            <div id="Info.git" class="classattr">
+                            <div id="Info.jvm" class="classattr">
                                 <div class="attr variable">
-            <span class="name">git</span><span class="annotation">: <a href="#Git">lavalink_rs.model.http.Git</a></span>
+            <span class="name">jvm</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#Info.git"></a>
+    <a class="headerlink" href="#Info.jvm"></a>
     
-            <div class="docstring"><p>The git information of the Lavalink server.</p>
+            <div class="docstring"><p>The JVM version the Lavalink server is running on.</p>
 </div>
 
 
@@ -451,6 +425,32 @@ stop, and provide the current <code>session_id</code> when creating the node con
 
 
                             </div>
+                            <div id="Info.git" class="classattr">
+                                <div class="attr variable">
+            <span class="name">git</span><span class="annotation">: <a href="#Git">lavalink_rs.model.http.Git</a></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Info.git"></a>
+    
+            <div class="docstring"><p>The git information of the Lavalink server.</p>
+</div>
+
+
+                            </div>
+                            <div id="Info.filters" class="classattr">
+                                <div class="attr variable">
+            <span class="name">filters</span><span class="annotation">: List[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Info.filters"></a>
+    
+            <div class="docstring"><p>The enabled filters for the Lavalink server.</p>
+</div>
+
+
+                            </div>
                             <div id="Info.build_time" class="classattr">
                                 <div class="attr variable">
             <span class="name">build_time</span><span class="annotation">: int</span>
@@ -464,15 +464,15 @@ stop, and provide the current <code>session_id</code> when creating the node con
 
 
                             </div>
-                            <div id="Info.plugins" class="classattr">
+                            <div id="Info.source_managers" class="classattr">
                                 <div class="attr variable">
-            <span class="name">plugins</span><span class="annotation">: List[<a href="#Plugin">lavalink_rs.model.http.Plugin</a>]</span>
+            <span class="name">source_managers</span><span class="annotation">: List[str]</span>
 
         
     </div>
-    <a class="headerlink" href="#Info.plugins"></a>
+    <a class="headerlink" href="#Info.source_managers"></a>
     
-            <div class="docstring"><p>The enabled plugins for the Lavalink server.</p>
+            <div class="docstring"><p>The enabled source managers for the Lavalink server.</p>
 </div>
 
 
@@ -490,19 +490,6 @@ stop, and provide the current <code>session_id</code> when creating the node con
     
     
 
-                            <div id="Git.commit" class="classattr">
-                                <div class="attr variable">
-            <span class="name">commit</span><span class="annotation">: str</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Git.commit"></a>
-    
-            <div class="docstring"><p>The commit the Lavalink server was built on.</p>
-</div>
-
-
-                            </div>
                             <div id="Git.branch" class="classattr">
                                 <div class="attr variable">
             <span class="name">branch</span><span class="annotation">: str</span>
@@ -525,6 +512,19 @@ stop, and provide the current <code>session_id</code> when creating the node con
     <a class="headerlink" href="#Git.commit_time"></a>
     
             <div class="docstring"><p>The millisecond unix timestamp for when the commit was created.</p>
+</div>
+
+
+                            </div>
+                            <div id="Git.commit" class="classattr">
+                                <div class="attr variable">
+            <span class="name">commit</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Git.commit"></a>
+    
+            <div class="docstring"><p>The commit the Lavalink server was built on.</p>
 </div>
 
 
@@ -583,28 +583,6 @@ stop, and provide the current <code>session_id</code> when creating the node con
 </div>
 
 
-                            <div id="Version.major" class="classattr">
-                                <div class="attr variable">
-            <span class="name">major</span><span class="annotation">: int</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Version.major"></a>
-    
-    
-
-                            </div>
-                            <div id="Version.semver" class="classattr">
-                                <div class="attr variable">
-            <span class="name">semver</span><span class="annotation">: str</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Version.semver"></a>
-    
-    
-
-                            </div>
                             <div id="Version.patch" class="classattr">
                                 <div class="attr variable">
             <span class="name">patch</span><span class="annotation">: int</span>
@@ -627,13 +605,13 @@ stop, and provide the current <code>session_id</code> when creating the node con
     
 
                             </div>
-                            <div id="Version.build" class="classattr">
+                            <div id="Version.semver" class="classattr">
                                 <div class="attr variable">
-            <span class="name">build</span><span class="annotation">: Optional[str]</span>
+            <span class="name">semver</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#Version.build"></a>
+    <a class="headerlink" href="#Version.semver"></a>
     
     
 
@@ -645,6 +623,28 @@ stop, and provide the current <code>session_id</code> when creating the node con
         
     </div>
     <a class="headerlink" href="#Version.pre_release"></a>
+    
+    
+
+                            </div>
+                            <div id="Version.major" class="classattr">
+                                <div class="attr variable">
+            <span class="name">major</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Version.major"></a>
+    
+    
+
+                            </div>
+                            <div id="Version.build" class="classattr">
+                                <div class="attr variable">
+            <span class="name">build</span><span class="annotation">: Optional[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Version.build"></a>
     
     
 

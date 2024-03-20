@@ -7,6 +7,7 @@ import typing as t
 
 import hikari
 import lightbulb
+from lavalink_rs.model.search import SearchEngines
 from lavalink_rs.model.track import TrackData, PlaylistData, TrackLoadType
 
 plugin = Plugin("Music (basic) commands")
@@ -138,7 +139,7 @@ async def play(ctx: Context) -> None:
         return None
 
     if not query.startswith("http"):
-        query = f"spsearch:{query}"
+        query = SearchEngines.spotify(query)
 
     try:
         tracks = await ctx.bot.lavalink.load_tracks(ctx.guild_id, query)

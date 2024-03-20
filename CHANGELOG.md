@@ -2,7 +2,8 @@
 
 ## 0.12.0
 
-- load_tracks in python now returns Track
+- `load_tracks()` in python now returns `Track`.
+- Implement search utilities in python.
 
 ## 0.11.2
 

@@ -69,7 +69,7 @@ impl SearchEngines {
 /// Any of the seed fields must have a value.
 ///
 /// Spotify documentation can be found [here](https://developer.spotify.com/documentation/web-api/reference/get-recommendations)
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct SpotifyRecommendedParameters {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -168,7 +168,7 @@ pub struct SpotifyRecommendedParameters {
     pub target_valence: Option<f64>,
 }
 
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
 pub struct FloweryTTSParameters {
     /// A list of voices can be found [here](https://api.flowery.pw/v1/tts/voices)

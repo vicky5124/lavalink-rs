@@ -1,11 +1,11 @@
 import typing as t
 
 class TrackLoadType:
-    Track = 0
-    Playlist = 1
-    Search = 2
-    Empty = 3
-    Error = 4
+    Track: TrackLoadType
+    Playlist: TrackLoadType
+    Search: TrackLoadType
+    Empty: TrackLoadType
+    Error: TrackLoadType
 
 class Track:
     load_type: TrackLoadType

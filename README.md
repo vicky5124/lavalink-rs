@@ -17,7 +17,7 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 ### 0.12.0
 
 - [ ] Expose Http and methods to python
-- [ ] Implement search utilities to python
+- [x] Implement search utilities to python
 - [x] load_tracks to return Track in python
 - [ ] Streamable queue reader
 
