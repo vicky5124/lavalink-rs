@@ -12,7 +12,7 @@ pub fn event(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass(subclass, sequence)]
+#[pyclass(subclass)]
 #[derive(Debug, Clone)]
 pub struct EventHandler {
     pub inner: PyObject,

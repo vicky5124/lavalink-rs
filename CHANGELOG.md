@@ -4,6 +4,9 @@
 
 - `load_tracks()` in python now returns `Track`.
 - Implement search utilities in python.
+- Rework queues.
+- Implement `Stream` to `QueueRef`.
+- ~~Implement `async for` to `QueueRef`.~~
 
 ## 0.11.2
 

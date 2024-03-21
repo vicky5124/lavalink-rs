@@ -145,7 +145,7 @@ async def queue(ctx: Context) -> None:
         else:
             now_playing = f"`{player.track.info.author} - {player.track.info.title}` | {time} (Second {time_true_s})"
 
-    queue = await voice.player.get_queue()
+    queue = await voice.player.get_queue().get_queue()
     queue_text = ""
 
     for idx, i in enumerate(queue):

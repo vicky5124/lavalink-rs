@@ -6,6 +6,7 @@ use crate::model::*;
 use std::collections::VecDeque;
 
 pub use context::PlayerContext;
+pub use context::QueueRef;
 pub(crate) use inner::PlayerContextInner;
 
 #[derive(PartialEq, Debug, Clone, Default)]
@@ -30,16 +31,21 @@ pub(crate) enum PlayerMessage {
     UpdatePlayerTrack(Option<track::TrackData>),
     UpdatePlayerState(player::State),
 
-    GetQueue(oneshot::Sender<VecDeque<TrackInQueue>>),
-    SetQueue(QueueMessage),
+    QueueMessage(QueueMessage),
 
     TrackFinished(bool),
     StartTrack,
     Close,
 }
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(Debug)]
 pub enum QueueMessage {
+    /// Clone the entire queue and return it.
+    GetQueue(oneshot::Sender<VecDeque<TrackInQueue>>),
+    /// Get the track at a specific index.
+    GetTrack(usize, oneshot::Sender<Option<TrackInQueue>>),
+    /// Get the length of the queue
+    GetCount(oneshot::Sender<usize>),
     /// Add a track to the end of the queue.
     PushToBack(TrackInQueue),
     /// Add a track to the start of the queue.
@@ -54,6 +60,8 @@ pub enum QueueMessage {
     Replace(VecDeque<TrackInQueue>),
     /// Append a queue to the end of the current one.
     Append(VecDeque<TrackInQueue>),
+    /// Swap the track at the index with the new track.
+    Swap(usize, TrackInQueue),
 }
 
 impl TrackInQueue {
@@ -73,15 +81,6 @@ impl From<track::TrackData> for TrackInQueue {
     fn from(track: track::TrackData) -> Self {
         Self {
             track,
-            ..Default::default()
-        }
-    }
-}
-
-impl From<&track::TrackData> for TrackInQueue {
-    fn from(track: &track::TrackData) -> Self {
-        Self {
-            track: track.clone(),
             ..Default::default()
         }
     }

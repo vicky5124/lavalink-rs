@@ -3,9 +3,8 @@ use std::time::Duration;
 use crate::Context;
 use crate::Error;
 
-use lavalink_rs::prelude::*;
-
-use itertools::Itertools;
+use futures::future;
+use futures::stream::StreamExt;
 
 /// Add a song to the queue
 #[poise::command(slash_command, prefix_command)]
@@ -19,13 +18,14 @@ pub async fn queue(ctx: Context<'_>) -> Result<(), Error> {
         return Ok(());
     };
 
-    let queue = player.get_queue().await?;
+    let queue = player.get_queue();
     let player_data = player.get_player().await?;
 
-    let max = queue.len().min(9);
+    let max = queue.get_count().await?.min(9);
+
     let queue_message = queue
-        .range(0..max)
         .enumerate()
+        .take_while(|(idx, _)| future::ready(*idx < max))
         .map(|(idx, x)| {
             if let Some(uri) = &x.track.info.uri {
                 format!(
@@ -44,6 +44,8 @@ pub async fn queue(ctx: Context<'_>) -> Result<(), Error> {
                 )
             }
         })
+        .collect::<Vec<_>>()
+        .await
         .join("\n");
 
     let now_playing_message = if let Some(track) = player_data.track {
@@ -200,7 +202,7 @@ pub async fn remove(
         return Ok(());
     };
 
-    player.set_queue(QueueMessage::Remove(index))?;
+    player.get_queue().remove(index)?;
 
     ctx.say("Removed successfully").await?;
 
@@ -219,7 +221,7 @@ pub async fn clear(ctx: Context<'_>) -> Result<(), Error> {
         return Ok(());
     };
 
-    player.set_queue(QueueMessage::Clear)?;
+    player.get_queue().clear()?;
 
     ctx.say("Queue cleared successfully").await?;
 
@@ -242,10 +244,11 @@ pub async fn swap(
         return Ok(());
     };
 
-    let mut queue = player.get_queue().await?;
+    let queue = player.get_queue();
+    let queue_len = queue.get_count().await?;
 
-    if index1 > queue.len() || index2 > queue.len() {
-        ctx.say(format!("Maximum allowed index: {}", queue.len()))
+    if index1 > queue_len || index2 > queue_len {
+        ctx.say(format!("Maximum allowed index: {}", queue_len))
             .await?;
         return Ok(());
     } else if index1 == index2 {
@@ -253,9 +256,11 @@ pub async fn swap(
         return Ok(());
     }
 
-    queue.swap(index1 - 1, index2 - 1);
+    let track1 = queue.get_track(index1 - 1).await?.unwrap();
+    let track2 = queue.get_track(index1 - 2).await?.unwrap();
 
-    player.set_queue(QueueMessage::Replace(queue))?;
+    queue.swap(index1 - 1, track2)?;
+    queue.swap(index2 - 1, track1)?;
 
     ctx.say("Swapped successfully").await?;
 

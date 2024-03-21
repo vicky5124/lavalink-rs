@@ -13,8 +13,8 @@ use reqwest::{header::HeaderMap, Client as ReqwestClient};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::Mutex;
 
-#[derive(Clone, Debug)]
-#[cfg_attr(feature = "python", pyo3::pyclass(sequence))]
+#[derive(Clone)]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// The main client, where everything gets done, from events to requests to management.
 pub struct LavalinkClient {
     pub nodes: Vec<Arc<node::Node>>,
@@ -660,7 +660,6 @@ impl LavalinkClient {
         rx.await?.map_err(|_| LavalinkError::Timeout)
     }
 
-    #[cfg_attr(not(feature = "python"), tracing::instrument)]
     async fn handle_connection_info(self, mut rx: UnboundedReceiver<client::ClientMessage>) {
         let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>)>> =
             Arc::new(DashMap::new());

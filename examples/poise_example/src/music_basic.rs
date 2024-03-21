@@ -103,8 +103,9 @@ pub async fn play(
         }
     } else {
         if let Ok(player_data) = player.get_player().await {
-            if player_data.track.is_none() && player.get_queue().await.is_ok_and(|x| !x.is_empty())
-            {
+            let queue = player.get_queue();
+
+            if player_data.track.is_none() && queue.get_track(0).await.is_ok_and(|x| x.is_some()) {
                 player.skip()?;
             } else {
                 ctx.say("The queue is empty.").await?;
@@ -123,7 +124,7 @@ pub async fn play(
         Some(TrackLoadData::Search(x)) => vec![x[0].clone().into()],
         Some(TrackLoadData::Playlist(x)) => {
             playlist_info = Some(x.info);
-            x.tracks.iter().map(|x| x.into()).collect()
+            x.tracks.iter().map(|x| x.clone().into()).collect()
         }
 
         _ => {
@@ -153,13 +154,15 @@ pub async fn play(
         }
     }
 
-    player.set_queue(QueueMessage::Append(tracks.into()))?;
+    let queue = player.get_queue();
+    queue.append(tracks.into())?;
+
+    if has_joined {
+        return Ok(());
+    }
 
     if let Ok(player_data) = player.get_player().await {
-        if player_data.track.is_none()
-            && player.get_queue().await.is_ok_and(|x| !x.is_empty())
-            && !has_joined
-        {
+        if player_data.track.is_none() && queue.get_track(0).await.is_ok_and(|x| x.is_some()) {
             player.skip()?;
         }
     }

@@ -3,18 +3,31 @@ use crate::error::{LavalinkError, LavalinkResult};
 use crate::model::*;
 
 use std::collections::VecDeque;
+//use std::future::Future;
+use std::pin::Pin;
+use std::task::Context;
+use std::task::Poll;
 
 use reqwest::Method;
 use tokio::sync::mpsc::UnboundedSender;
 
-#[derive(Clone, Debug)]
-#[cfg_attr(feature = "python", pyo3::pyclass(sequence))]
+#[derive(Clone)]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 /// The player context.
 pub struct PlayerContext {
     pub guild_id: GuildId,
     pub client: LavalinkClient,
     pub(crate) tx: UnboundedSender<super::PlayerMessage>,
     pub(crate) user_data: std::sync::Arc<dyn std::any::Any + Send + Sync>,
+}
+
+#[derive(Clone)]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
+/// A reference to the player queue
+pub struct QueueRef {
+    pub(crate) tx: UnboundedSender<super::PlayerMessage>,
+    pub(crate) stream:
+        std::sync::Arc<std::sync::Mutex<dyn futures::Stream<Item = super::TrackInQueue> + Send>>,
 }
 
 impl PlayerContext {
@@ -61,23 +74,29 @@ impl PlayerContext {
 
     /// Add a track to the end of the queue.
     pub fn queue(&self, track: impl Into<super::TrackInQueue>) -> LavalinkResult<()> {
-        self.set_queue(super::QueueMessage::PushToBack(track.into()))
+        let q = self.get_queue();
+        q.send(super::QueueMessage::PushToBack(track.into()))
     }
 
-    /// Get the current queue.
-    pub async fn get_queue(&self) -> LavalinkResult<VecDeque<super::TrackInQueue>> {
-        let (tx, rx) = oneshot::channel();
+    /// Get a reference to the current queue.
+    pub fn get_queue(&self) -> QueueRef {
+        let stream = futures::stream::unfold((0, self.tx.clone()), |(idx, outer_tx)| async move {
+            let (tx, rx) = oneshot::channel();
 
-        self.tx.send(super::PlayerMessage::GetQueue(tx))?;
+            let _ = outer_tx.send(super::PlayerMessage::QueueMessage(
+                super::QueueMessage::GetTrack(idx, tx),
+            ));
 
-        Ok(rx.await?)
-    }
+            rx.await
+                .ok()
+                .flatten()
+                .map(|track| (track, (idx + 1, outer_tx)))
+        });
 
-    /// Modify the queue in specific ways.
-    pub fn set_queue(&self, queue_message: super::QueueMessage) -> LavalinkResult<()> {
-        self.tx
-            .send(super::PlayerMessage::SetQueue(queue_message))?;
-        Ok(())
+        QueueRef {
+            tx: self.tx.clone(),
+            stream: std::sync::Arc::new(std::sync::Mutex::new(stream)),
+        }
     }
 
     /// Get the current player information.
@@ -234,5 +253,98 @@ impl PlayerContext {
             .clone()
             .downcast()
             .map_err(|_| LavalinkError::InvalidDataType)
+    }
+}
+
+impl QueueRef {
+    /// Get the current queue.
+    ///
+    /// Note: This clones the entire queue. Use the Stream implementation instead to iterate
+    /// through it.
+    pub async fn get_queue(&self) -> LavalinkResult<VecDeque<super::TrackInQueue>> {
+        let (tx, rx) = oneshot::channel();
+
+        self.send(super::QueueMessage::GetQueue(tx))?;
+
+        Ok(rx.await?)
+    }
+
+    /// Get the track at the index.
+    ///
+    /// Note: This clones the track.
+    pub async fn get_track(&self, index: usize) -> LavalinkResult<Option<super::TrackInQueue>> {
+        let (tx, rx) = oneshot::channel();
+
+        self.send(super::QueueMessage::GetTrack(index, tx))?;
+
+        Ok(rx.await?)
+    }
+
+    /// Get the amount of tracks in the queue, AKA the queue length.
+    pub async fn get_count(&self) -> LavalinkResult<usize> {
+        let (tx, rx) = oneshot::channel();
+
+        self.send(super::QueueMessage::GetCount(tx))?;
+
+        Ok(rx.await?)
+    }
+
+    /// Add the track at the end of the queue.
+    pub fn push_to_back(&self, track: impl Into<super::TrackInQueue>) -> LavalinkResult<()> {
+        self.send(super::QueueMessage::PushToBack(track.into()))
+    }
+
+    /// Add the track at the start of the queue.
+    pub fn push_to_front(&self, track: impl Into<super::TrackInQueue>) -> LavalinkResult<()> {
+        self.send(super::QueueMessage::PushToFront(track.into()))
+    }
+
+    /// Insert the track at the given index.
+    pub fn insert(
+        &self,
+        index: usize,
+        track: impl Into<super::TrackInQueue>,
+    ) -> LavalinkResult<()> {
+        self.send(super::QueueMessage::Insert(index, track.into()))
+    }
+
+    /// Remove the track at the given index.
+    pub fn remove(&self, index: usize) -> LavalinkResult<()> {
+        self.send(super::QueueMessage::Remove(index))
+    }
+
+    /// Clear the queue.
+    pub fn clear(&self) -> LavalinkResult<()> {
+        self.send(super::QueueMessage::Clear)
+    }
+
+    /// Replace the entire queue with a new one.
+    pub fn replace(&self, tracks: VecDeque<super::TrackInQueue>) -> LavalinkResult<()> {
+        self.send(super::QueueMessage::Replace(tracks))
+    }
+
+    /// Append the list at the end of the current queue.
+    pub fn append(&self, tracks: VecDeque<super::TrackInQueue>) -> LavalinkResult<()> {
+        self.send(super::QueueMessage::Replace(tracks))
+    }
+
+    /// Swap the track at the index with a new track.
+    pub fn swap(&self, index: usize, track: impl Into<super::TrackInQueue>) -> LavalinkResult<()> {
+        self.send(super::QueueMessage::Swap(index, track.into()))
+    }
+
+    /// Send messages to the queue to obtain tracks from it, or modify it.
+    pub fn send(&self, queue_message: super::QueueMessage) -> LavalinkResult<()> {
+        self.tx
+            .send(super::PlayerMessage::QueueMessage(queue_message))?;
+        Ok(())
+    }
+}
+
+impl futures::Stream for QueueRef {
+    type Item = super::TrackInQueue;
+
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        unsafe { Pin::new_unchecked(&mut *self.stream.lock().unwrap()) }.poll_next(cx)
     }
 }

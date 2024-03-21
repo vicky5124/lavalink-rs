@@ -6,7 +6,7 @@ use crate::{
         player::{Filters, Player},
         track::TrackData,
     },
-    player_context::{QueueMessage, TrackInQueue},
+    player_context::TrackInQueue,
 };
 
 use parking_lot::RwLock;
@@ -16,54 +16,16 @@ use pyo3::prelude::*;
 pub fn player(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<crate::player_context::PlayerContext>()?;
     m.add_class::<crate::player_context::TrackInQueue>()?;
+    m.add_class::<crate::player_context::QueueRef>()?;
 
     Ok(())
 }
 
 #[pymethods]
 impl crate::player_context::PlayerContext {
-    fn set_queue_push_to_back<'a>(&self, track: PyTrackInQueue) -> PyResult<()> {
-        self.set_queue(QueueMessage::PushToBack(track.into()))?;
-        Ok(())
-    }
-    fn set_queue_push_to_front<'a>(&self, track: PyTrackInQueue) -> PyResult<()> {
-        self.set_queue(QueueMessage::PushToFront(track.into()))?;
-        Ok(())
-    }
-    fn set_queue_insert<'a>(&self, position: usize, track: PyTrackInQueue) -> PyResult<()> {
-        self.set_queue(QueueMessage::Insert(position, track.into()))?;
-        Ok(())
-    }
-    fn set_queue_remove<'a>(&self, position: usize) -> PyResult<()> {
-        self.set_queue(QueueMessage::Remove(position))?;
-        Ok(())
-    }
-    fn set_queue_clear<'a>(&self) -> PyResult<()> {
-        self.set_queue(QueueMessage::Clear)?;
-        Ok(())
-    }
-    fn set_queue_replace<'a>(&self, tracks: Vec<PyTrackInQueue>) -> PyResult<()> {
-        self.set_queue(QueueMessage::Replace(
-            tracks.into_iter().map(TrackInQueue::from).collect(),
-        ))?;
-        Ok(())
-    }
-    fn set_queue_append<'a>(&self, tracks: Vec<PyTrackInQueue>) -> PyResult<()> {
-        self.set_queue(QueueMessage::Append(
-            tracks.into_iter().map(TrackInQueue::from).collect(),
-        ))?;
-        Ok(())
-    }
-
     #[pyo3(name = "get_queue")]
-    fn get_queue_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
-        let player = self.clone();
-
-        pyo3_asyncio::tokio::future_into_py(py, async move {
-            let queue: Vec<_> = player.get_queue().await?.into();
-
-            Ok(Python::with_gil(|_py| queue))
-        })
+    fn get_queue_py(&self) -> crate::player_context::QueueRef {
+        self.get_queue()
     }
 
     #[pyo3(name = "get_player")]
@@ -227,6 +189,91 @@ impl crate::player_context::PlayerContext {
 
         Ok(())
     }
+}
+
+#[pymethods]
+impl crate::player_context::QueueRef {
+    #[pyo3(name = "get_queue")]
+    fn get_queue_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+        let queue = self.clone();
+
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            let q: Vec<_> = queue.get_queue().await?.into();
+
+            Ok(Python::with_gil(|_py| q))
+        })
+    }
+
+    #[pyo3(name = "get_track")]
+    fn get_track_py<'a>(&self, py: Python<'a>, index: usize) -> PyResult<&'a PyAny> {
+        let queue = self.clone();
+
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            let q = queue.get_track(index).await?;
+
+            Ok(Python::with_gil(|_py| q))
+        })
+    }
+
+    #[pyo3(name = "get_count")]
+    fn get_count_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+        let queue = self.clone();
+
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            let q = queue.get_count().await?;
+
+            Ok(Python::with_gil(|_py| q))
+        })
+    }
+
+    #[pyo3(name = "push_to_back")]
+    fn push_to_back_py(&self, track: PyTrackInQueue) -> PyResult<()> {
+        Ok(self.push_to_back(TrackInQueue::from(track))?)
+    }
+
+    #[pyo3(name = "push_to_front")]
+    fn push_to_front_py(&self, track: PyTrackInQueue) -> PyResult<()> {
+        Ok(self.push_to_front(TrackInQueue::from(track))?)
+    }
+
+    #[pyo3(name = "insert")]
+    fn insert_py(&self, index: usize, track: PyTrackInQueue) -> PyResult<()> {
+        Ok(self.insert(index, TrackInQueue::from(track))?)
+    }
+
+    #[pyo3(name = "remove")]
+    fn remove_py(&self, index: usize) -> PyResult<()> {
+        Ok(self.remove(index)?)
+    }
+
+    #[pyo3(name = "clear")]
+    fn clear_py(&self) -> PyResult<()> {
+        Ok(self.clear()?)
+    }
+
+    #[pyo3(name = "replace")]
+    fn replace_py(&self, tracks: Vec<PyTrackInQueue>) -> PyResult<()> {
+        Ok(self.replace(tracks.into_iter().map(TrackInQueue::from).collect())?)
+    }
+
+    #[pyo3(name = "append")]
+    fn append_py(&self, tracks: Vec<PyTrackInQueue>) -> PyResult<()> {
+        Ok(self.append(tracks.into_iter().map(TrackInQueue::from).collect())?)
+    }
+
+    #[pyo3(name = "swap")]
+    fn swap_py(&self, index: usize, track: PyTrackInQueue) -> PyResult<()> {
+        Ok(self.swap(index, TrackInQueue::from(track))?)
+    }
+
+    // TODO: pyo3 0.21
+    // https://github.com/PyO3/pyo3/pull/3661
+    //#[pyo3(name = "__anext__")]
+    //fn async_for_impl<'a>(&mut self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    //    use futures::StreamExt;
+
+    //    pyo3_asyncio::tokio::future_into_py(py, async move { Ok(self.next().await) })
+    //}
 }
 
 #[apply(crate::python::with_getter_setter)]

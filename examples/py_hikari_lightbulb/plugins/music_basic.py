@@ -194,7 +194,8 @@ async def play(ctx: Context) -> None:
                     f"Added to queue: `{track.info.author} - {track.info.title}`"
                 )
         else:
-            player_ctx.set_queue_append(loaded_tracks.tracks)
+            queue = player_ctx.get_queue()
+            queue.append(loaded_tracks.tracks)
             await ctx.respond(f"Added playlist to queue: `{loaded_tracks.info.name}`")
 
     # Error or no search results
@@ -202,10 +203,14 @@ async def play(ctx: Context) -> None:
         await ctx.respond("No songs found")
         return None
 
+    if has_joined:
+        return None
+
     player_data = await player_ctx.get_player()
+    queue = player_ctx.get_queue()
 
     if player_data:
-        if not player_data.track and await player_ctx.get_queue() and not has_joined:
+        if not player_data.track and await queue.get_track(0):
             player_ctx.skip()
 
 

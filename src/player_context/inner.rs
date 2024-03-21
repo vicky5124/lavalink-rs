@@ -4,7 +4,6 @@ use std::collections::VecDeque;
 
 use tokio::sync::mpsc::UnboundedReceiver;
 
-#[cfg_attr(not(feature = "user-data"), derive(Debug))]
 pub(crate) struct PlayerContextInner {
     pub guild_id: GuildId,
     pub queue: VecDeque<super::TrackInQueue>,
@@ -32,20 +31,38 @@ impl PlayerContextInner {
                     UpdatePlayerTrack(track) => self.player_data.track = track,
                     UpdatePlayerState(state) => self.player_data.state = state,
 
-                    GetQueue(tx) => {
-                        if let Err(why) = tx.send(self.queue.clone()) {
-                            error!(
-                                "Error sending queue back to the player {}: {}",
-                                self.guild_id.0, why
-                            );
-                        }
-                    }
-                    SetQueue(queue_message) => {
+                    QueueMessage(queue_message) => {
                         self.queue_init().await;
 
                         use super::QueueMessage::*;
 
                         match queue_message {
+                            GetQueue(tx) => {
+                                if let Err(why) = tx.send(self.queue.clone()) {
+                                    error!(
+                                        "Error sending queue back to the player {}: {}",
+                                        self.guild_id.0, why
+                                    );
+                                }
+                            }
+                            GetTrack(index, tx) => {
+                                let track = self.queue.get(index).cloned();
+
+                                if let Err(why) = tx.send(track) {
+                                    error!(
+                                        "Error sending track back to the player {}: {}",
+                                        self.guild_id.0, why
+                                    );
+                                }
+                            }
+                            GetCount(tx) => {
+                                if let Err(why) = tx.send(self.queue.len()) {
+                                    error!(
+                                        "Error sending queue length back to the player {}: {}",
+                                        self.guild_id.0, why
+                                    );
+                                }
+                            }
                             PushToBack(track) => {
                                 self.queue.push_back(track);
                             }
@@ -66,6 +83,11 @@ impl PlayerContextInner {
                             }
                             Append(mut tracks) => {
                                 self.queue.append(&mut tracks);
+                            }
+                            Swap(index, track) => {
+                                if let Some(t) = self.queue.get_mut(index) {
+                                    *t = track;
+                                }
                             }
                         }
                     }
