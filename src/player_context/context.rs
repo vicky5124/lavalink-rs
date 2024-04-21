@@ -325,7 +325,7 @@ impl QueueRef {
 
     /// Append the list at the end of the current queue.
     pub fn append(&self, tracks: VecDeque<super::TrackInQueue>) -> LavalinkResult<()> {
-        self.send(super::QueueMessage::Replace(tracks))
+        self.send(super::QueueMessage::Append(tracks))
     }
 
     /// Swap the track at the index with a new track.
