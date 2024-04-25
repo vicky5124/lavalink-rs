@@ -2,14 +2,16 @@ use crate::model::track::TrackError;
 
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
+use std::io::Error as IoError;
 
-use http::header::InvalidHeaderValue;
-use http::Error as HttpError;
+use ::http::header::InvalidHeaderValue;
+use ::http::uri::InvalidUri;
+use ::http::Error as HttpError;
+use hyper::Error as HyperError;
+use hyper_util::client::legacy::Error as HyperClientError;
 use oneshot::RecvError;
-use reqwest::Error as ReqwestError;
 use tokio::sync::mpsc::error::SendError;
 use tokio_tungstenite::tungstenite::error::Error as TungsteniteError;
-use url::ParseError;
 
 #[cfg(feature = "python")]
 use pyo3::exceptions::PyException;
@@ -48,13 +50,15 @@ impl<T> RequestResult<T> {
 #[derive(Debug)]
 /// Every error the library can return.
 pub enum LavalinkError {
+    IoError(IoError),
     WebsocketError(TungsteniteError),
     InvalidHeaderValue(InvalidHeaderValue),
-    ReqwestError(ReqwestError),
+    HyperError(HyperError),
+    HyperClientError(HyperClientError),
     HttpError(HttpError),
+    InvalidUri(InvalidUri),
     ChannelSendError,
     ChannelReceiveError(RecvError),
-    UrlParseError(ParseError),
     SerdeErrorQs(serde_qs::Error),
     SerdeErrorJson(serde_json::Error),
 
@@ -77,23 +81,29 @@ impl Display for LavalinkError {
                     why
                 )
             }
+            LavalinkError::IoError(why) => {
+                write!(f, "I/O Error => {:?}", why)
+            }
             LavalinkError::InvalidHeaderValue(why) => {
                 write!(f, "Invalid Header Value => {:?}", why)
             }
             LavalinkError::HttpError(why) => {
                 write!(f, "HttpError => {:?}", why)
             }
-            LavalinkError::ReqwestError(why) => {
-                write!(f, "Reqwest Error => {:?}", why)
+            LavalinkError::InvalidUri(why) => {
+                write!(f, "Invalid URI => {:?}", why)
+            }
+            LavalinkError::HyperError(why) => {
+                write!(f, "Hyper Error => {:?}", why)
+            }
+            LavalinkError::HyperClientError(why) => {
+                write!(f, "Hyper Client Error => {:?}", why)
             }
             LavalinkError::ChannelSendError => {
                 write!(f, "The channel receiver is closed.")
             }
             LavalinkError::ChannelReceiveError(why) => {
                 write!(f, "Error receiving from player context: {:?}", why)
-            }
-            LavalinkError::UrlParseError(why) => {
-                write!(f, "Url Parsing Error => {:?}", why)
             }
             LavalinkError::SerdeErrorQs(why) => {
                 write!(f, "Error serializing or desesrializing qs => {:?}", why)
@@ -121,6 +131,12 @@ impl Display for LavalinkError {
                 write!(f, "Timeout reached while waiting for response.")
             }
         }
+    }
+}
+
+impl From<IoError> for LavalinkError {
+    fn from(err: IoError) -> LavalinkError {
+        LavalinkError::IoError(err)
     }
 }
 
@@ -154,15 +170,21 @@ impl From<HttpError> for LavalinkError {
     }
 }
 
-impl From<ReqwestError> for LavalinkError {
-    fn from(err: ReqwestError) -> LavalinkError {
-        LavalinkError::ReqwestError(err)
+impl From<InvalidUri> for LavalinkError {
+    fn from(err: InvalidUri) -> LavalinkError {
+        LavalinkError::InvalidUri(err)
     }
 }
 
-impl From<ParseError> for LavalinkError {
-    fn from(err: ParseError) -> LavalinkError {
-        LavalinkError::UrlParseError(err)
+impl From<HyperError> for LavalinkError {
+    fn from(err: HyperError) -> LavalinkError {
+        LavalinkError::HyperError(err)
+    }
+}
+
+impl From<HyperClientError> for LavalinkError {
+    fn from(err: HyperClientError) -> LavalinkError {
+        LavalinkError::HyperClientError(err)
     }
 }
 

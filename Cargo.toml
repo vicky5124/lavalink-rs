@@ -32,8 +32,10 @@ twilight16 = ["twilight-model-16"]
 
 macros = ["macros-dep"]
 
-rustls = ["reqwest/rustls-tls", "tokio-tungstenite/rustls-tls-webpki-roots"]
-native-tls = ["reqwest/native-tls", "tokio-tungstenite/native-tls"]
+#rustls = ["reqwest/rustls-tls", "tokio-tungstenite/rustls-tls-webpki-roots"]
+#native-tls = ["reqwest/native-tls", "tokio-tungstenite/native-tls"]
+rustls = ["tokio-tungstenite/rustls-tls-webpki-roots"]
+native-tls = ["tokio-tungstenite/native-tls"]
 
 python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute", "parking_lot"]
 
@@ -47,25 +49,32 @@ dashmap = "5"
 http = "1"
 tracing = "0.1"
 futures = "0.3"
-url = "2"
 oneshot = "0.1"
-serde_qs = "0.12"
+serde_qs = "0.13"
+http-body-util = "0.1"
+bytes = "1"
+urlencoding = "2"
 
 [dependencies.tokio-tungstenite]
 version = "0.21"
 
 [dependencies.tokio]
 version = "1"
-features = ["sync"]
+features = ["sync", "rt", "net", "time"]
 
 [dependencies.serde]
 version = "1"
 features = ["derive"]
 
-[dependencies.reqwest]
-version = "0.11"
+[dependencies.hyper]
+version = "1"
 default-features = false
-features = ["json"]
+features = ["client", "http1", "http2"]
+
+[dependencies.hyper-util]
+version = "0.1"
+default-features = false
+features = ["tokio", "client", "client-legacy", "http1", "http2"]
 
 [dependencies.songbird-dep]
 package = "songbird"

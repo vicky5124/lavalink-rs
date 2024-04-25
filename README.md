@@ -17,6 +17,8 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 ### 0.12.0
 
 - [ ] Expose Http and methods to python
+- [x] Switch from reqwests to `hyper`
+- [ ] Implement SSL support with `hyper`
 - [x] Implement search utilities to python
 - [x] load_tracks to return Track in python
 - [x] Streamable queue reader
@@ -25,7 +27,6 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 - [ ] Implement some const methods
 - [ ] RoutePlanner API
-- [ ] Switch from reqwests to hyper
 - [ ] Support `tokio-websockets`
 - [ ] native and webpki roots for rustls feature separation
 

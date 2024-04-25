@@ -7,9 +7,9 @@ use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
+use ::http::header::HeaderMap;
 use arc_swap::{ArcSwap, ArcSwapOption};
 use dashmap::DashMap;
-use reqwest::{header::HeaderMap, Client as ReqwestClient};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::Mutex;
 
@@ -66,6 +66,7 @@ impl LavalinkClient {
             let mut headers = HeaderMap::new();
             headers.insert("Authorization", i.password.parse().unwrap());
             headers.insert("User-Id", i.user_id.0.to_string().parse().unwrap());
+            headers.insert("Connection", "keep-alive".parse().unwrap());
 
             if let Some(session_id) = &i.session_id {
                 headers.insert("Session-Id", session_id.parse().unwrap());
@@ -79,16 +80,19 @@ impl LavalinkClient {
                     .unwrap(),
             );
 
-            let rest_client = ReqwestClient::builder()
-                .default_headers(headers)
-                .build()
-                .unwrap();
+            let request_client =
+                hyper_util::client::legacy::Client::builder(hyper_util::rt::TokioExecutor::new())
+                    .pool_idle_timeout(std::time::Duration::from_secs(60))
+                    .pool_timer(hyper_util::rt::TokioTimer::new())
+                    .build_http();
 
             let node = if i.is_ssl {
                 let http = crate::http::Http {
+                    authority: i.hostname.clone(),
                     rest_address: format!("https://{}/v4", i.hostname),
                     rest_address_versionless: format!("https://{}", i.hostname),
-                    rest_client,
+                    headers,
+                    request_client: request_client.into(),
                 };
 
                 node::Node {
@@ -109,9 +113,11 @@ impl LavalinkClient {
                 }
             } else {
                 let http = crate::http::Http {
+                    authority: i.hostname.clone(),
                     rest_address: format!("http://{}/v4", i.hostname),
                     rest_address_versionless: format!("http://{}", i.hostname),
-                    rest_client,
+                    headers,
+                    request_client: request_client.into(),
                 };
 
                 node::Node {
@@ -132,7 +138,9 @@ impl LavalinkClient {
                 }
             };
 
-            built_nodes.push(Arc::new(node));
+            let node_arc = Arc::new(node);
+
+            built_nodes.push(node_arc);
         }
 
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();

@@ -8,7 +8,7 @@ use std::pin::Pin;
 use std::task::Context;
 use std::task::Poll;
 
-use reqwest::Method;
+use ::http::Method;
 use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Clone)]
@@ -166,18 +166,21 @@ impl PlayerContext {
     pub async fn stop_now(&self) -> LavalinkResult<player::Player> {
         let node = self.client.get_node_for_guild(self.guild_id).await;
 
-        let path = format!(
-            "/v4/sessions/{}/players/{}",
-            &node.session_id.load(),
-            self.guild_id.0
-        );
+        let path = node.http.path_to_uri(
+            &format!(
+                "/sessions/{}/players/{}",
+                &node.session_id.load(),
+                self.guild_id.0
+            ),
+            true,
+        )?;
 
         let result = node
             .http
-            .raw_request(
+            .request(
                 Method::PATCH,
                 path,
-                &serde_json::json!({"encodedTrack": null}),
+                Some(&serde_json::json!({"encodedTrack": null})),
             )
             .await?;
 
