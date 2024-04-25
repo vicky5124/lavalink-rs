@@ -1,5 +1,6 @@
 pub mod client;
 pub mod event;
+pub mod http;
 pub mod model;
 pub mod node;
 pub mod player;

@@ -17,7 +17,7 @@ pub fn model(py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
     self::client::client(py, m)?;
     m.add_wrapped(wrap_pymodule!(self::events::events))?;
-    m.add_wrapped(wrap_pymodule!(self::http::http))?;
+    self::http::http(py, m)?;
     self::player::player(py, m)?;
     m.add_wrapped(wrap_pymodule!(self::search::search))?;
     m.add_wrapped(wrap_pymodule!(self::track::track))?;

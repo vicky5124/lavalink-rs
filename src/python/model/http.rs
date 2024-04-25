@@ -2,14 +2,17 @@ use crate::model::http::*;
 
 use pyo3::prelude::*;
 
-#[pymodule]
-pub fn http(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_class::<UpdatePlayer>()?;
-    m.add_class::<ResumingState>()?;
-    m.add_class::<Info>()?;
-    m.add_class::<Git>()?;
-    m.add_class::<Plugin>()?;
-    m.add_class::<Version>()?;
+pub fn http(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    let http = PyModule::new(py, "http")?;
+
+    http.add_class::<UpdatePlayer>()?;
+    http.add_class::<ResumingState>()?;
+    http.add_class::<Info>()?;
+    http.add_class::<Git>()?;
+    http.add_class::<Plugin>()?;
+    http.add_class::<Version>()?;
+
+    m.add_submodule(http)?;
 
     Ok(())
 }
