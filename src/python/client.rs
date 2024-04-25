@@ -157,6 +157,27 @@ impl crate::client::LavalinkClient {
         Ok(player)
     }
 
+    #[pyo3(name = "get_node_by_index")]
+    fn get_node_by_index_py(&self, idx: usize) -> Option<super::node::Node> {
+        self.get_node_by_index(idx)
+            .map(|x| super::node::Node { inner: x })
+    }
+
+    #[pyo3(name = "get_node_for_guild")]
+    pub fn get_node_for_guild_py<'a>(
+        &self,
+        py: Python<'a>,
+        guild_id: super::model::PyGuildId,
+    ) -> PyResult<&'a PyAny> {
+        let client = self.clone();
+
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            let res = client.get_node_for_guild(guild_id).await;
+
+            Ok(Python::with_gil(|_py| super::node::Node { inner: res }))
+        })
+    }
+
     #[pyo3(name = "load_tracks")]
     fn load_tracks_py<'a>(
         &self,

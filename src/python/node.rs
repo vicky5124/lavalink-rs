@@ -1,12 +1,29 @@
 use crate::model::events::Events;
 
+use std::sync::Arc;
+
 use pyo3::prelude::*;
 
 #[pymodule]
 pub fn node(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_class::<Node>()?;
     m.add_class::<crate::node::NodeBuilder>()?;
 
     Ok(())
+}
+
+#[pyclass]
+pub(crate) struct Node {
+    pub(crate) inner: Arc<crate::node::Node>,
+}
+
+#[pymethods]
+impl Node {
+    fn get_http(&self) -> super::http::Http {
+        super::http::Http {
+            inner: self.inner.http.clone(),
+        }
+    }
 }
 
 #[apply(super::with_getter_setter)]

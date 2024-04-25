@@ -10,8 +10,8 @@ pub fn http(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
 #[pyclass]
 #[derive(Clone)]
-struct Http {
-    inner: crate::http::Http,
+pub(crate) struct Http {
+    pub(crate) inner: crate::http::Http,
 }
 
 #[pymethods]
