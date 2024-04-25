@@ -273,6 +273,7 @@ impl LavalinkClient {
                     let current_loop = pyo3_asyncio::tokio::get_current_loop(py).unwrap();
 
                     let client = client.clone();
+                    let client2 = client.clone();
 
                     pyo3_asyncio::tokio::future_into_py_with_locals(
                         py,
@@ -292,11 +293,13 @@ impl LavalinkClient {
                                     Python::with_gil(|py| {
                                         e.print_and_set_sys_last_vars(py);
                                     });
-                                    let _ = tx.send(0);
+                                    let _ = tx.send(crate::python::node::Node {
+                                        inner: client2.get_node_by_index(0).unwrap().clone()
+                                    });
                                 }
                                 Ok(x) => {
                                     let _ = tx.send(Python::with_gil(|py| {
-                                        x.extract::<usize>(py).unwrap_or(0)
+                                        x.extract::<crate::python::node::Node>(py).unwrap()
                                     }));
                                 }
                             }
@@ -307,12 +310,7 @@ impl LavalinkClient {
                     .unwrap();
                 });
 
-                let idx = rx.await.unwrap();
-
-                client.get_node_by_index(idx).unwrap_or_else(|| {
-                    error!("Index provided does not lead to any node, defaulting to 0.");
-                    client.get_node_by_index(0).unwrap()
-                })
+                rx.await.unwrap().inner
             }
         }
     }

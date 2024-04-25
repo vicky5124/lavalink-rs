@@ -127,8 +127,9 @@ async def play(ctx: Context) -> None:
 
     if not query:
         player = await player_ctx.get_player()
+        queue = player_ctx.get_queue()
 
-        if not player.track and await player_ctx.get_queue():
+        if not player.track and await queue.get_count() > 0:
             player_ctx.skip()
         else:
             if player.track:

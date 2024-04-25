@@ -184,14 +184,16 @@ async def remove(ctx: Context) -> None:
 
     assert isinstance(voice, LavalinkVoice)
 
-    queue = await voice.player.get_queue()
+    queue = voice.player.get_queue()
 
-    if ctx.options.index > len(queue):
+    if ctx.options.index > await queue.get_count():
         await ctx.respond("Index out of range")
         return None
 
     assert isinstance(ctx.options.index, int)
-    track = queue[ctx.options.index - 1].track
+    track_in_queue = await queue.get_track(ctx.options.index - 1)
+    assert track_in_queue
+    track = track_in_queue.track
 
     if track.info.uri:
         await ctx.respond(
@@ -200,7 +202,7 @@ async def remove(ctx: Context) -> None:
     else:
         await ctx.respond(f"Removed: `{track.info.author} - {track.info.title}`")
 
-    voice.player.set_queue_remove(ctx.options.index - 1)
+    queue.remove(ctx.options.index - 1)
 
 
 @plugin.command()
@@ -219,13 +221,13 @@ async def clear(ctx: Context) -> None:
 
     assert isinstance(voice, LavalinkVoice)
 
-    queue = await voice.player.get_queue()
+    queue = voice.player.get_queue()
 
-    if not queue:
+    if not await queue.get_count():
         await ctx.respond("The queue is already empty")
         return None
 
-    voice.player.set_queue_clear()
+    queue.clear()
     await ctx.respond("The queue has been cleared")
 
 
@@ -255,13 +257,14 @@ async def swap(ctx: Context) -> None:
 
     assert isinstance(voice, LavalinkVoice)
 
-    queue = await voice.player.get_queue()
+    queue = voice.player.get_queue()
+    queue_len = await queue.get_count()
 
-    if ctx.options.index1 > len(queue):
+    if ctx.options.index1 > queue_len:
         await ctx.respond("Index 1 out of range")
         return None
 
-    if ctx.options.index2 > len(queue):
+    if ctx.options.index2 > queue_len:
         await ctx.respond("Index 2 out of range")
         return None
 
@@ -272,13 +275,14 @@ async def swap(ctx: Context) -> None:
     assert isinstance(ctx.options.index1, int)
     assert isinstance(ctx.options.index2, int)
 
-    track1 = queue[ctx.options.index1 - 1]
-    track2 = queue[ctx.options.index2 - 1]
+    track1 = await queue.get_track(ctx.options.index1 - 1)
+    track2 = await queue.get_track(ctx.options.index2 - 1)
 
-    queue[ctx.options.index1 - 1] = track2
-    queue[ctx.options.index2 - 1] = track1
+    assert track1
+    assert track2
 
-    voice.player.set_queue_replace(queue)
+    queue.swap(ctx.options.index1 - 1, track2)
+    queue.swap(ctx.options.index2 - 1, track1)
 
     if track1.track.info.uri:
         track1_text = f"[`{track1.track.info.author} - {track1.track.info.title}`](<{track1.track.info.uri}>)"
@@ -309,11 +313,12 @@ async def shuffle(ctx: Context) -> None:
 
     assert isinstance(voice, LavalinkVoice)
 
-    queue = await voice.player.get_queue()
+    queue_ref = voice.player.get_queue()
+    queue = await queue_ref.get_queue()
 
     random.shuffle(queue)
 
-    voice.player.set_queue_replace(queue)
+    queue_ref.replace(queue)
 
     await ctx.respond("Shuffled the queue")
 

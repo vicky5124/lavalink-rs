@@ -13,13 +13,15 @@ pub fn node(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 }
 
 #[pyclass]
+#[derive(Clone)]
 pub(crate) struct Node {
     pub(crate) inner: Arc<crate::node::Node>,
 }
 
 #[pymethods]
 impl Node {
-    fn get_http(&self) -> super::http::Http {
+    #[getter]
+    fn http(&self) -> super::http::Http {
         super::http::Http {
             inner: self.inner.http.clone(),
         }

@@ -55,6 +55,14 @@ class Events(lavalink_rs.EventHandler):
             )
 
 
+# async def custom_node(
+#    client: lavalink_rs.LavalinkClient, guild_id: lavalink_rs.GuildId | int
+# ) -> lavalink_rs.Node:
+#    node = client.get_node_by_index(0)
+#    assert node
+#    return node
+
+
 @plugin.listener(hikari.ShardReadyEvent, bind=True)
 async def start_lavalink(plug: Plugin, event: hikari.ShardReadyEvent) -> None:
     """Event that triggers when the hikari gateway is ready."""
@@ -70,6 +78,7 @@ async def start_lavalink(plug: Plugin, event: hikari.ShardReadyEvent) -> None:
         Events(),
         [node],
         lavalink_rs.NodeDistributionStrategy.sharded(),
+        # lavalink_rs.NodeDistributionStrategy.custom(custom_node),
     )
 
     plug.bot.lavalink = lavalink_client
