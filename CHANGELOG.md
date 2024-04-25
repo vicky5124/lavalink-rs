@@ -6,7 +6,8 @@
 - Implement search utilities in python.
 - Rework queues.
 - Implement `Stream` to `QueueRef`.
-- ~~Implement `async for` to `QueueRef`.~~
+- Switch from reqwests to `hyper`
+- Expose `Node` and `Http` to python.
 
 ## 0.11.2
 

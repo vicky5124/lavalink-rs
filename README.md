@@ -9,22 +9,9 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 ## To-Do
 
-### 0.11.2
-
-- [x] hikari-lightbulb example
-- [x] Implement python builders for all the needed model structures
-
-### 0.12.0
-
-- [x] Expose Http and methods to python
-- [x] Switch from reqwests to `hyper`
-- [x] Implement SSL support with `hyper`
-- [x] Implement search utilities to python
-- [x] load_tracks to return Track in python
-- [x] Streamable queue reader
-
 ### 0.13
 
+- [ ] Implement `__anext__` to QueueRef
 - [ ] Implement some const methods
 - [ ] RoutePlanner API
 - [ ] Support `tokio-websockets`
@@ -63,6 +50,14 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 - [x] Python stubs
 - [x] Basic Twilight 0.16 support
 - [x] Hide password from logs
+- [x] hikari-lightbulb example
+- [x] Implement python builders for all the needed model structures
+- [x] Expose Http and methods to python
+- [x] Switch from reqwests to `hyper`
+- [x] Implement SSL support with `hyper`
+- [x] Implement search utilities to python
+- [x] load_tracks to return Track in python
+- [x] Streamable queue reader
 
 ## Links to download stuff you will need
 
@@ -77,12 +72,12 @@ This is how you can install the library to be used.
 You can install the latest version from crates.io:
 
 ```toml
-lavalink-rs = "0.11"
+lavalink-rs = "0.12"
 
 # or
 
 [dependencies.lavalink-rs]
-version = "0.11"
+version = "0.12"
 ```
 
 Or the development release:
