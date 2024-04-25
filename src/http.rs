@@ -17,7 +17,7 @@ pub struct Http {
     pub headers: ::http::header::HeaderMap,
     pub request_client: Arc<
         hyper_util::client::legacy::Client<
-            hyper_util::client::legacy::connect::HttpConnector,
+            crate::HttpsConnector,
             http_body_util::Full<bytes::Bytes>,
         >,
     >,

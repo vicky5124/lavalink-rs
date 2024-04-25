@@ -1,4 +1,8 @@
-#[cfg(all(not(feature = "rustls"), not(feature = "native-tls")))]
+#[cfg(all(
+    not(feature = "rustls-webpki-roots"),
+    not(feature = "rustls-native-roots"),
+    not(feature = "native-tls")
+))]
 compile_error!("Please specify a feature, either `rustls` or `native`.");
 
 #[cfg(all(feature = "rustls", feature = "native-tls"))]

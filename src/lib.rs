@@ -16,6 +16,14 @@ extern crate macro_rules_attribute;
 #[macro_use]
 extern crate serde;
 
+#[cfg(any(feature = "rustls-native-roots", feature = "rustls-webpki-roots"))]
+pub(crate) type HttpsConnector =
+    hyper_rustls::HttpsConnector<hyper_util::client::legacy::connect::HttpConnector>;
+
+#[cfg(feature = "native-tls")]
+pub(crate) type HttpsConnector =
+    hyper_tls::HttpsConnector<hyper_util::client::legacy::connect::HttpConnector>;
+
 /// The main client, where everything gets done.
 pub mod client;
 /// Every possible error that the library can return.

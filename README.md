@@ -18,7 +18,7 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 - [ ] Expose Http and methods to python
 - [x] Switch from reqwests to `hyper`
-- [ ] Implement SSL support with `hyper`
+- [x] Implement SSL support with `hyper`
 - [x] Implement search utilities to python
 - [x] load_tracks to return Track in python
 - [x] Streamable queue reader
@@ -143,8 +143,9 @@ maturin develop --target x86_64-unknown-linux-gnu
 ## Features
 
 - `macros`: **default feature** - Adds procedural macros for ease of use.
-- `rustls`: **default feature** - Use rustls.
-- `native-tls` Use the system native tls.
+- `rustls-native-roots`: **default feature** - Use rustls with the system trusted roots.
+- `rustls-webpki-roots`: Use rustls with the Mozilla set of trusted roots.
+- `native-tls` Use the system native tls implementation.
 - `serenity` for [serenity](https://lib.rs/crates/serenity) support.
 - `songbird` for [songbird](https://lib.rs/crates/songbird) support.
 - `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) v0.15 support.

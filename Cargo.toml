@@ -23,7 +23,7 @@ exclude = ["examples", "docs"]
 members = ["lavalink_rs_macros"]
 
 [features]
-default = ["rustls", "macros"]
+default = ["rustls-native-roots", "macros"]
 
 songbird = ["songbird-dep"]
 serenity = ["serenity-dep"]
@@ -32,10 +32,9 @@ twilight16 = ["twilight-model-16"]
 
 macros = ["macros-dep"]
 
-#rustls = ["reqwest/rustls-tls", "tokio-tungstenite/rustls-tls-webpki-roots"]
-#native-tls = ["reqwest/native-tls", "tokio-tungstenite/native-tls"]
-rustls = ["tokio-tungstenite/rustls-tls-webpki-roots"]
-native-tls = ["tokio-tungstenite/native-tls"]
+rustls-native-roots = ["tokio-tungstenite/rustls-tls-native-roots", "hyper-rustls", "hyper-rustls/native-tokio"]
+rustls-webpki-roots = ["tokio-tungstenite/rustls-tls-webpki-roots", "hyper-rustls", "hyper-rustls/webpki-tokio"]
+native-tls = ["tokio-tungstenite/native-tls", "hyper-tls"]
 
 python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute", "parking_lot"]
 
@@ -75,6 +74,18 @@ features = ["client", "http1", "http2"]
 version = "0.1"
 default-features = false
 features = ["tokio", "client", "client-legacy", "http1", "http2"]
+
+[dependencies.hyper-tls]
+version = "0.6"
+default-features = false
+features = ["alpn"]
+optional = true
+
+[dependencies.hyper-rustls]
+version = "0.27"
+default-features = false
+features = ["http1", "http2", "tls12", "ring"]
+optional = true
 
 [dependencies.songbird-dep]
 package = "songbird"

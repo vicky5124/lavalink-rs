@@ -80,11 +80,27 @@ impl LavalinkClient {
                     .unwrap(),
             );
 
+            #[cfg(feature = "rustls-webpki-roots")]
+            let https_connector = hyper_rustls::HttpsConnectorBuilder::new()
+                .with_webpki_roots()
+                .https_or_http()
+                .enable_all_versions()
+                .build();
+            #[cfg(feature = "rustls-native-roots")]
+            let https_connector = hyper_rustls::HttpsConnectorBuilder::new()
+                .with_native_roots()
+                .expect("no native root CA certificates found")
+                .https_or_http()
+                .enable_all_versions()
+                .build();
+            #[cfg(feature = "native-tls")]
+            let https_connector = hyper_tls::HttpsConnector::new();
+
             let request_client =
                 hyper_util::client::legacy::Client::builder(hyper_util::rt::TokioExecutor::new())
                     .pool_idle_timeout(std::time::Duration::from_secs(60))
                     .pool_timer(hyper_util::rt::TokioTimer::new())
-                    .build_http();
+                    .build(https_connector);
 
             let node = if i.is_ssl {
                 let http = crate::http::Http {
@@ -705,9 +721,9 @@ impl LavalinkClient {
                                         data.get(&guild_id).map(|x| x.value().clone())
                                     {
                                         trace!(
-                                            "Connection information requested in {:?} but no changes since the previous request were received.",
-                                            guild_id
-                                        );
+                                                "Connection information requested in {:?} but no changes since the previous request were received.",
+                                                guild_id
+                                                );
 
                                         let _ = sender.send(Ok(player::ConnectionInfo {
                                             token: token.to_string(),
