@@ -136,7 +136,7 @@ async fn main() -> Result<(), Error> {
                     is_ssl: false,
                     events: events::Events::default(),
                     password: env!("LAVALINK_PASSWORD").to_string(),
-                    user_id: ctx.cache.current_user().id.into(),
+                    user_id: ctx.cache.current_user().id.get().into(),
                     session_id: None,
                 };
 
