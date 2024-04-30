@@ -56,6 +56,8 @@ pub struct UpdatePlayerTrack {
     /// Mutually exclusive with `encoded`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identifier: Option<String>,
+    /// Additional track data to be sent back with the `Track` object.
+    pub user_data: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]

@@ -47,6 +47,8 @@ pub struct TrackData {
     pub info: TrackInfo,
     /// Addition track info provided by plugins.
     pub plugin_info: Option<serde_json::Value>,
+    /// Additional track data provided via the `UpdatePlayer` endpoint.
+    pub user_data: Option<serde_json::Value>,
 }
 
 #[derive(Hash, PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Default, Serialize, Deserialize)]
