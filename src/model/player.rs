@@ -86,26 +86,37 @@ pub struct Filters {
     /// Adjusts the player volume from 0.0 to 5.0, where 1.0 is 100%.
     ///
     /// NOTE: Values >1.0 may cause clipping
-    pub volume: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub volume: Option<f64>,
     /// Adjusts 15 different bands.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub equalizer: Option<Vec<Equalizer>>,
     /// Eliminates part of a band, usually targeting vocals.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub karaoke: Option<Karaoke>,
     /// Changes the speed, pitch, and rate.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timescale: Option<Timescale>,
     /// Creates a shuddering effect, where the volume quickly oscillates.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tremolo: Option<TremoloVibrato>,
     /// Creates a shuddering effect, where the pitch quickly oscillates.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub vibrato: Option<TremoloVibrato>,
     /// Rotates the audio around the stereo channels/user headphones (aka Audio Panning).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rotation: Option<Rotation>,
     /// Distorts the audio.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub distortion: Option<Distortion>,
     /// Mixes both stereo channels (left and right).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub channel_mix: Option<ChannelMix>,
     /// Filters out higher frequencies.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub low_pass: Option<LowPass>,
     /// Filter plugin configurations.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub plugin_filters: Option<serde_json::Value>,
 }
 
@@ -118,9 +129,13 @@ pub struct Filters {
 /// Setting all factors to 0.5 means both channels get the same audio.
 /// All values are (0.0 <= x <= 1.0)
 pub struct ChannelMix {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub left_to_left: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub left_to_right: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub right_to_left: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub right_to_right: Option<f64>,
 }
 
@@ -131,13 +146,21 @@ pub struct ChannelMix {
 ///
 /// It can generate some pretty unique audio effects.
 pub struct Distortion {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sin_offset: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sin_scale: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cos_offset: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cos_scale: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tan_offset: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tan_scale: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub offset: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scale: Option<f64>,
 }
 
@@ -161,12 +184,16 @@ pub struct Equalizer {
 /// Uses equalization to eliminate part of a band, usually targeting vocals.
 pub struct Karaoke {
     /// The level (0 to 1.0 where 0.0 is no effect and 1.0 is full effect)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub level: Option<f64>,
     /// The mono level (0 to 1.0 where 0.0 is no effect and 1.0 is full effect)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub mono_level: Option<f64>,
     /// The filter band (in Hz)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub filter_band: Option<f64>,
     /// The filter width.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub filter_width: Option<f64>,
 }
 
@@ -178,6 +205,7 @@ pub struct LowPass {
     /// The smoothing factor (1.0 < x)
     ///
     /// Any smoothing values equal to or less than 1.0 will disable the filter.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub smoothing: Option<f64>,
 }
 
@@ -191,6 +219,7 @@ pub struct Rotation {
     /// The frequency of the audio rotating around the listener in Hz.
     ///
     /// 0.2 is similar to the example video above
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rotation_hz: Option<f64>,
 }
 
@@ -202,10 +231,13 @@ pub struct Rotation {
 /// All default to 1.0.
 pub struct Timescale {
     /// The playback speed (0.0 <= x)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub speed: Option<f64>,
     /// The pitch (0.0 <= x)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub pitch: Option<f64>,
     /// The rate (0.0 <= x)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rate: Option<f64>,
 }
 
@@ -220,7 +252,9 @@ pub struct Timescale {
 pub struct TremoloVibrato {
     /// For tremolo (0.0 < x)
     /// For vibrato (0.0 < x <= 14.0)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub frequency: Option<f64>,
     /// For both tremolo and vibrato (0.0 < x <= 1.0)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub depth: Option<f64>,
 }

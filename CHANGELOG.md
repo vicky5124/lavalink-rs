@@ -8,6 +8,7 @@
 - Implement `Stream` to `QueueRef`.
 - Switch from reqwests to `hyper`
 - Expose `Node` and `Http` to python.
+- Fixed filters.
 
 ## 0.11.2
 

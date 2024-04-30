@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing as t
 
-from utils import Bot
+from bot import Bot
 
 import hikari
 from hikari.api import VoiceConnection, VoiceComponent
