@@ -10,6 +10,8 @@
 - Expose `Node` and `Http` to python.
 - Fixed filters.
 - Update model, and remove deprecated fields.
+- Implement `Track` user_data.
+- Expose plugin information and user data to python.
 
 ## 0.11.2
 

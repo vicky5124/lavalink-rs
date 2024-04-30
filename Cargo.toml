@@ -36,7 +36,7 @@ rustls-native-roots = ["tokio-tungstenite/rustls-tls-native-roots", "hyper-rustl
 rustls-webpki-roots = ["tokio-tungstenite/rustls-tls-webpki-roots", "hyper-rustls", "hyper-rustls/webpki-tokio"]
 native-tls = ["tokio-tungstenite/native-tls", "hyper-tls"]
 
-python = ["pyo3", "pyo3-asyncio", "pyo3-log", "log", "paste", "macro_rules_attribute", "parking_lot"]
+python = ["pyo3", "pyo3-asyncio", "pyo3-log", "pythonize", "log", "paste", "macro_rules_attribute", "parking_lot"]
 
 [package.metadata.docs.rs]
 features = ["rustls-webpki-roots", "twilight", "serenity", "songbird", "macros", "python"]
@@ -111,6 +111,10 @@ optional = true
 [dependencies.pyo3]
 version = "0.20"
 features = ["extension-module"]
+optional = true
+
+[dependencies.pythonize]
+version = "0.20"
 optional = true
 
 [dependencies.pyo3-asyncio]

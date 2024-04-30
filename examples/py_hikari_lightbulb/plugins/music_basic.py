@@ -154,6 +154,8 @@ async def play(ctx: Context) -> None:
     if tracks.load_type == TrackLoadType.Track:
         assert isinstance(loaded_tracks, TrackData)
 
+        loaded_tracks.user_data = {"requester_id": int(ctx.author.id)}
+
         player_ctx.queue(loaded_tracks)
 
         if loaded_tracks.info.uri:
@@ -167,6 +169,8 @@ async def play(ctx: Context) -> None:
 
     elif tracks.load_type == TrackLoadType.Search:
         assert isinstance(loaded_tracks, list)
+
+        loaded_tracks[0].user_data = {"requester_id": int(ctx.author.id)}
 
         player_ctx.queue(loaded_tracks[0])
 
@@ -184,6 +188,9 @@ async def play(ctx: Context) -> None:
 
         if loaded_tracks.info.selected_track:
             track = loaded_tracks.tracks[loaded_tracks.info.selected_track]
+
+            track.user_data = {"requester_id": int(ctx.author.id)}
+
             player_ctx.queue(track)
 
             if track.info.uri:
@@ -195,8 +202,14 @@ async def play(ctx: Context) -> None:
                     f"Added to queue: `{track.info.author} - {track.info.title}`"
                 )
         else:
+            tracks = loaded_tracks.tracks
+
+            for i in tracks:
+                i.user_data = {"requester_id": int(ctx.author.id)}
+
             queue = player_ctx.get_queue()
-            queue.append(loaded_tracks.tracks)
+            queue.append(tracks)
+
             await ctx.respond(f"Added playlist to queue: `{loaded_tracks.info.name}`")
 
     # Error or no search results

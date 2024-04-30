@@ -45,11 +45,19 @@ pub async fn track_start(client: LavalinkClient, _session_id: String, event: &ev
 
         if let Some(uri) = &track.info.uri {
             format!(
-                "Now playing: [{} - {}](<{}>)",
-                track.info.author, track.info.title, uri
+                "Now playing: [{} - {}](<{}>) | Requested by <@!{}>",
+                track.info.author,
+                track.info.title,
+                uri,
+                track.user_data.clone().unwrap()["requester_id"]
             )
         } else {
-            format!("Now playing: {} - {}", track.info.author, track.info.title)
+            format!(
+                "Now playing: {} - {} | Requested by <@!{}>",
+                track.info.author,
+                track.info.title,
+                track.user_data.clone().unwrap()["requester_id"]
+            )
         }
     };
 

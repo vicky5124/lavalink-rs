@@ -1,6 +1,7 @@
 use crate::model::player::*;
 
 use pyo3::prelude::*;
+use pythonize::{depythonize, pythonize};
 
 pub fn player(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     let player = PyModule::new(py, "player")?;
@@ -123,5 +124,15 @@ impl Filters {
     #[new]
     fn new_py() -> Filters {
         Filters::default()
+    }
+
+    #[getter(plugin_filters)]
+    fn get_plugin_filters(&self, py: Python<'_>) -> PyObject {
+        pythonize(py, &self.plugin_filters).unwrap()
+    }
+
+    #[setter(plugin_filters)]
+    fn set_plugin_filters(&mut self, py: Python<'_>, input: PyObject) {
+        self.plugin_filters = depythonize(input.as_ref(py)).unwrap()
     }
 }

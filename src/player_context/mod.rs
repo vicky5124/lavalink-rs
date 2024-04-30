@@ -69,6 +69,7 @@ impl TrackInQueue {
         http::UpdatePlayer {
             track: Some(http::UpdatePlayerTrack {
                 encoded: self.track.encoded.into(),
+                user_data: self.track.user_data,
                 ..Default::default()
             }),
             position: self.start_time.map(|x| x.as_millis() as u64),

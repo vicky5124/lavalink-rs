@@ -1,6 +1,7 @@
 use crate::model::track::*;
 
 use pyo3::prelude::*;
+use pythonize::{depythonize, pythonize};
 
 #[pymodule]
 pub fn track(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
@@ -26,10 +27,40 @@ pub(crate) struct Track {
 #[pymethods]
 impl TrackData {
     getter_setter!((encoded, String), (info, TrackInfo),);
+
+    #[getter(plugin_info)]
+    fn get_plugin_info(&self, py: Python<'_>) -> PyObject {
+        pythonize(py, &self.plugin_info).unwrap()
+    }
+
+    #[setter(plugin_info)]
+    fn set_plugin_info(&mut self, py: Python<'_>, input: PyObject) {
+        self.plugin_info = depythonize(input.as_ref(py)).unwrap()
+    }
+
+    #[getter(user_data)]
+    fn get_user_data(&self, py: Python<'_>) -> PyObject {
+        pythonize(py, &self.user_data).unwrap()
+    }
+
+    #[setter(user_data)]
+    fn set_user_data(&mut self, py: Python<'_>, input: PyObject) {
+        self.user_data = depythonize(input.as_ref(py)).unwrap()
+    }
 }
 
 #[apply(crate::python::with_getter_setter)]
 #[pymethods]
 impl PlaylistData {
     getter_setter!((info, PlaylistInfo), (tracks, Vec<TrackData>),);
+
+    #[getter(plugin_info)]
+    fn get_plugin_info(&self, py: Python<'_>) -> PyObject {
+        pythonize(py, &self.plugin_info).unwrap()
+    }
+
+    #[setter(plugin_info)]
+    fn set_plugin_info(&mut self, py: Python<'_>, input: PyObject) {
+        self.plugin_info = depythonize(input.as_ref(py)).unwrap()
+    }
 }

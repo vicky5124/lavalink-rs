@@ -140,6 +140,7 @@ impl PlayerContext {
             &http::UpdatePlayer {
                 track: Some(http::UpdatePlayerTrack {
                     encoded: Some(track.encoded.to_string()),
+                    user_data: track.user_data.clone(),
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -157,6 +158,7 @@ impl PlayerContext {
             &http::UpdatePlayer {
                 track: Some(http::UpdatePlayerTrack {
                     encoded: Some(track.encoded.to_string()),
+                    user_data: track.user_data.clone(),
                     ..Default::default()
                 }),
                 ..Default::default()

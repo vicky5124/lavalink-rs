@@ -1,6 +1,7 @@
 use crate::model::http::*;
 
 use pyo3::prelude::*;
+use pythonize::{depythonize, pythonize};
 
 pub fn http(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     let http = PyModule::new(py, "http")?;
@@ -26,10 +27,23 @@ impl UpdatePlayer {
     }
 }
 
+#[apply(crate::python::with_getter_setter)]
 #[pymethods]
 impl UpdatePlayerTrack {
+    getter_setter!((encoded, Option<String>), (identifier, Option<String>),);
+
     #[new]
     fn new_py() -> UpdatePlayerTrack {
         UpdatePlayerTrack::default()
+    }
+
+    #[getter(user_data)]
+    fn get_user_data(&self, py: Python<'_>) -> PyObject {
+        pythonize(py, &self.user_data).unwrap()
+    }
+
+    #[setter(user_data)]
+    fn set_user_data(&mut self, py: Python<'_>, input: PyObject) {
+        self.user_data = depythonize(input.as_ref(py)).unwrap()
     }
 }

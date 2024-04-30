@@ -44,7 +44,7 @@ pub struct UpdatePlayer {
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
+#[cfg_attr(feature = "python", pyo3::pyclass)]
 pub struct UpdatePlayerTrack {
     /// The base64 encoded track to play.
     ///
@@ -57,6 +57,7 @@ pub struct UpdatePlayerTrack {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identifier: Option<String>,
     /// Additional track data to be sent back with the `Track` object.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_data: Option<serde_json::Value>,
 }
 

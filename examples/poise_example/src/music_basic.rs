@@ -119,7 +119,7 @@ pub async fn play(
 
     let mut playlist_info = None;
 
-    let tracks: Vec<TrackInQueue> = match loaded_tracks.data {
+    let mut tracks: Vec<TrackInQueue> = match loaded_tracks.data {
         Some(TrackLoadData::Track(x)) => vec![x.into()],
         Some(TrackLoadData::Search(x)) => vec![x[0].clone().into()],
         Some(TrackLoadData::Playlist(x)) => {
@@ -152,6 +152,10 @@ pub async fn play(
             ))
             .await?;
         }
+    }
+
+    for i in &mut tracks {
+        i.track.user_data = Some(serde_json::json!({"requester_id": ctx.author().id.get()}));
     }
 
     let queue = player.get_queue();

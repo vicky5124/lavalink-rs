@@ -29,18 +29,20 @@ pub async fn queue(ctx: Context<'_>) -> Result<(), Error> {
         .map(|(idx, x)| {
             if let Some(uri) = &x.track.info.uri {
                 format!(
-                    "{} -> [{} - {}](<{}>)",
+                    "{} -> [{} - {}](<{}>) | Requested by <@!{}>",
                     idx + 1,
                     x.track.info.author,
                     x.track.info.title,
-                    uri
+                    uri,
+                    x.track.user_data.unwrap()["requester_id"]
                 )
             } else {
                 format!(
-                    "{} -> {} - {}",
+                    "{} -> {} - {} | Requested by <@!{}",
                     idx + 1,
                     x.track.info.author,
-                    x.track.info.title
+                    x.track.info.title,
+                    x.track.user_data.unwrap()["requester_id"]
                 )
             }
         })
@@ -55,13 +57,20 @@ pub async fn queue(ctx: Context<'_>) -> Result<(), Error> {
 
         if let Some(uri) = &track.info.uri {
             format!(
-                "Now playing: [{} - {}](<{}>) | {}",
-                track.info.author, track.info.title, uri, time
+                "Now playing: [{} - {}](<{}>) | {}, Requested by <@!{}>",
+                track.info.author,
+                track.info.title,
+                uri,
+                time,
+                track.user_data.unwrap()["requester_id"]
             )
         } else {
             format!(
-                "Now playing: {} - {} | {}",
-                track.info.author, track.info.title, time
+                "Now playing: {} - {} | {}, Requested by <@!{}>",
+                track.info.author,
+                track.info.title,
+                time,
+                track.user_data.unwrap()["requester_id"]
             )
         }
     } else {

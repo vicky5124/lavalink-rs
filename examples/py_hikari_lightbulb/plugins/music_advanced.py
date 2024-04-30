@@ -140,10 +140,12 @@ async def queue(ctx: Context) -> None:
         time_true_s = int(player.state.position / 1000)
         time = f"{time_m:02}:{time_s:02}"
 
+        assert player.track.user_data and isinstance(player.track.user_data, dict)
+
         if player.track.info.uri:
-            now_playing = f"[`{player.track.info.author} - {player.track.info.title}`](<{player.track.info.uri}>) | {time} (Second {time_true_s})"
+            now_playing = f"[`{player.track.info.author} - {player.track.info.title}`](<{player.track.info.uri}>) | {time} (Second {time_true_s}), Requested by <@!{player.track.user_data['requester_id']}>"
         else:
-            now_playing = f"`{player.track.info.author} - {player.track.info.title}` | {time} (Second {time_true_s})"
+            now_playing = f"`{player.track.info.author} - {player.track.info.title}` | {time} (Second {time_true_s}), Requested by <@!{player.track.user_data['requester_id']}>"
 
     queue = await voice.player.get_queue().get_queue()
     queue_text = ""
@@ -152,10 +154,12 @@ async def queue(ctx: Context) -> None:
         if idx == 9:
             break
 
+        assert i.track.user_data and isinstance(i.track.user_data, dict)
+
         if i.track.info.uri:
-            queue_text += f"{idx+1} -> [`{i.track.info.author} - {i.track.info.title}`](<{i.track.info.uri}>)\n"
+            queue_text += f"{idx+1} -> [`{i.track.info.author} - {i.track.info.title}`](<{i.track.info.uri}>) | Requested by <@!{i.track.user_data['requester_id']}>\n"
         else:
-            queue_text += f"{idx+1} -> `{i.track.info.author} - {i.track.info.title}`\n"
+            queue_text += f"{idx+1} -> `{i.track.info.author} - {i.track.info.title}` | Requested by <@!{i.track.user_data['requester_id']}>\n"
 
     if not queue_text:
         queue_text = "Empty queue"

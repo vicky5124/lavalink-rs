@@ -43,15 +43,17 @@ class Events(lavalink_rs.EventHandler):
 
         data = t.cast(t.Tuple[hikari.Snowflake, hikari.api.RESTClient], player_ctx.data)
 
+        assert event.track.user_data and isinstance(event.track.user_data, dict)
+
         if event.track.info.uri:
             await data[1].create_message(
                 data[0],
-                f"Started playing [`{event.track.info.author} - {event.track.info.title}`](<{event.track.info.uri}>)",
+                f"Started playing [`{event.track.info.author} - {event.track.info.title}`](<{event.track.info.uri}>) | Requested by <@!{event.track.user_data['requester_id']}>",
             )
         else:
             await data[1].create_message(
                 data[0],
-                f"Started playing `{event.track.info.author} - {event.track.info.title}`",
+                f"Started playing `{event.track.info.author} - {event.track.info.title}` | Requested by <@!{event.track.user_data['requester_id']}>",
             )
 
 

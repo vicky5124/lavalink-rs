@@ -1,5 +1,7 @@
 import typing as t
 
+JSON: t.TypeAlias = t.Union[t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None]
+
 class TrackLoadType:
     Track: TrackLoadType
     Playlist: TrackLoadType
@@ -14,6 +16,8 @@ class Track:
 class TrackData:
     info: TrackInfo
     encoded: str
+    plugin_info: t.Optional[JSON]
+    user_data: t.Optional[JSON]
 
 class TrackInfo:
     identifier: str
@@ -31,6 +35,7 @@ class TrackInfo:
 class PlaylistData:
     tracks: t.List[TrackData]
     info: PlaylistInfo
+    plugin_info: t.Optional[JSON]
 
 class PlaylistInfo:
     name: str
