@@ -119,8 +119,8 @@ Linux | x86 | 3.8-3.12 | ✅
 Linux | x86_64 | 3.8-3.12 | ✅
 Linux | armv7 | 3.8-3.12 | ✅
 Linux | aarch64 | 3.8-3.12 | ✅
-Linux | ppc64le | 3.8-3.12 | ✅
-Linux | s390x | 3.8-3.12 | ✅
+Linux | ppc64le | - | ❌
+Linux | s390x | - | ❌
 
 ## Building the library
 
