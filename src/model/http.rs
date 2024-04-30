@@ -7,46 +7,55 @@ use crate::model::*;
 ///
 /// If every field is None, the player will stop playing.
 pub struct UpdatePlayer {
+    /// The track to play.
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// The base64 encoded track to play.
-    ///
-    /// Mutually exclusive with `identifier`.
-    pub encoded_track: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// The identifier of the track to play.
-    ///
-    /// Mutually exclusive with `encoded_track`.
-    pub identifier: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    pub track: Option<UpdatePlayerTrack>,
     /// The track end time in milliseconds.
     ///
     /// It must be a value above 0 or None.
     ///
     /// None resets this if it was set previously.
-    pub end_time: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<u64>,
     /// The player volume.
     ///
     /// In percentage, from 0 to 1000.
-    pub volume: Option<u16>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub volume: Option<u16>,
     /// The track position in milliseconds.
     ///
     /// This value can be set to start a track at a specific time.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub position: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     /// Whether the player should be paused.
-    pub paused: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub paused: Option<bool>,
     /// The filters to apply.
     ///
     /// This will override all previously applied filters.
-    pub filters: Option<player::Filters>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub filters: Option<player::Filters>,
     /// The discord websocket connection information.
     ///
     /// Required for creating a player.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub voice: Option<player::ConnectionInfo>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
+pub struct UpdatePlayerTrack {
+    /// The base64 encoded track to play.
+    ///
+    /// Mutually exclusive with `identifier`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub encoded: Option<String>,
+    /// The identifier of the track to play.
+    ///
+    /// Mutually exclusive with `encoded`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub identifier: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -56,13 +65,13 @@ pub struct UpdatePlayer {
 /// You must call this method if you wish to restart the discord bot without having all players
 /// stop, and provide the current `session_id` when creating the node connection.
 pub struct ResumingState {
-    #[serde(skip_serializing_if = "Option::is_none")]
     /// Whether resuming should be, or is enabled for this session or not.
-    pub resuming: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub resuming: Option<bool>,
     /// The timeout in seconds.
     ///
     /// default is 60s
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timeout: Option<u32>,
 }
 

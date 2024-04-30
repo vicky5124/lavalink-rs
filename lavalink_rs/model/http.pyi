@@ -7,9 +7,12 @@ class UpdatePlayer:
     volume: t.Optional[int]
     position: t.Optional[int]
     filters: t.Optional[Filters]
-    encoded_track: t.Optional[str]
     voice: t.Optional[ConnectionInfo]
     paused: t.Optional[bool]
+    track: t.Optional[UpdatePlayerTrack]
+
+class UpdatePlayerTrack:
+    encoded: t.Optional[str]
     identifier: t.Optional[str]
 
 class ResumingState:

@@ -67,7 +67,10 @@ pub enum QueueMessage {
 impl TrackInQueue {
     fn into_update_player(self) -> http::UpdatePlayer {
         http::UpdatePlayer {
-            encoded_track: self.track.encoded.into(),
+            track: Some(http::UpdatePlayerTrack {
+                encoded: self.track.encoded.into(),
+                ..Default::default()
+            }),
             position: self.start_time.map(|x| x.as_millis() as u64),
             end_time: self.end_time.map(|x| x.as_millis() as u64),
             volume: self.volume,

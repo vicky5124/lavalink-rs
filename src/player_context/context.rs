@@ -138,7 +138,10 @@ impl PlayerContext {
     pub async fn play(&self, track: &track::TrackData) -> LavalinkResult<player::Player> {
         self.update_player(
             &http::UpdatePlayer {
-                encoded_track: Some(track.encoded.to_string()),
+                track: Some(http::UpdatePlayerTrack {
+                    encoded: Some(track.encoded.to_string()),
+                    ..Default::default()
+                }),
                 ..Default::default()
             },
             true,
@@ -152,7 +155,10 @@ impl PlayerContext {
     pub async fn play_now(&self, track: &track::TrackData) -> LavalinkResult<player::Player> {
         self.update_player(
             &http::UpdatePlayer {
-                encoded_track: Some(track.encoded.to_string()),
+                track: Some(http::UpdatePlayerTrack {
+                    encoded: Some(track.encoded.to_string()),
+                    ..Default::default()
+                }),
                 ..Default::default()
             },
             false,
@@ -180,7 +186,7 @@ impl PlayerContext {
             .request(
                 Method::PATCH,
                 path,
-                Some(&serde_json::json!({"encodedTrack": null})),
+                Some(&serde_json::json!({"track" : {"encoded": null}})),
             )
             .await?;
 

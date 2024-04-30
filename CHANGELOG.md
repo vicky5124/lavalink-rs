@@ -9,6 +9,7 @@
 - Switch from reqwests to `hyper`
 - Expose `Node` and `Http` to python.
 - Fixed filters.
+- Update model, and remove deprecated fields.
 
 ## 0.11.2
 

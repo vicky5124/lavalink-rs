@@ -108,7 +108,7 @@ impl TremoloVibrato {
 #[pymethods]
 impl Filters {
     getter_setter!(
-        (volume, Option<u16>),
+        (volume, Option<f64>),
         (equalizer, Option<Vec<Equalizer>>),
         (karaoke, Option<Karaoke>),
         (timescale, Option<Timescale>),
