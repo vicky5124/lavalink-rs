@@ -47,6 +47,12 @@
                                 <a class="function" href="#LavalinkClient.get_player_context">get_player_context</a>
                         </li>
                         <li>
+                                <a class="function" href="#LavalinkClient.get_node_by_index">get_node_by_index</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#LavalinkClient.get_node_for_guild">get_node_for_guild</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#LavalinkClient.load_tracks">load_tracks</a>
                         </li>
                         <li>
@@ -97,27 +103,6 @@
             <li>
                     <a class="class" href="#PlayerContext">PlayerContext</a>
                             <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#PlayerContext.set_queue_push_to_back">set_queue_push_to_back</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#PlayerContext.set_queue_push_to_front">set_queue_push_to_front</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#PlayerContext.set_queue_insert">set_queue_insert</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#PlayerContext.set_queue_remove">set_queue_remove</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#PlayerContext.set_queue_clear">set_queue_clear</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#PlayerContext.set_queue_replace">set_queue_replace</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#PlayerContext.set_queue_append">set_queue_append</a>
-                        </li>
                         <li>
                                 <a class="function" href="#PlayerContext.get_queue">get_queue</a>
                         </li>
@@ -200,6 +185,21 @@
 
             </li>
             <li>
+                    <a class="class" href="#Http">Http</a>
+                            <ul class="memberlist">
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#Node">Node</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#Node.http">http</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#NodeBuilder">NodeBuilder</a>
                             <ul class="memberlist">
                         <li>
@@ -209,16 +209,16 @@
                                 <a class="variable" href="#NodeBuilder.password">password</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.session_id">session_id</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
+                                <a class="variable" href="#NodeBuilder.hostname">hostname</a>
                         </li>
                         <li>
                                 <a class="variable" href="#NodeBuilder.user_id">user_id</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.hostname">hostname</a>
+                                <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#NodeBuilder.session_id">session_id</a>
                         </li>
                 </ul>
 
@@ -251,19 +251,58 @@
                     <a class="class" href="#TrackInQueue">TrackInQueue</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackInQueue.volume">volume</a>
+                                <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.filters">filters</a>
+                                <a class="variable" href="#TrackInQueue.start_time_ms">start_time_ms</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInQueue.volume">volume</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInQueue.track">track</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
+                                <a class="variable" href="#TrackInQueue.filters">filters</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#QueueRef">QueueRef</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#QueueRef.get_queue">get_queue</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.start_time_ms">start_time_ms</a>
+                                <a class="function" href="#QueueRef.get_track">get_track</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.get_count">get_count</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.push_to_back">push_to_back</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.push_to_front">push_to_front</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.insert">insert</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.remove">remove</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.clear">clear</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.replace">replace</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.append">append</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#QueueRef.swap">swap</a>
                         </li>
                 </ul>
 
@@ -387,6 +426,32 @@ lavalink_rs    </h1>
         
     </div>
     <a class="headerlink" href="#LavalinkClient.get_player_context"></a>
+    
+    
+
+                            </div>
+                            <div id="LavalinkClient.get_node_by_index" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">get_node_by_index</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">idx</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n">Optional</span><span class="p">[</span><span class="n"><a href="#Node">lavalink_rs.Node</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#LavalinkClient.get_node_by_index"></a>
+    
+    
+
+                            </div>
+                            <div id="LavalinkClient.get_node_for_guild" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">get_node_for_guild</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">guild_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="n"><a href="#Node">lavalink_rs.Node</a></span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#LavalinkClient.get_node_for_guild"></a>
     
     
 
@@ -599,102 +664,11 @@ lavalink_rs    </h1>
 </div>
 
 
-                            <div id="PlayerContext.set_queue_push_to_back" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">set_queue_push_to_back</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">track</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlayerContext.set_queue_push_to_back"></a>
-    
-    
-
-                            </div>
-                            <div id="PlayerContext.set_queue_push_to_front" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">set_queue_push_to_front</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">track</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlayerContext.set_queue_push_to_front"></a>
-    
-    
-
-                            </div>
-                            <div id="PlayerContext.set_queue_insert" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">set_queue_insert</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">position</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">track</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlayerContext.set_queue_insert"></a>
-    
-    
-
-                            </div>
-                            <div id="PlayerContext.set_queue_remove" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">set_queue_remove</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">position</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlayerContext.set_queue_remove"></a>
-    
-    
-
-                            </div>
-                            <div id="PlayerContext.set_queue_clear" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">set_queue_clear</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlayerContext.set_queue_clear"></a>
-    
-    
-
-                            </div>
-                            <div id="PlayerContext.set_queue_replace" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">set_queue_replace</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">tracks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlayerContext.set_queue_replace"></a>
-    
-    
-
-                            </div>
-                            <div id="PlayerContext.set_queue_append" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">set_queue_append</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">tracks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlayerContext.set_queue_append"></a>
-    
-    
-
-                            </div>
                             <div id="PlayerContext.get_queue" class="classattr">
                                 <div class="attr function">
             
-        <span class="def">async def</span>
-        <span class="name">get_queue</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="n">List</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">]</span>:</span></span>
+        <span class="def">def</span>
+        <span class="name">get_queue</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="n"><a href="#QueueRef">lavalink_rs.QueueRef</a></span>:</span></span>
 
         
     </div>
@@ -1030,6 +1004,43 @@ lavalink_rs    </h1>
 
                             </div>
                 </section>
+                <section id="Http">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Http</span>:
+
+        
+    </div>
+    <a class="headerlink" href="#Http"></a>
+    
+    
+
+                </section>
+                <section id="Node">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Node</span>:
+
+        
+    </div>
+    <a class="headerlink" href="#Node"></a>
+    
+    
+
+                            <div id="Node.http" class="classattr">
+                                <div class="attr variable">
+            <span class="name">http</span><span class="annotation">: <a href="#Http">lavalink_rs.Http</a></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Node.http"></a>
+    
+    
+
+                            </div>
+                </section>
                 <section id="NodeBuilder">
                     <div class="attr class">
             
@@ -1078,24 +1089,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.session_id" class="classattr">
+                            <div id="NodeBuilder.hostname" class="classattr">
                                 <div class="attr variable">
-            <span class="name">session_id</span><span class="annotation">: Optional[str]</span>
+            <span class="name">hostname</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#NodeBuilder.session_id"></a>
-    
-    
-
-                            </div>
-                            <div id="NodeBuilder.is_ssl" class="classattr">
-                                <div class="attr variable">
-            <span class="name">is_ssl</span><span class="annotation">: bool</span>
-
-        
-    </div>
-    <a class="headerlink" href="#NodeBuilder.is_ssl"></a>
+    <a class="headerlink" href="#NodeBuilder.hostname"></a>
     
     
 
@@ -1111,13 +1111,24 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.hostname" class="classattr">
+                            <div id="NodeBuilder.is_ssl" class="classattr">
                                 <div class="attr variable">
-            <span class="name">hostname</span><span class="annotation">: str</span>
+            <span class="name">is_ssl</span><span class="annotation">: bool</span>
 
         
     </div>
-    <a class="headerlink" href="#NodeBuilder.hostname"></a>
+    <a class="headerlink" href="#NodeBuilder.is_ssl"></a>
+    
+    
+
+                            </div>
+                            <div id="NodeBuilder.session_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">session_id</span><span class="annotation">: Optional[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NodeBuilder.session_id"></a>
     
     
 
@@ -1204,7 +1215,7 @@ let node_builder = NodeBuilder {
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">custom</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n"><a href="#LavalinkClient">lavalink_rs.LavalinkClient</a></span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
+        <span class="name">custom</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n"><a href="#LavalinkClient">lavalink_rs.LavalinkClient</a></span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="n"><a href="#Node">lavalink_rs.Node</a></span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="n"><a href="#NodeDistributionStrategy">lavalink_rs.NodeDistributionStrategy</a></span>:</span></span>
 
         
     </div>
@@ -1228,39 +1239,6 @@ let node_builder = NodeBuilder {
 </div>
 
 
-                            <div id="TrackInQueue.volume" class="classattr">
-                                <div class="attr variable">
-            <span class="name">volume</span><span class="annotation">: Optional[int]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInQueue.volume"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackInQueue.filters" class="classattr">
-                                <div class="attr variable">
-            <span class="name">filters</span><span class="annotation">: Optional[Filters]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInQueue.filters"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackInQueue.track" class="classattr">
-                                <div class="attr variable">
-            <span class="name">track</span><span class="annotation">: TrackData</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInQueue.track"></a>
-    
-    
-
-                            </div>
                             <div id="TrackInQueue.end_time_ms" class="classattr">
                                 <div class="attr variable">
             <span class="name">end_time_ms</span><span class="annotation">: Optional[int]</span>
@@ -1279,6 +1257,197 @@ let node_builder = NodeBuilder {
         
     </div>
     <a class="headerlink" href="#TrackInQueue.start_time_ms"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackInQueue.volume" class="classattr">
+                                <div class="attr variable">
+            <span class="name">volume</span><span class="annotation">: Optional[int]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInQueue.volume"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackInQueue.track" class="classattr">
+                                <div class="attr variable">
+            <span class="name">track</span><span class="annotation">: TrackData</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInQueue.track"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackInQueue.filters" class="classattr">
+                                <div class="attr variable">
+            <span class="name">filters</span><span class="annotation">: Optional[Filters]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInQueue.filters"></a>
+    
+    
+
+                            </div>
+                </section>
+                <section id="QueueRef">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">QueueRef</span>:
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef"></a>
+    
+            <div class="docstring"><p>A reference to the player queue</p>
+</div>
+
+
+                            <div id="QueueRef.get_queue" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">get_queue</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="n">List</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.get_queue"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.get_track" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">get_track</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n">Optional</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.get_track"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.get_count" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">get_count</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">int</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.get_count"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.push_to_back" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">push_to_back</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">track</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.push_to_back"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.push_to_front" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">push_to_front</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">track</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.push_to_front"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.insert" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">insert</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">index</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">track</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.insert"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.remove" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">remove</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">index</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.remove"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.clear" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">clear</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.clear"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.replace" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">replace</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">tracks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.replace"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.append" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">append</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">tracks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.append"></a>
+    
+    
+
+                            </div>
+                            <div id="QueueRef.swap" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">swap</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">index</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">track</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#TrackInQueue">lavalink_rs.TrackInQueue</a></span><span class="p">,</span> <span class="n">TrackData</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#QueueRef.swap"></a>
     
     
 

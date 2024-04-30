@@ -1,6 +1,8 @@
 import typing as t
 
-JSON: t.TypeAlias = t.Union[t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None]
+JSON: t.TypeAlias = t.Union[
+    t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None
+]
 
 class TrackLoadType:
     Track: TrackLoadType

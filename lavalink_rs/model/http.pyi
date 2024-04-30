@@ -2,7 +2,9 @@ import typing as t
 
 from lavalink_rs.model.player import Filters, ConnectionInfo
 
-JSON: t.TypeAlias = t.Union[t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None]
+JSON: t.TypeAlias = t.Union[
+    t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None
+]
 
 class UpdatePlayer:
     end_time: t.Optional[int]

@@ -3,7 +3,9 @@ import typing as t
 from lavalink_rs import GuildId
 from lavalink_rs.model.track import TrackData
 
-JSON: t.TypeAlias = t.Union[t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None]
+JSON: t.TypeAlias = t.Union[
+    t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None
+]
 
 class Player:
     track: t.Optional[TrackData]

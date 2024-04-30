@@ -294,7 +294,7 @@ impl LavalinkClient {
                                         e.print_and_set_sys_last_vars(py);
                                     });
                                     let _ = tx.send(crate::python::node::Node {
-                                        inner: client2.get_node_by_index(0).unwrap().clone()
+                                        inner: client2.get_node_by_index(0).unwrap().clone(),
                                     });
                                 }
                                 Ok(x) => {
