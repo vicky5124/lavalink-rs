@@ -7,6 +7,7 @@ use std::io::Error as IoError;
 use ::http::header::InvalidHeaderValue;
 use ::http::uri::InvalidUri;
 use ::http::Error as HttpError;
+use ::http::method::InvalidMethod;
 use hyper::Error as HyperError;
 use hyper_util::client::legacy::Error as HyperClientError;
 use oneshot::RecvError;
@@ -48,6 +49,7 @@ impl<T> RequestResult<T> {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 /// Every error the library can return.
 pub enum LavalinkError {
     IoError(IoError),
@@ -57,6 +59,7 @@ pub enum LavalinkError {
     HyperClientError(HyperClientError),
     HttpError(HttpError),
     InvalidUri(InvalidUri),
+    InvalidMethod(InvalidMethod),
     ChannelSendError,
     ChannelReceiveError(RecvError),
     SerdeErrorQs(serde_qs::Error),
@@ -92,6 +95,9 @@ impl Display for LavalinkError {
             }
             LavalinkError::InvalidUri(why) => {
                 write!(f, "Invalid URI => {:?}", why)
+            }
+            LavalinkError::InvalidMethod(why) => {
+                write!(f, "Invalid HTTP request method => {:?}", why)
             }
             LavalinkError::HyperError(why) => {
                 write!(f, "Hyper Error => {:?}", why)
@@ -173,6 +179,12 @@ impl From<HttpError> for LavalinkError {
 impl From<InvalidUri> for LavalinkError {
     fn from(err: InvalidUri) -> LavalinkError {
         LavalinkError::InvalidUri(err)
+    }
+}
+
+impl From<InvalidMethod> for LavalinkError {
+    fn from(err: InvalidMethod) -> LavalinkError {
+        LavalinkError::InvalidMethod(err)
     }
 }
 

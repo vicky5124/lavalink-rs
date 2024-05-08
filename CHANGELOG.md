@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.0
+
+- Fix `Http::delete_player`.
+- Make `Error` be `#[non_exhaustive]`
+
 ## 0.12.0
 
 - `load_tracks()` in python now returns `Track`.
