@@ -112,7 +112,7 @@ impl Http {
     ) -> LavalinkResult<()> {
         let guild_id = guild_id.into();
 
-        self.request(
+        self.raw_request(
             Method::DELETE,
             self.path_to_uri(
                 &format!("/sessions/{}/players/{}", session_id, guild_id.0),
