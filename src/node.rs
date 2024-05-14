@@ -321,7 +321,7 @@ impl Node {
                                     }
 
                                     if let Err(why) =
-                                        player.update_track(track_event.track.clone().into())
+                                        player.update_track(None)
                                     {
                                         error!(
                                             "Error sending update track message for player {}: {}",
