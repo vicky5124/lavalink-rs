@@ -76,7 +76,7 @@ fn lavalink_rs(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<player_context::PlayerContext>()?;
 
     m.add_class::<python::event::EventHandler>()?;
-    m.add_class::<http::Http>()?;
+    m.add_class::<python::http::Http>()?;
     m.add_class::<python::node::Node>()?;
     m.add_class::<node::NodeBuilder>()?;
     m.add_class::<python::model::client::NodeDistributionStrategyPy>()?;

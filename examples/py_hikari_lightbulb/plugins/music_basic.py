@@ -36,13 +36,25 @@ async def _join(ctx: Context) -> t.Optional[hikari.Snowflake]:
     voice = ctx.bot.voice.connections.get(ctx.guild_id)
 
     if not voice:
-        voice = await LavalinkVoice.connect(
+        await LavalinkVoice.connect(
             ctx.guild_id,
             channel_id,
             ctx.bot,
             ctx.bot.lavalink,
             (ctx.channel_id, ctx.bot.rest),
         )
+    else:
+        assert isinstance(voice, LavalinkVoice)
+
+        await LavalinkVoice.connect(
+            ctx.guild_id,
+            channel_id,
+            ctx.bot,
+            ctx.bot.lavalink,
+            (ctx.channel_id, ctx.bot.rest),
+            old_voice=voice,
+        )
+
 
     return channel_id
 

@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+use pythonize::{depythonize, pythonize};
 
 #[pymodule]
 pub fn http(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
@@ -16,6 +17,85 @@ pub(crate) struct Http {
 
 #[pymethods]
 impl Http {
+    #[getter]
+    fn get_authority(&self) -> String {
+        self.inner.authority.clone()
+    }
+
+    #[setter]
+    fn set_authority(&mut self, val: String) {
+        self.inner.authority = val;
+    }
+
+    #[getter]
+    fn get_rest_address(&self) -> String {
+        self.inner.rest_address.clone()
+    }
+
+    #[setter]
+    fn set_rest_address(&mut self, val: String) {
+        self.inner.rest_address = val;
+    }
+
+    #[getter]
+    fn get_rest_address_versionless(&self) -> String {
+        self.inner.rest_address_versionless.clone()
+    }
+
+    #[setter]
+    fn set_rest_address_versionless(&mut self, val: String) {
+        self.inner.rest_address_versionless = val;
+    }
+
+    pub fn request<'a>(
+        &self,
+        py: Python<'a>,
+        method: String,
+        uri: String,
+        data: PyObject,
+    ) -> PyResult<&'a PyAny> {
+        let http = self.inner.clone();
+
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            let data =
+                Python::with_gil(|py| depythonize::<Option<serde_json::Value>>(data.as_ref(py)))?;
+            let res = http
+                .request::<serde_json::Value, _, _>(
+                    ::http::Method::from_bytes(method.as_bytes()).map_err(crate::error::LavalinkError::from)?,
+                    uri,
+                    data.as_ref(),
+                )
+                .await?;
+
+            Ok(Python::with_gil(|py| pythonize(py, &res))?)
+        })
+    }
+
+    pub fn raw_request<'a>(
+        &self,
+        py: Python<'a>,
+        method: String,
+        uri: String,
+        data: PyObject,
+    ) -> PyResult<&'a PyAny> {
+        let http = self.inner.clone();
+
+        pyo3_asyncio::tokio::future_into_py(py, async move {
+            let data =
+                Python::with_gil(|py| depythonize::<Option<serde_json::Value>>(data.as_ref(py)))?;
+
+            let res = http
+                .raw_request(
+                    ::http::Method::from_bytes(method.as_bytes()).map_err(crate::error::LavalinkError::from)?,
+                    uri,
+                    data.as_ref(),
+                )
+                .await?;
+
+            Ok(Python::with_gil(|_py| res))
+        })
+    }
+
     /// Destroys the player for this guild in this session.
     pub fn delete_player<'a>(
         &self,
