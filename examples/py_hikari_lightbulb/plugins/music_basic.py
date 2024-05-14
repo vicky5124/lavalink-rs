@@ -55,7 +55,6 @@ async def _join(ctx: Context) -> t.Optional[hikari.Snowflake]:
             old_voice=voice,
         )
 
-
     return channel_id
 
 

@@ -320,9 +320,7 @@ impl Node {
                                         );
                                     }
 
-                                    if let Err(why) =
-                                        player.update_track(None)
-                                    {
+                                    if let Err(why) = player.update_track(None) {
                                         error!(
                                             "Error sending update track message for player {}: {}",
                                             track_event.guild_id.0, why

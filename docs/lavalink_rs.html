@@ -187,6 +187,54 @@
             <li>
                     <a class="class" href="#Http">Http</a>
                             <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#Http.request">request</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.raw_request">raw_request</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.delete_player">delete_player</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.update_player">update_player</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.set_resuming_state">set_resuming_state</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.load_tracks">load_tracks</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.version">version</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.stats">stats</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.info">info</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.decode_track">decode_track</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.decode_tracks">decode_tracks</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.get_player">get_player</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Http.get_players">get_players</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Http.authority">authority</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Http.rest_address">rest_address</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Http.rest_address_versionless">rest_address_versionless</a>
+                        </li>
                 </ul>
 
             </li>
@@ -206,19 +254,19 @@
                                 <a class="function" href="#NodeBuilder.__init__">NodeBuilder</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.password">password</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#NodeBuilder.hostname">hostname</a>
+                                <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
                         </li>
                         <li>
                                 <a class="variable" href="#NodeBuilder.user_id">user_id</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
+                                <a class="variable" href="#NodeBuilder.password">password</a>
                         </li>
                         <li>
                                 <a class="variable" href="#NodeBuilder.session_id">session_id</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#NodeBuilder.hostname">hostname</a>
                         </li>
                 </ul>
 
@@ -251,6 +299,9 @@
                     <a class="class" href="#TrackInQueue">TrackInQueue</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="variable" href="#TrackInQueue.track">track</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
                         </li>
                         <li>
@@ -258,9 +309,6 @@
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInQueue.volume">volume</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInQueue.track">track</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInQueue.filters">filters</a>
@@ -1016,6 +1064,255 @@ lavalink_rs    </h1>
     
     
 
+                            <div id="Http.request" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">request</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="o">/</span>, </span><span class="param"><span class="n">method</span>, </span><span class="param"><span class="n">uri</span>, </span><span class="param"><span class="n">data</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.request"></a>
+    
+    
+
+                            </div>
+                            <div id="Http.raw_request" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">raw_request</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="o">/</span>, </span><span class="param"><span class="n">method</span>, </span><span class="param"><span class="n">uri</span>, </span><span class="param"><span class="n">data</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.raw_request"></a>
+    
+    
+
+                            </div>
+                            <div id="Http.delete_player" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">delete_player</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">guild_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>, </span><span class="param"><span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.delete_player"></a>
+    
+            <div class="docstring"><p>Destroys the player for this guild in this session.</p>
+</div>
+
+
+                            </div>
+                            <div id="Http.update_player" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">update_player</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">guild_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>,</span><span class="param">	<span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">data</span><span class="p">:</span> <span class="n">UpdatePlayer</span>,</span><span class="param">	<span class="n">no_replace</span><span class="p">:</span> <span class="nb">bool</span></span><span class="return-annotation">) -> <span class="n">Player</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.update_player"></a>
+    
+            <div class="docstring"><p>Updates or creates the player for this guild.</p>
+</div>
+
+
+                            </div>
+                            <div id="Http.set_resuming_state" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">set_resuming_state</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">resuming_state</span><span class="p">:</span> <span class="n">ResumingState</span></span><span class="return-annotation">) -> <span class="n">ResumingState</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.set_resuming_state"></a>
+    
+            <div class="docstring"><p>Updates the session with the resuming state and timeout.</p>
+</div>
+
+
+                            </div>
+                            <div id="Http.load_tracks" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">load_tracks</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="n">Track</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.load_tracks"></a>
+    
+            <div class="docstring"><p>Resolves audio tracks for use with the <code><a href="#Http.update_player">update_player</a></code> endpoint.</p>
+
+<h1 id="parameters">Parameters</h1>
+
+<ul>
+<li><code>identifier</code>: A track identifier.
+<ul>
+<li>Can be a url: "https://youtu.be/watch?v=DrM2lo6B04I"</li>
+<li>A unique identifier: "DrM2lo6B04I"</li>
+<li>A search: "ytsearch:Ne Obliviscaris - Forget Not"</li>
+</ul></li>
+</ul>
+</div>
+
+
+                            </div>
+                            <div id="Http.version" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">version</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.version"></a>
+    
+            <div class="docstring"><p>Request Lavalink server version.</p>
+</div>
+
+
+                            </div>
+                            <div id="Http.stats" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">stats</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="n">Stats</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.stats"></a>
+    
+            <div class="docstring"><p>Request Lavalink statistics.</p>
+
+<p>NOTE: The frame stats will never be returned.</p>
+</div>
+
+
+                            </div>
+                            <div id="Http.info" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">info</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="n">Info</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.info"></a>
+    
+            <div class="docstring"><p>Request Lavalink server information.</p>
+</div>
+
+
+                            </div>
+                            <div id="Http.decode_track" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">decode_track</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">track</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="n">TrackData</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.decode_track"></a>
+    
+            <div class="docstring"><p>Decode a single track into its info.</p>
+
+<h1 id="parameters">Parameters</h1>
+
+<ul>
+<li><code>track</code>: base64 encoded track data.</li>
+</ul>
+</div>
+
+
+                            </div>
+                            <div id="Http.decode_tracks" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">decode_tracks</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">tracks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="n">List</span><span class="p">[</span><span class="n">TrackData</span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.decode_tracks"></a>
+    
+            <div class="docstring"><p>Decode multiple tracks into their info.</p>
+
+<h1 id="parameters">Parameters</h1>
+
+<ul>
+<li><code>tracks</code>: base64 encoded tracks.</li>
+</ul>
+</div>
+
+
+                            </div>
+                            <div id="Http.get_player" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">get_player</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">guild_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n"><a href="#GuildId">lavalink_rs.GuildId</a></span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>,</span><span class="param">	<span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="n">Player</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.get_player"></a>
+    
+            <div class="docstring"><p>Returns the player for this guild in this session.</p>
+</div>
+
+
+                            </div>
+                            <div id="Http.get_players" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">get_players</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="n">List</span><span class="p">[</span><span class="n">Player</span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.get_players"></a>
+    
+            <div class="docstring"><p>Returns a list of players in this specific session.</p>
+</div>
+
+
+                            </div>
+                            <div id="Http.authority" class="classattr">
+                                <div class="attr variable">
+            <span class="name">authority</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.authority"></a>
+    
+    
+
+                            </div>
+                            <div id="Http.rest_address" class="classattr">
+                                <div class="attr variable">
+            <span class="name">rest_address</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.rest_address"></a>
+    
+    
+
+                            </div>
+                            <div id="Http.rest_address_versionless" class="classattr">
+                                <div class="attr variable">
+            <span class="name">rest_address_versionless</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.rest_address_versionless"></a>
+    
+    
+
+                            </div>
                 </section>
                 <section id="Node">
                     <div class="attr class">
@@ -1078,24 +1375,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.password" class="classattr">
+                            <div id="NodeBuilder.is_ssl" class="classattr">
                                 <div class="attr variable">
-            <span class="name">password</span><span class="annotation">: str</span>
+            <span class="name">is_ssl</span><span class="annotation">: bool</span>
 
         
     </div>
-    <a class="headerlink" href="#NodeBuilder.password"></a>
-    
-    
-
-                            </div>
-                            <div id="NodeBuilder.hostname" class="classattr">
-                                <div class="attr variable">
-            <span class="name">hostname</span><span class="annotation">: str</span>
-
-        
-    </div>
-    <a class="headerlink" href="#NodeBuilder.hostname"></a>
+    <a class="headerlink" href="#NodeBuilder.is_ssl"></a>
     
     
 
@@ -1111,13 +1397,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="NodeBuilder.is_ssl" class="classattr">
+                            <div id="NodeBuilder.password" class="classattr">
                                 <div class="attr variable">
-            <span class="name">is_ssl</span><span class="annotation">: bool</span>
+            <span class="name">password</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#NodeBuilder.is_ssl"></a>
+    <a class="headerlink" href="#NodeBuilder.password"></a>
     
     
 
@@ -1129,6 +1415,17 @@ let node_builder = NodeBuilder {
         
     </div>
     <a class="headerlink" href="#NodeBuilder.session_id"></a>
+    
+    
+
+                            </div>
+                            <div id="NodeBuilder.hostname" class="classattr">
+                                <div class="attr variable">
+            <span class="name">hostname</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NodeBuilder.hostname"></a>
     
     
 
@@ -1239,6 +1536,17 @@ let node_builder = NodeBuilder {
 </div>
 
 
+                            <div id="TrackInQueue.track" class="classattr">
+                                <div class="attr variable">
+            <span class="name">track</span><span class="annotation">: TrackData</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInQueue.track"></a>
+    
+    
+
+                            </div>
                             <div id="TrackInQueue.end_time_ms" class="classattr">
                                 <div class="attr variable">
             <span class="name">end_time_ms</span><span class="annotation">: Optional[int]</span>
@@ -1268,17 +1576,6 @@ let node_builder = NodeBuilder {
         
     </div>
     <a class="headerlink" href="#TrackInQueue.volume"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackInQueue.track" class="classattr">
-                                <div class="attr variable">
-            <span class="name">track</span><span class="annotation">: TrackData</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInQueue.track"></a>
     
     
 

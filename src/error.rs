@@ -5,9 +5,9 @@ use std::fmt::{Display, Formatter, Result};
 use std::io::Error as IoError;
 
 use ::http::header::InvalidHeaderValue;
+use ::http::method::InvalidMethod;
 use ::http::uri::InvalidUri;
 use ::http::Error as HttpError;
-use ::http::method::InvalidMethod;
 use hyper::Error as HyperError;
 use hyper_util::client::legacy::Error as HyperClientError;
 use oneshot::RecvError;

@@ -167,7 +167,7 @@ class Node:
     http: Http
 
 class Http:
-    authority: str 
+    authority: str
     rest_address: str
     rest_address_versionless: str
 

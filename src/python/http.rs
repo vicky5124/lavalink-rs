@@ -61,7 +61,8 @@ impl Http {
                 Python::with_gil(|py| depythonize::<Option<serde_json::Value>>(data.as_ref(py)))?;
             let res = http
                 .request::<serde_json::Value, _, _>(
-                    ::http::Method::from_bytes(method.as_bytes()).map_err(crate::error::LavalinkError::from)?,
+                    ::http::Method::from_bytes(method.as_bytes())
+                        .map_err(crate::error::LavalinkError::from)?,
                     uri,
                     data.as_ref(),
                 )
@@ -86,7 +87,8 @@ impl Http {
 
             let res = http
                 .raw_request(
-                    ::http::Method::from_bytes(method.as_bytes()).map_err(crate::error::LavalinkError::from)?,
+                    ::http::Method::from_bytes(method.as_bytes())
+                        .map_err(crate::error::LavalinkError::from)?,
                     uri,
                     data.as_ref(),
                 )
