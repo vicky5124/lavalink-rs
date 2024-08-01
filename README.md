@@ -9,7 +9,7 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 ## To-Do
 
-### 0.13
+### 0.14
 
 - [ ] Implement `__anext__` to QueueRef
 - [ ] Implement some const methods
@@ -72,12 +72,12 @@ This is how you can install the library to be used.
 You can install the latest version from crates.io:
 
 ```toml
-lavalink-rs = "0.12"
+lavalink-rs = "0.13"
 
 # or
 
 [dependencies.lavalink-rs]
-version = "0.12"
+version = "0.13"
 ```
 
 Or the development release:
