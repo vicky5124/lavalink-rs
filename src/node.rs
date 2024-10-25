@@ -8,9 +8,10 @@ use std::sync::Arc;
 use arc_swap::ArcSwap;
 use futures::stream::StreamExt;
 use http::HeaderMap;
-use http::Request;
+//use http::Request;
 use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
-use tokio_tungstenite::{connect_async, tungstenite::handshake::client::generate_key};
+use tokio_tungstenite::tungstenite::protocol::WebSocketConfig;
+use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(not(feature = "python"), derive(Hash, Default))]
@@ -95,15 +96,16 @@ impl<'a> EventDispatcher<'a> {
 impl Node {
     /// Create a connection to the Lavalink server.
     pub async fn connect(&self, lavalink_client: LavalinkClient) -> Result<(), LavalinkError> {
-        let mut url = Request::builder()
-            .method("GET")
-            .header("Host", &self.websocket_address)
-            .header("Connection", "Upgrade")
-            .header("Upgrade", "websocket")
-            .header("Sec-WebSocket-Version", "13")
-            .header("Sec-WebSocket-Key", generate_key())
-            .uri(&self.websocket_address)
-            .body(())?;
+        //let mut url = Request::builder()
+        //    .method("GET")
+        //    .header("Host", &self.websocket_address)
+        //    .header("Connection", "Upgrade")
+        //    .header("Upgrade", "websocket")
+        //    .header("Sec-WebSocket-Version", "13")
+        //    .header("Sec-WebSocket-Key", generate_key())
+        //    .uri(&self.websocket_address)
+        //    .body(())?;
+        let mut url = self.websocket_address.clone().into_client_request()?;
 
         {
             let ref_headers = url.headers_mut();
@@ -122,7 +124,11 @@ impl Node {
             ref_headers.extend(headers.clone());
         }
 
-        let (ws_stream, _) = connect_async(url).await?;
+        let (ws_stream, _) = tokio_tungstenite::connect_async_with_config(url, Some(WebSocketConfig {
+            max_message_size: None,
+            max_frame_size: None,
+            ..Default::default()
+        }), false).await?;
 
         info!("Connected to {}", self.websocket_address);
 
