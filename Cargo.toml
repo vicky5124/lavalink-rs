@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.13.0"
+version = "0.14.0"
 edition = "2021"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 license = "MPL-2.0"
@@ -145,8 +145,8 @@ optional = true
 
 [dependencies.macros-dep]
 package = "lavalink_rs_macros"
-version = "0.1"
-#path = "./macros"
+#version = "0.2"
+path = "./lavalink_rs_macros"
 optional = true
 
 

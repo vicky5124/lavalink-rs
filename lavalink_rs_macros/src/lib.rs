@@ -41,7 +41,7 @@ use quote::quote;
 /// use std::future::Future;
 /// use std::pin::Pin;
 ///
-/// fn foo(n: i32) -> Pin<Box<dyn std::future::Future<Output = i32>>> {
+/// fn foo(n: i32) -> Pin<Box<dyn Future<Output = i32>>> {
 ///     Box::pin(async move { n + 4 })
 /// }
 /// ```
@@ -73,7 +73,7 @@ use quote::quote;
 /// use std::future::Future;
 /// use std::pin::Pin;
 ///
-/// fn foo<'fut>(n: &'fut i32) -> Pin<Box<dyn std::future::Future<Output = i32> + 'fut>> {
+/// fn foo<'fut>(n: &'fut i32) -> Pin<Box<dyn Future<Output = i32> + 'fut>> {
 ///     Box::pin(async move { *n + 4 })
 /// }
 /// ```
@@ -155,12 +155,10 @@ pub fn hook(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
     let result = quote! {
         #(#attrs)*
-        #vis fn #ident<'fut>(#inputs) -> futures::future::BoxFuture<'fut, #output> {
-            use futures::future::FutureExt;
-
-            async move {
+        #vis fn #ident<'fut>(#inputs) -> std::pin::Pin<std::boxed::Box<dyn std::future::Future<Output = #output> + Send + 'fut>> {
+            std::boxed::Box::pin(async move {
                 #block
-            }.boxed()
+            })
         }
     };
 
