@@ -28,7 +28,6 @@ default = ["rustls-native-roots", "macros"]
 songbird = ["songbird-dep"]
 serenity = ["serenity-dep"]
 twilight = ["twilight-model"]
-twilight16 = ["twilight-model-16"]
 
 macros = ["macros-dep"]
 
@@ -100,12 +99,7 @@ default-features = false
 optional = true
 
 [dependencies.twilight-model]
-version = "0.15"
-optional = true
-
-[dependencies.twilight-model-16]
-package = "twilight-model"
-version = "0.16.0-rc"
+version = "0.16"
 optional = true
 
 [dependencies.pyo3]
@@ -148,7 +142,6 @@ package = "lavalink_rs_macros"
 #version = "0.2"
 path = "./lavalink_rs_macros"
 optional = true
-
 
 [build-dependencies]
 version_check = "0.9"
