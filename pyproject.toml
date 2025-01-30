@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "lavalink_rs"
-requires-python = ">=3.8,<3.13"
+requires-python = ">=3.8,<3.14"
 #classifiers = [
 #    "Programming Language :: Rust",
 #    "Programming Language :: Python :: Implementation :: CPython",
@@ -16,7 +16,7 @@ default-features = false
 features = ["python"]
 
 [tool.pyright]
-pythonVersion = "3.12"
+pythonVersion = "3.13"
 typeCheckingMode = "strict"
 reportPrivateUsage = false
 reportMissingTypeStubs = true
