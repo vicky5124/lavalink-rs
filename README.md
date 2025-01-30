@@ -11,7 +11,6 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 ### 0.15
 
-- [ ] Update PyO3
 - [ ] Implement `__anext__` to QueueRef
 - [ ] RoutePlanner API
 
@@ -58,6 +57,7 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 - [x] Streamable queue reader
 - [x] Support `tokio-websockets`
 - [x] native and webpki roots for rustls feature separation
+- [x] Update PyO3 to 0.23
 
 ## Links to download stuff you will need
 

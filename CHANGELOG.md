@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.14.1
+
+- Upgrade pyo3 to 0.23
+- Support python 3.13
+
+## 0.14.0
+
+- Update to twilight 0.16
+- Implement support for `tokio-websockets`
+
 ## 0.13.0
 
 - Fix `Http::delete_player`.
