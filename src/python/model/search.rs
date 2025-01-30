@@ -4,7 +4,7 @@ use crate::model::search::*;
 use pyo3::prelude::*;
 
 #[pymodule]
-pub fn search(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn search(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<SearchEngines>()?;
     m.add_class::<SpotifyRecommendedParameters>()?;
     m.add_class::<FloweryTTSParameters>()?;

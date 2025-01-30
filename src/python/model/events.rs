@@ -3,7 +3,7 @@ use crate::model::events::*;
 use pyo3::prelude::*;
 
 #[pymodule]
-pub fn events(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn events(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Ready>()?;
     m.add_class::<PlayerUpdate>()?;
     m.add_class::<Stats>()?;

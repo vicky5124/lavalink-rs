@@ -13,7 +13,7 @@ use parking_lot::RwLock;
 use pyo3::prelude::*;
 
 #[pymodule]
-pub fn player(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn player(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::player_context::PlayerContext>()?;
     m.add_class::<crate::player_context::TrackInQueue>()?;
     m.add_class::<crate::player_context::QueueRef>()?;
@@ -29,10 +29,10 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "get_player")]
-    fn get_player_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    fn get_player_py<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player_inner = player.get_player().await?;
 
             Ok(Python::with_gil(|_py| player_inner))
@@ -45,10 +45,10 @@ impl crate::player_context::PlayerContext {
         py: Python<'a>,
         update_player: UpdatePlayer,
         no_replace: bool,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player_inner = player.update_player(&update_player, no_replace).await?;
 
             Ok(Python::with_gil(|_py| player_inner))
@@ -60,10 +60,10 @@ impl crate::player_context::PlayerContext {
         &self,
         py: Python<'a>,
         track: crate::model::track::TrackData,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             player.play(&track).await?;
 
             Ok(Python::with_gil(|py| py.None()))
@@ -75,10 +75,10 @@ impl crate::player_context::PlayerContext {
         &self,
         py: Python<'a>,
         track: crate::model::track::TrackData,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             player.play_now(&track).await?;
 
             Ok(Python::with_gil(|py| py.None()))
@@ -86,10 +86,10 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "stop_now")]
-    fn stop_now_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    fn stop_now_py<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player_inner = player.stop_now().await?;
 
             Ok(Python::with_gil(|_py| player_inner))
@@ -97,10 +97,10 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "set_pause")]
-    fn set_pause_py<'a>(&self, py: Python<'a>, pause: bool) -> PyResult<&'a PyAny> {
+    fn set_pause_py<'a>(&self, py: Python<'a>, pause: bool) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player_inner = player.set_pause(pause).await?;
 
             Ok(Python::with_gil(|_py| player_inner))
@@ -108,10 +108,10 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "set_volume")]
-    fn set_volume_py<'a>(&self, py: Python<'a>, volume: u16) -> PyResult<&'a PyAny> {
+    fn set_volume_py<'a>(&self, py: Python<'a>, volume: u16) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player_inner = player.set_volume(volume).await?;
 
             Ok(Python::with_gil(|_py| player_inner))
@@ -119,10 +119,10 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "set_filters")]
-    fn set_filters_py<'a>(&self, py: Python<'a>, filters: Filters) -> PyResult<&'a PyAny> {
+    fn set_filters_py<'a>(&self, py: Python<'a>, filters: Filters) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player_inner = player.set_filters(filters).await?;
 
             Ok(Python::with_gil(|_py| player_inner))
@@ -130,10 +130,10 @@ impl crate::player_context::PlayerContext {
     }
 
     #[pyo3(name = "set_position_ms")]
-    fn set_position_ms_py<'a>(&self, py: Python<'a>, position: u64) -> PyResult<&'a PyAny> {
+    fn set_position_ms_py<'a>(&self, py: Python<'a>, position: u64) -> PyResult<Bound<'a, PyAny>> {
         let player = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player_inner = player.set_position(Duration::from_millis(position)).await?;
 
             Ok(Python::with_gil(|_py| player_inner))
@@ -194,10 +194,10 @@ impl crate::player_context::PlayerContext {
 #[pymethods]
 impl crate::player_context::QueueRef {
     #[pyo3(name = "get_queue")]
-    fn get_queue_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    fn get_queue_py<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
         let queue = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let q: Vec<_> = queue.get_queue().await?.into();
 
             Ok(Python::with_gil(|_py| q))
@@ -205,10 +205,10 @@ impl crate::player_context::QueueRef {
     }
 
     #[pyo3(name = "get_track")]
-    fn get_track_py<'a>(&self, py: Python<'a>, index: usize) -> PyResult<&'a PyAny> {
+    fn get_track_py<'a>(&self, py: Python<'a>, index: usize) -> PyResult<Bound<'a, PyAny>> {
         let queue = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let q = queue.get_track(index).await?;
 
             Ok(Python::with_gil(|_py| q))
@@ -216,10 +216,10 @@ impl crate::player_context::QueueRef {
     }
 
     #[pyo3(name = "get_count")]
-    fn get_count_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    fn get_count_py<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
         let queue = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let q = queue.get_count().await?;
 
             Ok(Python::with_gil(|_py| q))
@@ -269,10 +269,10 @@ impl crate::player_context::QueueRef {
     // TODO: pyo3 0.21
     // https://github.com/PyO3/pyo3/pull/3661
     //#[pyo3(name = "__anext__")]
-    //fn async_for_impl<'a>(&mut self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    //fn async_for_impl<'a>(&mut self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
     //    use futures::StreamExt;
 
-    //    pyo3_asyncio::tokio::future_into_py(py, async move { Ok(self.next().await) })
+    //    pyo3_async_runtimes::tokio::future_into_py(py, async move { Ok(self.next().await) })
     //}
 }
 

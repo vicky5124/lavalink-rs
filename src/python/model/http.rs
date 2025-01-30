@@ -3,7 +3,7 @@ use crate::model::http::*;
 use pyo3::prelude::*;
 use pythonize::{depythonize, pythonize};
 
-pub fn http(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn http(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let http = PyModule::new(py, "http")?;
 
     http.add_class::<UpdatePlayer>()?;
@@ -14,7 +14,7 @@ pub fn http(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     http.add_class::<Plugin>()?;
     http.add_class::<Version>()?;
 
-    m.add_submodule(http)?;
+    m.add_submodule(&http)?;
 
     Ok(())
 }
@@ -39,11 +39,11 @@ impl UpdatePlayerTrack {
 
     #[getter(user_data)]
     fn get_user_data(&self, py: Python<'_>) -> PyObject {
-        pythonize(py, &self.user_data).unwrap()
+        pythonize(py, &self.user_data).unwrap().into()
     }
 
     #[setter(user_data)]
     fn set_user_data(&mut self, py: Python<'_>, input: PyObject) {
-        self.user_data = depythonize(input.as_ref(py)).unwrap()
+        self.user_data = depythonize(&input.into_bound(py)).unwrap()
     }
 }

@@ -9,7 +9,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyList;
 
 #[pymodule]
-pub fn client(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn client(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::client::LavalinkClient>()?;
 
     Ok(())
@@ -28,6 +28,7 @@ fn raw_event(
 #[pymethods]
 impl crate::client::LavalinkClient {
     #[pyo3(name = "new")]
+    #[pyo3(signature = (events, nodes, strategy, user_data=None))]
     #[staticmethod]
     fn new_py<'a>(
         py: Python<'a>,
@@ -35,8 +36,8 @@ impl crate::client::LavalinkClient {
         nodes: Vec<crate::node::NodeBuilder>,
         strategy: super::model::client::NodeDistributionStrategyPy,
         user_data: Option<PyObject>,
-    ) -> PyResult<&'a PyAny> {
-        let current_loop = pyo3_asyncio::get_running_loop(py)?;
+    ) -> PyResult<Bound<'a, PyAny>> {
+        let current_loop = pyo3_async_runtimes::get_running_loop(py)?;
         let loop_ref = PyObject::from(current_loop);
 
         let event_handler = crate::python::event::EventHandler {
@@ -50,9 +51,9 @@ impl crate::client::LavalinkClient {
             ..Default::default()
         };
 
-        pyo3_asyncio::tokio::future_into_py_with_locals(
+        pyo3_async_runtimes::tokio::future_into_py_with_locals(
             py,
-            pyo3_asyncio::tokio::get_current_locals(py)?,
+            pyo3_async_runtimes::tokio::get_current_locals(py)?,
             async move {
                 if let Some(data) = user_data {
                     Ok(crate::client::LavalinkClient::new_with_data(
@@ -84,12 +85,12 @@ impl crate::client::LavalinkClient {
         token: String,
         session_id: String,
         user_data: Option<PyObject>,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py_with_locals(
+        pyo3_async_runtimes::tokio::future_into_py_with_locals(
             py,
-            pyo3_asyncio::tokio::get_current_locals(py)?,
+            pyo3_async_runtimes::tokio::get_current_locals(py)?,
             async move {
                 if let Some(data) = user_data {
                     Ok(client
@@ -128,10 +129,10 @@ impl crate::client::LavalinkClient {
         endpoint: String,
         token: String,
         session_id: String,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player = client
                 .create_player(
                     guild_id,
@@ -168,10 +169,10 @@ impl crate::client::LavalinkClient {
         &self,
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = client.get_node_for_guild(guild_id).await;
 
             Ok(Python::with_gil(|_py| super::node::Node { inner: res }))
@@ -184,10 +185,10 @@ impl crate::client::LavalinkClient {
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
         identifier: String,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let tracks = client.load_tracks(guild_id, &identifier).await?;
 
             use crate::model::track::TrackLoadData::*;
@@ -221,10 +222,10 @@ impl crate::client::LavalinkClient {
         &self,
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             client.delete_player(guild_id).await?;
 
             Ok(())
@@ -232,10 +233,10 @@ impl crate::client::LavalinkClient {
     }
 
     #[pyo3(name = "delete_all_player_contexts")]
-    fn delete_all_player_contexts_py<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    fn delete_all_player_contexts_py<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             client.delete_all_player_contexts().await?;
 
             Ok(())
@@ -249,10 +250,10 @@ impl crate::client::LavalinkClient {
         guild_id: super::model::PyGuildId,
         update_player: UpdatePlayer,
         no_replace: bool,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player = client
                 .update_player(guild_id, &update_player, no_replace)
                 .await?;
@@ -267,10 +268,10 @@ impl crate::client::LavalinkClient {
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
         track: String,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let track = client.decode_track(guild_id, &track).await?;
 
             Ok(track)
@@ -283,10 +284,10 @@ impl crate::client::LavalinkClient {
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
         tracks: Vec<String>,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let tracks = client.decode_tracks(guild_id, &tracks).await?;
 
             Ok(tracks)
@@ -298,10 +299,10 @@ impl crate::client::LavalinkClient {
         &self,
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let version = client.request_version(guild_id).await?;
 
             Ok(version)
@@ -313,10 +314,10 @@ impl crate::client::LavalinkClient {
         &self,
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let info = client.request_info(guild_id).await?;
 
             Ok(info)
@@ -328,10 +329,10 @@ impl crate::client::LavalinkClient {
         &self,
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let stats = client.request_stats(guild_id).await?;
 
             Ok(stats)
@@ -343,10 +344,10 @@ impl crate::client::LavalinkClient {
         &self,
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let player = client.request_player(guild_id).await?;
 
             Ok(player)
@@ -358,10 +359,10 @@ impl crate::client::LavalinkClient {
         &self,
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let players = client.request_all_players(guild_id).await?;
 
             Ok(players)
@@ -415,11 +416,11 @@ impl crate::client::LavalinkClient {
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
         timeout: u64,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let timeout = std::time::Duration::from_millis(timeout);
         let client = self.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let connection_info = client.get_connection_info(guild_id, timeout).await?;
 
             Ok(connection_info)

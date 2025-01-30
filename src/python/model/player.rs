@@ -3,7 +3,7 @@ use crate::model::player::*;
 use pyo3::prelude::*;
 use pythonize::{depythonize, pythonize};
 
-pub fn player(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn player(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let player = PyModule::new(py, "player")?;
 
     player.add_class::<Player>()?;
@@ -19,7 +19,7 @@ pub fn player(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     player.add_class::<Timescale>()?;
     player.add_class::<TremoloVibrato>()?;
 
-    m.add_submodule(player)?;
+    m.add_submodule(&player)?;
 
     Ok(())
 }
@@ -128,11 +128,11 @@ impl Filters {
 
     #[getter(plugin_filters)]
     fn get_plugin_filters(&self, py: Python<'_>) -> PyObject {
-        pythonize(py, &self.plugin_filters).unwrap()
+        pythonize(py, &self.plugin_filters).unwrap().into()
     }
 
     #[setter(plugin_filters)]
     fn set_plugin_filters(&mut self, py: Python<'_>, input: PyObject) {
-        self.plugin_filters = depythonize(input.as_ref(py)).unwrap()
+        self.plugin_filters = depythonize(&input.into_bound(py)).unwrap()
     }
 }

@@ -3,7 +3,7 @@ use pyo3::types::PyList;
 use pythonize::{depythonize, pythonize};
 
 #[pymodule]
-pub fn http(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn http(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Http>()?;
 
     Ok(())
@@ -53,12 +53,14 @@ impl Http {
         method: String,
         uri: String,
         data: PyObject,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
-            let data =
-                Python::with_gil(|py| depythonize::<Option<serde_json::Value>>(data.as_ref(py)))?;
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
+            let data = Python::with_gil(|py| {
+                depythonize::<Option<serde_json::Value>>(data.downcast_bound(py)?)
+            })?;
+
             let res = http
                 .request::<serde_json::Value, _, _>(
                     ::http::Method::from_bytes(method.as_bytes())
@@ -68,7 +70,9 @@ impl Http {
                 )
                 .await?;
 
-            Ok(Python::with_gil(|py| pythonize(py, &res))?)
+            Ok(Python::with_gil(|py| {
+                PyObject::from(pythonize(py, &res).unwrap())
+            }))
         })
     }
 
@@ -78,12 +82,13 @@ impl Http {
         method: String,
         uri: String,
         data: PyObject,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
-            let data =
-                Python::with_gil(|py| depythonize::<Option<serde_json::Value>>(data.as_ref(py)))?;
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
+            let data = Python::with_gil(|py| {
+                depythonize::<Option<serde_json::Value>>(data.downcast_bound(py)?)
+            })?;
 
             let res = http
                 .raw_request(
@@ -104,10 +109,10 @@ impl Http {
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
         session_id: String,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http.delete_player(guild_id, &session_id).await?;
 
             Ok(Python::with_gil(|_py| res))
@@ -122,10 +127,10 @@ impl Http {
         session_id: String,
         data: crate::model::http::UpdatePlayer,
         no_replace: bool,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http
                 .update_player(guild_id, &session_id, &data, no_replace)
                 .await?;
@@ -140,10 +145,10 @@ impl Http {
         py: Python<'a>,
         session_id: String,
         resuming_state: crate::model::http::ResumingState,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http
                 .set_resuming_state(&session_id, &resuming_state)
                 .await?;
@@ -160,10 +165,14 @@ impl Http {
     ///  - Can be a url: "https://youtu.be/watch?v=DrM2lo6B04I"
     ///  - A unique identifier: "DrM2lo6B04I"
     ///  - A search: "ytsearch:Ne Obliviscaris - Forget Not"
-    pub fn load_tracks<'a>(&self, py: Python<'a>, identifier: String) -> PyResult<&'a PyAny> {
+    pub fn load_tracks<'a>(
+        &self,
+        py: Python<'a>,
+        identifier: String,
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let tracks = http.load_tracks(&identifier).await?;
 
             use crate::model::track::TrackLoadData::*;
@@ -193,10 +202,10 @@ impl Http {
     }
 
     /// Request Lavalink server version.
-    pub fn version<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    pub fn version<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http.version().await?;
 
             Ok(Python::with_gil(|_py| res))
@@ -206,10 +215,10 @@ impl Http {
     /// Request Lavalink statistics.
     ///
     /// NOTE: The frame stats will never be returned.
-    pub fn stats<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    pub fn stats<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http.stats().await?;
 
             Ok(Python::with_gil(|_py| res))
@@ -217,10 +226,10 @@ impl Http {
     }
 
     /// Request Lavalink server information.
-    pub fn info<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+    pub fn info<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http.info().await?;
 
             Ok(Python::with_gil(|_py| res))
@@ -232,10 +241,10 @@ impl Http {
     /// # Parameters
     ///
     /// - `track`: base64 encoded track data.
-    pub fn decode_track<'a>(&self, py: Python<'a>, track: String) -> PyResult<&'a PyAny> {
+    pub fn decode_track<'a>(&self, py: Python<'a>, track: String) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http.decode_track(&track).await?;
 
             Ok(Python::with_gil(|_py| res))
@@ -247,10 +256,14 @@ impl Http {
     /// # Parameters
     ///
     /// - `tracks`: base64 encoded tracks.
-    pub fn decode_tracks<'a>(&self, py: Python<'a>, tracks: Vec<String>) -> PyResult<&'a PyAny> {
+    pub fn decode_tracks<'a>(
+        &self,
+        py: Python<'a>,
+        tracks: Vec<String>,
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http.decode_tracks(&tracks).await?;
 
             Ok(Python::with_gil(|_py| res))
@@ -263,10 +276,10 @@ impl Http {
         py: Python<'a>,
         guild_id: super::model::PyGuildId,
         session_id: String,
-    ) -> PyResult<&'a PyAny> {
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http.get_player(guild_id, &session_id).await?;
 
             Ok(Python::with_gil(|_py| res))
@@ -274,10 +287,14 @@ impl Http {
     }
 
     /// Returns a list of players in this specific session.
-    pub fn get_players<'a>(&self, py: Python<'a>, session_id: String) -> PyResult<&'a PyAny> {
+    pub fn get_players<'a>(
+        &self,
+        py: Python<'a>,
+        session_id: String,
+    ) -> PyResult<Bound<'a, PyAny>> {
         let http = self.inner.clone();
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let res = http.get_players(&session_id).await?;
 
             Ok(Python::with_gil(|_py| res))

@@ -1,12 +1,12 @@
 use crate::model::client::NodeDistributionStrategy;
 use pyo3::prelude::*;
 
-pub fn client(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn client(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let client = PyModule::new(py, "client")?;
 
     client.add_class::<NodeDistributionStrategyPy>()?;
 
-    m.add_submodule(client)?;
+    m.add_submodule(&client)?;
 
     Ok(())
 }

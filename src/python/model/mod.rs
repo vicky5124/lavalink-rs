@@ -10,7 +10,7 @@ use pyo3::types::PyDict;
 use pyo3::wrap_pymodule;
 
 #[pymodule]
-pub fn model(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn model(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::model::UserId>()?;
     m.add_class::<crate::model::GuildId>()?;
     m.add_class::<crate::model::ChannelId>()?;
@@ -23,7 +23,9 @@ pub fn model(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pymodule!(self::track::track))?;
 
     let sys = PyModule::import(py, "sys")?;
-    let sys_modules: &PyDict = sys.getattr("modules")?.downcast()?;
+    let raw_modules = sys.getattr("modules")?;
+    let sys_modules: &Bound<'_, PyDict> = raw_modules.downcast()?;
+
     sys_modules.set_item("lavalink_rs.model.client", m.getattr("client")?)?;
     sys_modules.set_item("lavalink_rs.model.events", m.getattr("events")?)?;
     sys_modules.set_item("lavalink_rs.model.http", m.getattr("http")?)?;

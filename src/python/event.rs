@@ -6,7 +6,7 @@ use pyo3::prelude::*;
 pyo3::import_exception!(builtins, NameError);
 
 #[pymodule]
-pub fn event(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn event(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<EventHandler>()?;
 
     Ok(())
@@ -23,7 +23,7 @@ pub struct EventHandler {
 impl EventHandler {
     #[new]
     fn new(py: Python<'_>) -> PyResult<Self> {
-        let current_loop = pyo3_asyncio::get_running_loop(py)?;
+        let current_loop = pyo3_async_runtimes::get_running_loop(py)?;
         let loop_ref = PyObject::from(current_loop);
 
         Ok(Self {
@@ -125,30 +125,31 @@ impl EventHandler {
     }
 }
 
-fn call_event<T: Send + Sync + pyo3::IntoPy<PyObject> + 'static>(
+fn call_event<T: Send + Sync + for<'a> pyo3::IntoPyObject<'a> + 'static>(
     handler: &EventHandler,
     client: LavalinkClient,
     session_id: String,
     event: T,
     name: &'static str,
 ) {
-    let slf1 = handler.clone();
-    let slf2 = handler.clone();
+    let (slf1, slf2) = Python::with_gil(|_| {
+        (handler.clone(), handler.clone())
+    });
 
     Python::with_gil(|py| {
-        let current_loop = slf1.current_loop.as_ref(py);
+        let current_loop = slf1.current_loop.into_bound(py);
 
-        pyo3_asyncio::tokio::future_into_py_with_locals(
+        pyo3_async_runtimes::tokio::future_into_py_with_locals(
             py,
-            pyo3_asyncio::TaskLocals::new(current_loop),
+            pyo3_async_runtimes::TaskLocals::new(current_loop),
             async move {
                 let future = Python::with_gil(|py| {
-                    let py_event_handler = slf2.inner.as_ref(py);
                     let coro_result =
-                        py_event_handler.call_method(name, (client, session_id, event), None);
+                        slf2.inner
+                            .call_method(py, name, (client, session_id, event), None);
 
                     if let Ok(coro) = coro_result {
-                        pyo3_asyncio::tokio::into_future(coro)
+                        pyo3_async_runtimes::tokio::into_future(coro.into_bound(py))
                     } else {
                         Err(NameError::new_err("Undefined event"))
                     }

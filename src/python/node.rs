@@ -5,7 +5,7 @@ use std::sync::Arc;
 use pyo3::prelude::*;
 
 #[pymodule]
-pub fn node(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn node(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Node>()?;
     m.add_class::<crate::node::NodeBuilder>()?;
 
@@ -50,7 +50,7 @@ impl crate::node::NodeBuilder {
         events: Option<PyObject>,
     ) -> PyResult<Self> {
         let events = if let Some(events) = events {
-            let current_loop = pyo3_asyncio::get_running_loop(py)?;
+            let current_loop = pyo3_async_runtimes::get_running_loop(py)?;
             let loop_ref = PyObject::from(current_loop);
 
             let event_handler = crate::python::event::EventHandler {

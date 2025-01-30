@@ -4,7 +4,7 @@ use pyo3::prelude::*;
 use pythonize::{depythonize, pythonize};
 
 #[pymodule]
-pub fn track(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+pub fn track(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<TrackLoadType>()?;
     //m.add_class::<TrackLoadData>()?;
     m.add_class::<Track>()?;
@@ -30,22 +30,22 @@ impl TrackData {
 
     #[getter(plugin_info)]
     fn get_plugin_info(&self, py: Python<'_>) -> PyObject {
-        pythonize(py, &self.plugin_info).unwrap()
+        pythonize(py, &self.plugin_info).unwrap().into()
     }
 
     #[setter(plugin_info)]
     fn set_plugin_info(&mut self, py: Python<'_>, input: PyObject) {
-        self.plugin_info = depythonize(input.as_ref(py)).unwrap()
+        self.plugin_info = depythonize(&input.into_bound(py)).unwrap()
     }
 
     #[getter(user_data)]
     fn get_user_data(&self, py: Python<'_>) -> PyObject {
-        pythonize(py, &self.user_data).unwrap()
+        pythonize(py, &self.user_data).unwrap().into()
     }
 
     #[setter(user_data)]
     fn set_user_data(&mut self, py: Python<'_>, input: PyObject) {
-        self.user_data = depythonize(input.as_ref(py)).unwrap()
+        self.user_data = depythonize(&input.into_bound(py)).unwrap()
     }
 }
 
@@ -56,11 +56,11 @@ impl PlaylistData {
 
     #[getter(plugin_info)]
     fn get_plugin_info(&self, py: Python<'_>) -> PyObject {
-        pythonize(py, &self.plugin_info).unwrap()
+        pythonize(py, &self.plugin_info).unwrap().into()
     }
 
     #[setter(plugin_info)]
     fn set_plugin_info(&mut self, py: Python<'_>, input: PyObject) {
-        self.plugin_info = depythonize(input.as_ref(py)).unwrap()
+        self.plugin_info = depythonize(&input.into_bound(py)).unwrap()
     }
 }

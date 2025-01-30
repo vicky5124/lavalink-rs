@@ -63,7 +63,7 @@ mod python;
 
 #[cfg(feature = "python")]
 #[pymodule]
-fn lavalink_rs(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn lavalink_rs(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let handle = pyo3_log::Logger::new(py, pyo3_log::Caching::LoggersAndLevels)?
         .filter(log::LevelFilter::Trace)
         .install()
@@ -90,7 +90,8 @@ fn lavalink_rs(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pymodule!(python::model::model))?;
 
     let sys = PyModule::import(py, "sys")?;
-    let sys_modules: &PyDict = sys.getattr("modules")?.downcast()?;
+    let raw_modules = sys.getattr("modules")?;
+    let sys_modules: &Bound<'_, PyDict> = raw_modules.downcast()?;
     sys_modules.set_item("lavalink_rs.model", m.getattr("model")?)?;
 
     Ok(())

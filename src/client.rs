@@ -19,7 +19,7 @@ use tokio::sync::Mutex;
 pub struct LavalinkClient {
     pub nodes: Vec<Arc<node::Node>>,
     pub players: Arc<DashMap<GuildId, (ArcSwapOption<PlayerContext>, Arc<node::Node>)>>,
-    pub events: events::Events,
+    pub events: Arc<events::Events>,
     tx: UnboundedSender<client::ClientMessage>,
     user_id: UserId,
     user_data: Arc<dyn std::any::Any + Send + Sync>,
@@ -165,7 +165,7 @@ impl LavalinkClient {
             user_id: built_nodes[0].user_id,
             nodes: built_nodes,
             players: Arc::new(DashMap::new()),
-            events,
+            events: Arc::new(events),
             tx,
             user_data,
             strategy,
@@ -270,21 +270,21 @@ impl LavalinkClient {
 
                 Python::with_gil(|py| {
                     let func = func.into_py(py);
-                    let current_loop = pyo3_asyncio::tokio::get_current_loop(py).unwrap();
+                    let current_loop = pyo3_async_runtimes::tokio::get_current_loop(py).unwrap();
 
                     let client = client.clone();
                     let client2 = client.clone();
 
-                    pyo3_asyncio::tokio::future_into_py_with_locals(
+                    pyo3_async_runtimes::tokio::future_into_py_with_locals(
                         py,
-                        pyo3_asyncio::TaskLocals::new(current_loop),
+                        pyo3_async_runtimes::TaskLocals::new(current_loop),
                         async move {
                             let future = Python::with_gil(|py| {
                                 let coro = func
                                     .call(py, (client.into_py(py), guild_id.into_py(py)), None)
                                     .unwrap();
 
-                                pyo3_asyncio::tokio::into_future(coro.downcast(py).unwrap())
+                                pyo3_async_runtimes::tokio::into_future(coro.into_bound(py))
                             })
                             .unwrap();
 

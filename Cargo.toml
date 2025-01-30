@@ -47,7 +47,7 @@ websockets-rustls-native-roots = ["tokio-websockets/rustls-native-roots", "_rust
 websockets-rustls-webpki-roots = ["tokio-websockets/rustls-webpki-roots", "_rustls-webpki-roots", "_websockets"]
 websockets-native-tls = ["tokio-websockets/native-tls", "_native-tls", "_websockets"]
 
-python = ["pyo3", "pyo3-asyncio", "pyo3-log", "pythonize", "log", "paste", "macro_rules_attribute", "parking_lot"]
+python = ["pyo3", "pyo3-async-runtimes", "pyo3-log", "pythonize", "log", "paste", "macro_rules_attribute", "parking_lot"]
 
 [package.metadata.docs.rs]
 features = ["tungstenite-rustls-webpki-roots", "twilight", "serenity", "songbird", "macros", "python"]
@@ -121,21 +121,21 @@ version = "0.16"
 optional = true
 
 [dependencies.pyo3]
-version = "0.20"
-features = ["extension-module"]
+version = "0.23"
+features = ["extension-module", "py-clone"]
 optional = true
 
 [dependencies.pythonize]
-version = "0.20"
+version = "0.23"
 optional = true
 
-[dependencies.pyo3-asyncio]
-version = "0.20"
+[dependencies.pyo3-async-runtimes]
+version = "0.23"
 features = ["attributes", "tokio-runtime"]
 optional = true
 
 [dependencies.pyo3-log]
-version = "0.9"
+version = "0.12"
 optional = true
 
 [dependencies.log]
@@ -157,8 +157,8 @@ optional = true
 
 [dependencies.macros-dep]
 package = "lavalink_rs_macros"
-#version = "0.2"
-path = "./lavalink_rs_macros"
+version = "0.2"
+#path = "./lavalink_rs_macros"
 optional = true
 
 
