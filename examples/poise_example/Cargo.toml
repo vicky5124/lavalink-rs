@@ -28,4 +28,4 @@ features = ["rt-multi-thread", "macros"]
 [dependencies.lavalink-rs]
 path = "../../"
 default-features = false
-features = ["songbird", "serenity", "native-tls", "macros"]
+features = ["songbird", "serenity", "tungstenite-native-tls", "macros"]

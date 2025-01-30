@@ -80,20 +80,20 @@ impl LavalinkClient {
                     .unwrap(),
             );
 
-            #[cfg(feature = "rustls-webpki-roots")]
+            #[cfg(feature = "_rustls-webpki-roots")]
             let https_connector = hyper_rustls::HttpsConnectorBuilder::new()
                 .with_webpki_roots()
                 .https_or_http()
                 .enable_all_versions()
                 .build();
-            #[cfg(feature = "rustls-native-roots")]
+            #[cfg(feature = "_rustls-native-roots")]
             let https_connector = hyper_rustls::HttpsConnectorBuilder::new()
                 .with_native_roots()
                 .expect("no native root CA certificates found")
                 .https_or_http()
                 .enable_all_versions()
                 .build();
-            #[cfg(feature = "native-tls")]
+            #[cfg(feature = "_native-tls")]
             let https_connector = hyper_tls::HttpsConnector::new();
 
             let request_client =

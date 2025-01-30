@@ -12,7 +12,10 @@ use hyper::Error as HyperError;
 use hyper_util::client::legacy::Error as HyperClientError;
 use oneshot::RecvError;
 use tokio::sync::mpsc::error::SendError;
+#[cfg(feature = "_tungstenite")]
 use tokio_tungstenite::tungstenite::error::Error as TungsteniteError;
+#[cfg(feature = "_websockets")]
+use tokio_websockets::error::Error as WebsocketsError;
 
 #[cfg(feature = "python")]
 use pyo3::exceptions::PyException;
@@ -53,7 +56,10 @@ impl<T> RequestResult<T> {
 /// Every error the library can return.
 pub enum LavalinkError {
     IoError(IoError),
+    #[cfg(feature = "_tungstenite")]
     WebsocketError(TungsteniteError),
+    #[cfg(feature = "_websockets")]
+    WebsocketError(WebsocketsError),
     InvalidHeaderValue(InvalidHeaderValue),
     HyperError(HyperError),
     HyperClientError(HyperClientError),
@@ -158,8 +164,16 @@ impl From<TrackError> for LavalinkError {
     }
 }
 
+#[cfg(feature = "_tungstenite")]
 impl From<TungsteniteError> for LavalinkError {
     fn from(err: TungsteniteError) -> LavalinkError {
+        LavalinkError::WebsocketError(err)
+    }
+}
+
+#[cfg(feature = "_websockets")]
+impl From<WebsocketsError> for LavalinkError {
+    fn from(err: WebsocketsError) -> LavalinkError {
         LavalinkError::WebsocketError(err)
     }
 }

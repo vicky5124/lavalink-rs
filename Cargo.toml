@@ -23,23 +23,34 @@ exclude = ["examples", "docs"]
 members = ["lavalink_rs_macros"]
 
 [features]
-default = ["rustls-native-roots", "macros"]
+default = ["tungstenite-rustls-native-roots", "macros"]
 
 songbird = ["songbird-dep"]
 serenity = ["serenity-dep"]
 twilight = ["twilight-model"]
-twilight16 = ["twilight-model-16"]
 
 macros = ["macros-dep"]
 
-rustls-native-roots = ["tokio-tungstenite/rustls-tls-native-roots", "hyper-rustls", "hyper-rustls/native-tokio"]
-rustls-webpki-roots = ["tokio-tungstenite/rustls-tls-webpki-roots", "hyper-rustls", "hyper-rustls/webpki-tokio"]
-native-tls = ["tokio-tungstenite/native-tls", "hyper-tls"]
+_rustls-native-roots = ["hyper-rustls", "hyper-rustls/native-tokio", "_rustls-tls"]
+_rustls-webpki-roots = ["hyper-rustls", "hyper-rustls/webpki-tokio", "_rustls-tls"]
+_rustls-tls = []
+_native-tls = ["hyper-tls"]
+
+_tungstenite = []
+_websockets = []
+
+tungstenite-rustls-native-roots = ["tokio-tungstenite/rustls-tls-native-roots", "_rustls-native-roots", "_tungstenite"]
+tungstenite-rustls-webpki-roots = ["tokio-tungstenite/rustls-tls-webpki-roots", "_rustls-webpki-roots", "_tungstenite"]
+tungstenite-native-tls = ["tokio-tungstenite/native-tls", "_native-tls", "_tungstenite"]
+
+websockets-rustls-native-roots = ["tokio-websockets/rustls-native-roots", "_rustls-native-roots", "_websockets"]
+websockets-rustls-webpki-roots = ["tokio-websockets/rustls-webpki-roots", "_rustls-webpki-roots", "_websockets"]
+websockets-native-tls = ["tokio-websockets/native-tls", "_native-tls", "_websockets"]
 
 python = ["pyo3", "pyo3-asyncio", "pyo3-log", "pythonize", "log", "paste", "macro_rules_attribute", "parking_lot"]
 
 [package.metadata.docs.rs]
-features = ["rustls-webpki-roots", "twilight", "serenity", "songbird", "macros", "python"]
+features = ["tungstenite-rustls-webpki-roots", "twilight", "serenity", "songbird", "macros", "python"]
 
 [dependencies]
 arc-swap = "1"
@@ -55,7 +66,13 @@ bytes = "1"
 urlencoding = "2"
 
 [dependencies.tokio-tungstenite]
-version = "0.24"
+optional = true
+version = "0.26"
+
+[dependencies.tokio-websockets]
+optional = true
+version = "0.11"
+features = ["client", "fastrand", "sha1_smol", "simd"]
 
 [dependencies.tokio]
 version = "1"
@@ -100,12 +117,7 @@ default-features = false
 optional = true
 
 [dependencies.twilight-model]
-version = "0.15"
-optional = true
-
-[dependencies.twilight-model-16]
-package = "twilight-model"
-version = "0.16.0-rc"
+version = "0.16"
 optional = true
 
 [dependencies.pyo3]

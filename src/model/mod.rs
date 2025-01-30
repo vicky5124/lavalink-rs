@@ -172,33 +172,6 @@ impl From<Id<ChannelMarker>> for ChannelId {
     }
 }
 
-#[cfg(feature = "twilight16")]
-use twilight_model_16::id::{
-    marker::{ChannelMarker, GuildMarker, UserMarker},
-    Id,
-};
-
-#[cfg(feature = "twilight16")]
-impl From<Id<UserMarker>> for UserId {
-    fn from(id: Id<UserMarker>) -> UserId {
-        UserId(id.get())
-    }
-}
-
-#[cfg(feature = "twilight16")]
-impl From<Id<GuildMarker>> for GuildId {
-    fn from(id: Id<GuildMarker>) -> GuildId {
-        GuildId(id.get())
-    }
-}
-
-#[cfg(feature = "twilight16")]
-impl From<Id<ChannelMarker>> for ChannelId {
-    fn from(id: Id<ChannelMarker>) -> ChannelId {
-        ChannelId(id.get())
-    }
-}
-
 #[cfg(feature = "songbird")]
 use songbird_dep::id::{
     ChannelId as SongbirdChannelId, GuildId as SongbirdGuildId, UserId as SongbirdUserId,

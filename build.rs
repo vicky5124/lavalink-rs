@@ -1,12 +1,11 @@
 #[cfg(all(
-    not(feature = "rustls-webpki-roots"),
-    not(feature = "rustls-native-roots"),
-    not(feature = "native-tls")
+    not(feature = "_tungstenite"),
+    not(feature = "_websockets")
 ))]
-compile_error!("Please specify a feature, either `rustls` or `native`.");
+compile_error!("Please specify a websocket feature, see README.md for a list.");
 
-#[cfg(all(feature = "rustls", feature = "native-tls"))]
-compile_error!("Please specify one of `rustls` or `native` as a feature, not both.");
+#[cfg(all(feature = "_rustls-tls", feature = "_native-tls"))]
+compile_error!("Please specify only one of the `rustls` or `native` features, not both.");
 
 use version_check::Version;
 

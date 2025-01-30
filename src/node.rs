@@ -7,11 +7,15 @@ use std::sync::Arc;
 
 use arc_swap::ArcSwap;
 use futures::stream::StreamExt;
+#[cfg(feature = "_tungstenite")]
 use http::HeaderMap;
-//use http::Request;
-use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
-use tokio_tungstenite::tungstenite::protocol::WebSocketConfig;
+
+#[cfg(feature = "_tungstenite")]
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
+#[cfg(feature = "_tungstenite")]
+use tokio_tungstenite::tungstenite::protocol::WebSocketConfig;
+#[cfg(feature = "_tungstenite")]
+use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(not(feature = "python"), derive(Hash, Default))]
@@ -82,19 +86,23 @@ impl<'a> EventDispatcher<'a> {
     }
 
     #[cfg(not(feature = "python"))]
-    pub(crate) async fn parse_and_dispatch<T, F>(self, event: &'a str, handler: F)
-    where
+    pub(crate) async fn parse_and_dispatch<T: serde::de::DeserializeOwned, F>(
+        self,
+        event: serde_json::Value,
+        handler: F,
+    ) where
         F: Fn(&events::Events) -> Option<fn(LavalinkClient, String, &T) -> BoxFuture<()>>,
-        T: serde::Deserialize<'a>,
+        T: serde::de::DeserializeOwned,
     {
         trace!("{:?}", event);
-        let event = serde_json::from_str(event).unwrap();
+        let event = serde_json::from_value(event).unwrap();
         self.dispatch(event, handler).await
     }
 }
 
 impl Node {
     /// Create a connection to the Lavalink server.
+    #[cfg(feature = "_tungstenite")]
     pub async fn connect(&self, lavalink_client: LavalinkClient) -> Result<(), LavalinkError> {
         //let mut url = Request::builder()
         //    .method("GET")
@@ -105,6 +113,7 @@ impl Node {
         //    .header("Sec-WebSocket-Key", generate_key())
         //    .uri(&self.websocket_address)
         //    .body(())?;
+
         let mut url = self.websocket_address.clone().into_client_request()?;
 
         {
@@ -124,11 +133,16 @@ impl Node {
             ref_headers.extend(headers.clone());
         }
 
-        let (ws_stream, _) = tokio_tungstenite::connect_async_with_config(url, Some(WebSocketConfig {
-            max_message_size: None,
-            max_frame_size: None,
-            ..Default::default()
-        }), false).await?;
+        let (ws_stream, _) = tokio_tungstenite::connect_async_with_config(
+            url,
+            Some(
+                WebSocketConfig::default()
+                    .max_message_size(None)
+                    .max_frame_size(None),
+            ),
+            false,
+        )
+        .await?;
 
         info!("Connected to {}", self.websocket_address);
 
@@ -153,313 +167,7 @@ impl Node {
                 let lavalink_client = lavalink_client.clone();
 
                 tokio::spawn(async move {
-                    let self_node = lavalink_client.nodes.get(self_node_id).unwrap();
-                    let ed = EventDispatcher(self_node, &lavalink_client);
-
-                    match base_event.get("op").unwrap().as_str().unwrap() {
-                        "ready" => {
-                            let ready_event: events::Ready = serde_json::from_str(&x).unwrap();
-
-                            self_node
-                                .session_id
-                                .swap(Arc::new(ready_event.session_id.to_string()));
-
-                            #[cfg(feature = "python")]
-                            {
-                                let session_id = self_node.session_id.load_full();
-
-                                if let Some(handler) = &self_node.events.event_handler {
-                                    handler
-                                        .event_ready(
-                                            lavalink_client.clone(),
-                                            (*session_id).clone(),
-                                            ready_event.clone(),
-                                        )
-                                        .await;
-                                }
-                                if let Some(handler) = &lavalink_client.events.event_handler {
-                                    handler
-                                        .event_ready(
-                                            lavalink_client.clone(),
-                                            (*session_id).clone(),
-                                            ready_event.clone(),
-                                        )
-                                        .await;
-                                }
-                            }
-
-                            ed.dispatch(ready_event, |e| e.ready).await;
-                        }
-                        "playerUpdate" => {
-                            let player_update_event: events::PlayerUpdate =
-                                serde_json::from_str(&x).unwrap();
-
-                            if let Some(player) =
-                                lavalink_client.get_player_context(player_update_event.guild_id)
-                            {
-                                if let Err(why) =
-                                    player.update_state(player_update_event.state.clone())
-                                {
-                                    error!(
-                                        "Error updating state for player {}: {}",
-                                        player_update_event.guild_id.0, why
-                                    );
-                                }
-                            }
-
-                            #[cfg(feature = "python")]
-                            {
-                                let session_id = self_node.session_id.load_full();
-
-                                if let Some(handler) = &self_node.events.event_handler {
-                                    handler
-                                        .event_player_update(
-                                            lavalink_client.clone(),
-                                            (*session_id).clone(),
-                                            player_update_event.clone(),
-                                        )
-                                        .await;
-                                }
-                                if let Some(handler) = &lavalink_client.events.event_handler {
-                                    handler
-                                        .event_player_update(
-                                            lavalink_client.clone(),
-                                            (*session_id).clone(),
-                                            player_update_event.clone(),
-                                        )
-                                        .await;
-                                }
-                            }
-
-                            ed.dispatch(player_update_event, |e| e.player_update).await;
-                        }
-                        "stats" => {
-                            #[cfg(feature = "python")]
-                            {
-                                let event: events::Stats = serde_json::from_str(&x).unwrap();
-                                let session_id = self_node.session_id.load_full();
-
-                                self_node.cpu.store(Arc::new(event.cpu.clone()));
-                                self_node.memory.store(Arc::new(event.memory.clone()));
-
-                                if let Some(handler) = &self_node.events.event_handler {
-                                    handler
-                                        .event_stats(
-                                            lavalink_client.clone(),
-                                            (*session_id).clone(),
-                                            event.clone(),
-                                        )
-                                        .await;
-                                }
-                                if let Some(handler) = &lavalink_client.events.event_handler {
-                                    handler
-                                        .event_stats(
-                                            lavalink_client.clone(),
-                                            (*session_id).clone(),
-                                            event.clone(),
-                                        )
-                                        .await;
-                                }
-
-                                ed.dispatch(event, |e| e.stats).await;
-                            }
-                            #[cfg(not(feature = "python"))]
-                            ed.parse_and_dispatch(&x, |e| e.stats).await;
-                        }
-                        "event" => match base_event.get("type").unwrap().as_str().unwrap() {
-                            "TrackStartEvent" => {
-                                let track_event: events::TrackStart =
-                                    serde_json::from_str(&x).unwrap();
-
-                                if let Some(player) =
-                                    lavalink_client.get_player_context(track_event.guild_id)
-                                {
-                                    if let Err(why) =
-                                        player.update_track(track_event.track.clone().into())
-                                    {
-                                        error!(
-                                            "Error sending update track message for player {}: {}",
-                                            track_event.guild_id.0, why
-                                        );
-                                    }
-                                }
-
-                                #[cfg(feature = "python")]
-                                {
-                                    let session_id = self_node.session_id.load_full();
-
-                                    if let Some(handler) = &self_node.events.event_handler {
-                                        handler
-                                            .event_track_start(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                track_event.clone(),
-                                            )
-                                            .await;
-                                    }
-                                    if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler
-                                            .event_track_start(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                track_event.clone(),
-                                            )
-                                            .await;
-                                    }
-                                }
-
-                                ed.dispatch(track_event, |e| e.track_start).await;
-                            }
-                            "TrackEndEvent" => {
-                                let track_event: events::TrackEnd =
-                                    serde_json::from_str(&x).unwrap();
-
-                                if let Some(player) =
-                                    lavalink_client.get_player_context(track_event.guild_id)
-                                {
-                                    if let Err(why) =
-                                        player.finish(track_event.reason.clone().into())
-                                    {
-                                        error!(
-                                            "Error sending finish message for player {}: {}",
-                                            track_event.guild_id.0, why
-                                        );
-                                    }
-
-                                    if let Err(why) = player.update_track(None) {
-                                        error!(
-                                            "Error sending update track message for player {}: {}",
-                                            track_event.guild_id.0, why
-                                        );
-                                    }
-                                }
-
-                                #[cfg(feature = "python")]
-                                {
-                                    let session_id = self_node.session_id.load_full();
-
-                                    if let Some(handler) = &self_node.events.event_handler {
-                                        handler
-                                            .event_track_end(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                track_event.clone(),
-                                            )
-                                            .await;
-                                    }
-                                    if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler
-                                            .event_track_end(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                track_event.clone(),
-                                            )
-                                            .await;
-                                    }
-                                }
-
-                                ed.dispatch(track_event, |e| e.track_end).await;
-                            }
-                            "TrackExceptionEvent" => {
-                                #[cfg(feature = "python")]
-                                {
-                                    let event: events::TrackException =
-                                        serde_json::from_str(&x).unwrap();
-                                    let session_id = self_node.session_id.load_full();
-
-                                    if let Some(handler) = &self_node.events.event_handler {
-                                        handler
-                                            .event_track_exception(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                event.clone(),
-                                            )
-                                            .await;
-                                    }
-                                    if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler
-                                            .event_track_exception(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                event.clone(),
-                                            )
-                                            .await;
-                                    }
-
-                                    ed.dispatch(event, |e| e.track_exception).await;
-                                }
-                                #[cfg(not(feature = "python"))]
-                                ed.parse_and_dispatch(&x, |e| e.track_exception).await;
-                            }
-                            "TrackStuckEvent" => {
-                                #[cfg(feature = "python")]
-                                {
-                                    let event: events::TrackStuck =
-                                        serde_json::from_str(&x).unwrap();
-                                    let session_id = self_node.session_id.load_full();
-
-                                    if let Some(handler) = &self_node.events.event_handler {
-                                        handler
-                                            .event_track_stuck(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                event.clone(),
-                                            )
-                                            .await;
-                                    }
-                                    if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler
-                                            .event_track_stuck(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                event.clone(),
-                                            )
-                                            .await;
-                                    }
-
-                                    ed.dispatch(event, |e| e.track_stuck).await;
-                                }
-                                #[cfg(not(feature = "python"))]
-                                ed.parse_and_dispatch(&x, |e| e.track_stuck).await;
-                            }
-                            "WebSocketClosedEvent" => {
-                                #[cfg(feature = "python")]
-                                {
-                                    let event: events::WebSocketClosed =
-                                        serde_json::from_str(&x).unwrap();
-                                    let session_id = self_node.session_id.load_full();
-
-                                    if let Some(handler) = &self_node.events.event_handler {
-                                        handler
-                                            .event_websocket_closed(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                event.clone(),
-                                            )
-                                            .await;
-                                    }
-                                    if let Some(handler) = &lavalink_client.events.event_handler {
-                                        handler
-                                            .event_websocket_closed(
-                                                lavalink_client.clone(),
-                                                (*session_id).clone(),
-                                                event.clone(),
-                                            )
-                                            .await;
-                                    }
-
-                                    ed.dispatch(event, |e| e.websocket_closed).await;
-                                }
-                                #[cfg(not(feature = "python"))]
-                                ed.parse_and_dispatch(&x, |e| e.websocket_closed).await;
-                            }
-                            _ => (),
-                        },
-
-                        _ => (),
-                    }
-
-                    ed.dispatch(base_event, |e| e.raw).await;
+                    Node::handle_event(lavalink_client, self_node_id, base_event).await;
                 });
             }
 
@@ -469,5 +177,372 @@ impl Node {
         });
 
         Ok(())
+    }
+
+    /// Create a connection to the Lavalink server.
+    #[cfg(feature = "_websockets")]
+    pub async fn connect(&self, lavalink_client: LavalinkClient) -> Result<(), LavalinkError> {
+        let uri = <::http::Uri as std::str::FromStr>::from_str(&self.websocket_address)?;
+
+        let (client, _) = tokio_websockets::ClientBuilder::from_uri(uri)
+            .add_header(
+                "authorization".try_into().unwrap(),
+                self.password.0.parse()?,
+            )?
+            .add_header(
+                "user-id".try_into().unwrap(),
+                self.user_id.0.to_string().parse()?,
+            )?
+            .add_header(
+                "session-id".try_into().unwrap(),
+                self.session_id.to_string().parse()?,
+            )?
+            .add_header(
+                "client-name".try_into().unwrap(),
+                format!("{}/{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"),)
+                    .to_string()
+                    .parse()?,
+            )?
+            .connect()
+            .await?;
+
+        info!("Connected to {}", self.websocket_address);
+
+        let (_write, mut read) = client.split();
+
+        self.is_running.store(true, Ordering::SeqCst);
+
+        let self_node_id = self.id;
+
+        tokio::spawn(async move {
+            while let Some(Ok(resp)) = read.next().await {
+                let x = match resp.as_text() {
+                    Some(x) => x,
+                    _ => continue,
+                };
+
+                let base_event = match serde_json::from_str::<serde_json::Value>(&x) {
+                    Ok(base_event) => base_event,
+                    _ => continue,
+                };
+
+                let lavalink_client = lavalink_client.clone();
+
+                tokio::spawn(async move {
+                    Node::handle_event(lavalink_client, self_node_id, base_event).await;
+                });
+            }
+
+            let self_node = lavalink_client.nodes.get(self_node_id).unwrap();
+            self_node.is_running.store(false, Ordering::SeqCst);
+            error!("Connection Closed.");
+        });
+
+        Ok(())
+    }
+
+    async fn handle_event(
+        lavalink_client: LavalinkClient,
+        self_node_id: usize,
+        base_event: serde_json::Value,
+    ) {
+        let base_event_clone = base_event.clone();
+        let self_node = lavalink_client.nodes.get(self_node_id).unwrap();
+        let ed = EventDispatcher(self_node, &lavalink_client);
+
+        match base_event.get("op").unwrap().as_str().unwrap() {
+            "ready" => {
+                let ready_event: events::Ready = serde_json::from_value(base_event).unwrap();
+
+                self_node
+                    .session_id
+                    .swap(Arc::new(ready_event.session_id.to_string()));
+
+                #[cfg(feature = "python")]
+                {
+                    let session_id = self_node.session_id.load_full();
+
+                    if let Some(handler) = &self_node.events.event_handler {
+                        handler
+                            .event_ready(
+                                lavalink_client.clone(),
+                                (*session_id).clone(),
+                                ready_event.clone(),
+                            )
+                            .await;
+                    }
+                    if let Some(handler) = &lavalink_client.events.event_handler {
+                        handler
+                            .event_ready(
+                                lavalink_client.clone(),
+                                (*session_id).clone(),
+                                ready_event.clone(),
+                            )
+                            .await;
+                    }
+                }
+
+                ed.dispatch(ready_event, |e| e.ready).await;
+            }
+            "playerUpdate" => {
+                let player_update_event: events::PlayerUpdate =
+                    serde_json::from_value(base_event).unwrap();
+
+                if let Some(player) =
+                    lavalink_client.get_player_context(player_update_event.guild_id)
+                {
+                    if let Err(why) = player.update_state(player_update_event.state.clone()) {
+                        error!(
+                            "Error updating state for player {}: {}",
+                            player_update_event.guild_id.0, why
+                        );
+                    }
+                }
+
+                #[cfg(feature = "python")]
+                {
+                    let session_id = self_node.session_id.load_full();
+
+                    if let Some(handler) = &self_node.events.event_handler {
+                        handler
+                            .event_player_update(
+                                lavalink_client.clone(),
+                                (*session_id).clone(),
+                                player_update_event.clone(),
+                            )
+                            .await;
+                    }
+                    if let Some(handler) = &lavalink_client.events.event_handler {
+                        handler
+                            .event_player_update(
+                                lavalink_client.clone(),
+                                (*session_id).clone(),
+                                player_update_event.clone(),
+                            )
+                            .await;
+                    }
+                }
+
+                ed.dispatch(player_update_event, |e| e.player_update).await;
+            }
+            "stats" => {
+                #[cfg(feature = "python")]
+                {
+                    let event: events::Stats = serde_json::from_value(base_event).unwrap();
+                    let session_id = self_node.session_id.load_full();
+
+                    self_node.cpu.store(Arc::new(event.cpu.clone()));
+                    self_node.memory.store(Arc::new(event.memory.clone()));
+
+                    if let Some(handler) = &self_node.events.event_handler {
+                        handler
+                            .event_stats(
+                                lavalink_client.clone(),
+                                (*session_id).clone(),
+                                event.clone(),
+                            )
+                            .await;
+                    }
+                    if let Some(handler) = &lavalink_client.events.event_handler {
+                        handler
+                            .event_stats(
+                                lavalink_client.clone(),
+                                (*session_id).clone(),
+                                event.clone(),
+                            )
+                            .await;
+                    }
+
+                    ed.dispatch(event, |e| e.stats).await;
+                }
+                #[cfg(not(feature = "python"))]
+                ed.parse_and_dispatch(base_event, |e| e.stats).await;
+            }
+            "event" => match base_event.get("type").unwrap().as_str().unwrap() {
+                "TrackStartEvent" => {
+                    let track_event: events::TrackStart =
+                        serde_json::from_value(base_event).unwrap();
+
+                    if let Some(player) = lavalink_client.get_player_context(track_event.guild_id) {
+                        if let Err(why) = player.update_track(track_event.track.clone().into()) {
+                            error!(
+                                "Error sending update track message for player {}: {}",
+                                track_event.guild_id.0, why
+                            );
+                        }
+                    }
+
+                    #[cfg(feature = "python")]
+                    {
+                        let session_id = self_node.session_id.load_full();
+
+                        if let Some(handler) = &self_node.events.event_handler {
+                            handler
+                                .event_track_start(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    track_event.clone(),
+                                )
+                                .await;
+                        }
+                        if let Some(handler) = &lavalink_client.events.event_handler {
+                            handler
+                                .event_track_start(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    track_event.clone(),
+                                )
+                                .await;
+                        }
+                    }
+
+                    ed.dispatch(track_event, |e| e.track_start).await;
+                }
+                "TrackEndEvent" => {
+                    let track_event: events::TrackEnd = serde_json::from_value(base_event).unwrap();
+
+                    if let Some(player) = lavalink_client.get_player_context(track_event.guild_id) {
+                        if let Err(why) = player.finish(track_event.reason.clone().into()) {
+                            error!(
+                                "Error sending finish message for player {}: {}",
+                                track_event.guild_id.0, why
+                            );
+                        }
+
+                        if let Err(why) = player.update_track(None) {
+                            error!(
+                                "Error sending update track message for player {}: {}",
+                                track_event.guild_id.0, why
+                            );
+                        }
+                    }
+
+                    #[cfg(feature = "python")]
+                    {
+                        let session_id = self_node.session_id.load_full();
+
+                        if let Some(handler) = &self_node.events.event_handler {
+                            handler
+                                .event_track_end(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    track_event.clone(),
+                                )
+                                .await;
+                        }
+                        if let Some(handler) = &lavalink_client.events.event_handler {
+                            handler
+                                .event_track_end(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    track_event.clone(),
+                                )
+                                .await;
+                        }
+                    }
+
+                    ed.dispatch(track_event, |e| e.track_end).await;
+                }
+                "TrackExceptionEvent" => {
+                    #[cfg(feature = "python")]
+                    {
+                        let event: events::TrackException =
+                            serde_json::from_value(base_event).unwrap();
+                        let session_id = self_node.session_id.load_full();
+
+                        if let Some(handler) = &self_node.events.event_handler {
+                            handler
+                                .event_track_exception(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    event.clone(),
+                                )
+                                .await;
+                        }
+                        if let Some(handler) = &lavalink_client.events.event_handler {
+                            handler
+                                .event_track_exception(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    event.clone(),
+                                )
+                                .await;
+                        }
+
+                        ed.dispatch(event, |e| e.track_exception).await;
+                    }
+                    #[cfg(not(feature = "python"))]
+                    ed.parse_and_dispatch(base_event, |e| e.track_exception)
+                        .await;
+                }
+                "TrackStuckEvent" => {
+                    #[cfg(feature = "python")]
+                    {
+                        let event: events::TrackStuck = serde_json::from_value(base_event).unwrap();
+                        let session_id = self_node.session_id.load_full();
+
+                        if let Some(handler) = &self_node.events.event_handler {
+                            handler
+                                .event_track_stuck(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    event.clone(),
+                                )
+                                .await;
+                        }
+                        if let Some(handler) = &lavalink_client.events.event_handler {
+                            handler
+                                .event_track_stuck(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    event.clone(),
+                                )
+                                .await;
+                        }
+
+                        ed.dispatch(event, |e| e.track_stuck).await;
+                    }
+                    #[cfg(not(feature = "python"))]
+                    ed.parse_and_dispatch(base_event, |e| e.track_stuck).await;
+                }
+                "WebSocketClosedEvent" => {
+                    #[cfg(feature = "python")]
+                    {
+                        let event: events::WebSocketClosed =
+                            serde_json::from_value(base_event).unwrap();
+                        let session_id = self_node.session_id.load_full();
+
+                        if let Some(handler) = &self_node.events.event_handler {
+                            handler
+                                .event_websocket_closed(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    event.clone(),
+                                )
+                                .await;
+                        }
+                        if let Some(handler) = &lavalink_client.events.event_handler {
+                            handler
+                                .event_websocket_closed(
+                                    lavalink_client.clone(),
+                                    (*session_id).clone(),
+                                    event.clone(),
+                                )
+                                .await;
+                        }
+
+                        ed.dispatch(event, |e| e.websocket_closed).await;
+                    }
+                    #[cfg(not(feature = "python"))]
+                    ed.parse_and_dispatch(base_event, |e| e.websocket_closed)
+                        .await;
+                }
+                _ => (),
+            },
+
+            _ => (),
+        }
+
+        ed.dispatch(base_event_clone, |e| e.raw).await;
     }
 }

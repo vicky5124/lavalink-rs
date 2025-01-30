@@ -9,13 +9,11 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 
 ## To-Do
 
-### 0.14
+### 0.15
 
+- [ ] Update PyO3
 - [ ] Implement `__anext__` to QueueRef
-- [ ] Implement some const methods
 - [ ] RoutePlanner API
-- [ ] Support `tokio-websockets`
-- [ ] native and webpki roots for rustls feature separation
 
 ### Future
 
@@ -58,6 +56,8 @@ Documentation for the library can be found [here for rust](https://docs.rs/laval
 - [x] Implement search utilities to python
 - [x] load_tracks to return Track in python
 - [x] Streamable queue reader
+- [x] Support `tokio-websockets`
+- [x] native and webpki roots for rustls feature separation
 
 ## Links to download stuff you will need
 
@@ -72,12 +72,12 @@ This is how you can install the library to be used.
 You can install the latest version from crates.io:
 
 ```toml
-lavalink-rs = "0.13"
+lavalink-rs = "0.14"
 
 # or
 
 [dependencies.lavalink-rs]
-version = "0.13"
+version = "0.14"
 ```
 
 Or the development release:
@@ -110,15 +110,15 @@ You can install the latest version from [pypi](https://pypi.org/project/lavalink
 
 OS | Arch | Python Versions | Supported?
 -|-|-|-
-Windows | x86 | 3.8-3.12 | ✅
-Windows | x64 | 3.8-3.12 | ✅
+Windows | x86 | 3.8-3.13 | ✅
+Windows | x64 | 3.8-3.13 | ✅
 Windows | aarch64 | - | ❌
-Mac OS | x86_64 | 3.8-3.12 | ✅
-Mac OS | aarch64 | 3.8-3.12 | ✅
-Linux | x86 | 3.8-3.12 | ✅
-Linux | x86_64 | 3.8-3.12 | ✅
-Linux | armv7 | 3.8-3.12 | ✅
-Linux | aarch64 | 3.8-3.12 | ✅
+Mac OS | x86_64 | 3.8-3.13 | ✅
+Mac OS | aarch64 | 3.8-3.13 | ✅
+Linux | x86 | 3.8-3.13 | ✅
+Linux | x86_64 | 3.8-3.13 | ✅
+Linux | armv7 | 3.8-3.13 | ✅
+Linux | aarch64 | 3.8-3.13 | ✅
 Linux | ppc64le | - | ❌
 Linux | s390x | - | ❌
 
@@ -138,14 +138,25 @@ maturin develop --target x86_64-unknown-linux-gnu
 ## Features
 
 - `macros`: **default feature** - Adds procedural macros for ease of use.
-- `rustls-native-roots`: **default feature** - Use rustls with the system trusted roots.
-- `rustls-webpki-roots`: Use rustls with the Mozilla set of trusted roots.
-- `native-tls` Use the system native tls implementation.
+- `python` for python3.8+ support.
+
+**Use tokio-tungstenite as the websocket client (for Serenity):**
+
+- `tungstenite-rustls-native-roots`: **default feature** - Use rustls with the system trusted roots.
+- `tungstenite-rustls-webpki-roots`: Use rustls with the Mozilla set of trusted roots.
+- `tungstenite-native-tls` Use the system native tls implementation.
+
+**Use tokio-websockets as the websocket client (for Twilight):**
+
+- `websockets-rustls-native-roots`: Use rustls with the system trusted roots.
+- `websockets-rustls-webpki-roots`: Use rustls with the Mozilla set of trusted roots.
+- `websockets-native-tls` Use the system native tls implementation.
+
+**Discord library utilities:**
+
 - `serenity` for [serenity](https://lib.rs/crates/serenity) support.
 - `songbird` for [songbird](https://lib.rs/crates/songbird) support.
 - `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) v0.15 support.
-- `twilight16` for [twilight-model](https://lib.rs/crates/twilight-model) v0.16-rc support.
-- `python` for python3.8+ support.
 
 ## Contributing
 
