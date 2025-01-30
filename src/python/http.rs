@@ -178,20 +178,21 @@ impl Http {
             use crate::model::track::TrackLoadData::*;
 
             Python::with_gil(|py| {
-                let track_data = match tracks.data {
-                    Some(Track(x)) => Some(x.into_py(py)),
-                    Some(Playlist(x)) => Some(x.into_py(py)),
+                let track_data: Option<PyObject> = match tracks.data {
+                    Some(Track(x)) => Some(x.into_pyobject(py).unwrap().into_any()),
+                    Some(Playlist(x)) => Some(x.into_pyobject(py).unwrap().into_any()),
                     Some(Search(x)) => {
                         let l = PyList::empty(py);
                         for i in x {
-                            l.append(i.into_py(py))?;
+                            l.append(i.into_pyobject(py).unwrap())?;
                         }
 
-                        Some(l.into_py(py))
+                        Some(l.into_pyobject(py).unwrap().into_any())
                     }
-                    Some(Error(x)) => Some(x.into_py(py)),
+                    Some(Error(x)) => Some(x.into_pyobject(py).unwrap().into_any()),
                     None => None,
-                };
+                }
+                .map(|x| x.into());
 
                 Ok(super::model::track::Track {
                     load_type: tracks.load_type,

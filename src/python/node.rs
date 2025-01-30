@@ -40,6 +40,7 @@ impl crate::node::NodeBuilder {
     );
 
     #[new]
+    #[pyo3(signature = (hostname, is_ssl, password, user_id, session_id=None, events=None))]
     fn new(
         py: Python<'_>,
         hostname: String,

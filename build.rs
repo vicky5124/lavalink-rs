@@ -1,7 +1,4 @@
-#[cfg(all(
-    not(feature = "_tungstenite"),
-    not(feature = "_websockets")
-))]
+#[cfg(all(not(feature = "_tungstenite"), not(feature = "_websockets")))]
 compile_error!("Please specify a websocket feature, see README.md for a list.");
 
 #[cfg(all(feature = "_rustls-tls", feature = "_native-tls"))]

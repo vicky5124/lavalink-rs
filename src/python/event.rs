@@ -132,9 +132,7 @@ fn call_event<T: Send + Sync + for<'a> pyo3::IntoPyObject<'a> + 'static>(
     event: T,
     name: &'static str,
 ) {
-    let (slf1, slf2) = Python::with_gil(|_| {
-        (handler.clone(), handler.clone())
-    });
+    let (slf1, slf2) = Python::with_gil(|_| (handler.clone(), handler.clone()));
 
     Python::with_gil(|py| {
         let current_loop = slf1.current_loop.into_bound(py);

@@ -2,7 +2,7 @@ use crate::model::deserialize_option_number;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all, eq, eq_int))]
 /// The type of data returned when loading a track.
 pub enum TrackLoadType {
     Track,

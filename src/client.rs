@@ -269,8 +269,8 @@ impl LavalinkClient {
                 let (tx, rx) = oneshot::channel();
 
                 Python::with_gil(|py| {
-                    let func = func.into_py(py);
                     let current_loop = pyo3_async_runtimes::tokio::get_current_loop(py).unwrap();
+                    let func = func.clone_ref(py);
 
                     let client = client.clone();
                     let client2 = client.clone();
@@ -281,7 +281,14 @@ impl LavalinkClient {
                         async move {
                             let future = Python::with_gil(|py| {
                                 let coro = func
-                                    .call(py, (client.into_py(py), guild_id.into_py(py)), None)
+                                    .call(
+                                        py,
+                                        (
+                                            client.into_pyobject(py).unwrap(),
+                                            guild_id.into_pyobject(py).unwrap(),
+                                        ),
+                                        None,
+                                    )
                                     .unwrap();
 
                                 pyo3_async_runtimes::tokio::into_future(coro.into_bound(py))

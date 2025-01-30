@@ -143,7 +143,7 @@ pub struct TrackEnd {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all))]
+#[cfg_attr(feature = "python", pyo3::pyclass(get_all, set_all, eq, eq_int))]
 /// The reason the track finished.
 pub enum TrackEndReason {
     Finished,
