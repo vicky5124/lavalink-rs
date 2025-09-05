@@ -63,3 +63,9 @@ pub async fn track_start(client: LavalinkClient, _session_id: String, event: &ev
 
     let _ = channel_id.say(http, msg).await;
 }
+
+#[hook]
+pub async fn track_end(client: LavalinkClient, _session_id: String, event: &events::TrackEnd) {
+    let player_context = client.get_player_context(event.guild_id).unwrap();
+    debug!("Songs left in queue: {:?}", player_context.get_queue().get_count().await);
+}

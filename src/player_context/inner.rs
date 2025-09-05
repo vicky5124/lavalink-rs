@@ -32,8 +32,9 @@ impl PlayerContextInner {
                     UpdatePlayerState(state) => self.player_data.state = state,
 
                     QueueMessage(queue_message) => {
-                        self.queue_init().await;
-
+                        // Why is this needed...?
+                        //self.queue_init().await;
+    
                         use super::QueueMessage::*;
 
                         match queue_message {
@@ -131,14 +132,14 @@ impl PlayerContextInner {
         });
     }
 
-    async fn queue_init(&self) {
-        if self.last_should_continue && self.player_data.track.is_none() {
-            if let Err(why) = self.dummy.skip() {
-                error!(
-                    "Error sending skip message in player {}: {}",
-                    self.guild_id.0, why
-                );
-            }
-        }
-    }
+    //async fn queue_init(&self) {
+    //    if self.last_should_continue && self.player_data.track.is_none() {
+    //        if let Err(why) = self.dummy.skip() {
+    //            error!(
+    //                "Error sending skip message in player {}: {}",
+    //                self.guild_id.0, why
+    //            );
+    //        }
+    //    }
+    //}
 }

@@ -128,6 +128,7 @@ async fn main() -> Result<(), Error> {
                     raw: Some(music_events::raw_event),
                     ready: Some(music_events::ready_event),
                     track_start: Some(music_events::track_start),
+                    track_end: Some(music_events::track_end),
                     ..Default::default()
                 };
 
