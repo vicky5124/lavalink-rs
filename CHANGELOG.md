@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.2
+
+- Fix queue operations skipping tracks when nothing is playing.
+
 ## 0.14.1
 
 - Upgrade pyo3 to 0.23
