@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.14.2"
+version = "0.14.3"
 edition = "2021"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 license = "MPL-2.0"
@@ -60,19 +60,19 @@ http = "1"
 tracing = "0.1"
 futures = "0.3"
 oneshot = "0.1"
-serde_qs = "0.13"
+serde_qs = "0.15"
 http-body-util = "0.1"
 bytes = "1"
 urlencoding = "2"
 
 [dependencies.tokio-tungstenite]
 optional = true
-version = "0.26"
+version = "0.28"
 
 [dependencies.tokio-websockets]
 optional = true
-version = "0.11"
-features = ["client", "fastrand", "sha1_smol", "simd"]
+version = "0.13"
+features = ["client", "fastrand", "sha1_smol"]
 
 [dependencies.tokio]
 version = "1"
@@ -106,7 +106,7 @@ optional = true
 
 [dependencies.songbird-dep]
 package = "songbird"
-version = "0.4"
+version = "0.5"
 default-features = false
 optional = true
 
@@ -117,7 +117,7 @@ default-features = false
 optional = true
 
 [dependencies.twilight-model]
-version = "0.16"
+version = "0.17"
 optional = true
 
 [dependencies.pyo3]

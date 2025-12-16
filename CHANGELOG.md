@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.14.3
+
+- Update twilight to 0.17
+- Update songbird to 0.5
+- Update tokio-tungstenite to 0.28
+- Update tokio-websockets to 0.13
+
 ## 0.14.2
 
 - Fix queue operations skipping tracks when nothing is playing.

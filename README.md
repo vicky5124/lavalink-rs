@@ -156,7 +156,7 @@ maturin develop --target x86_64-unknown-linux-gnu
 
 - `serenity` for [serenity](https://lib.rs/crates/serenity) support.
 - `songbird` for [songbird](https://lib.rs/crates/songbird) support.
-- `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) v0.15 support.
+- `twilight` for [twilight-model](https://lib.rs/crates/twilight-model) v0.17 support.
 
 ## Contributing
 
