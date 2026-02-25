@@ -27,11 +27,17 @@ pub fn player(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
 #[pymethods]
 impl ConnectionInfo {
     #[new]
-    fn new_py(endpoint: String, token: String, session_id: String) -> ConnectionInfo {
+    fn new_py(
+        endpoint: String,
+        token: String,
+        session_id: String,
+        channel_id: super::PyChannelId,
+    ) -> ConnectionInfo {
         ConnectionInfo {
             endpoint,
             token,
             session_id,
+            channel_id: Some(channel_id.into()),
         }
     }
 

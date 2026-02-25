@@ -690,8 +690,17 @@ impl LavalinkClient {
     }
 
     async fn handle_connection_info(self, mut rx: UnboundedReceiver<client::ClientMessage>) {
-        let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>, Option<ChannelId>)>> =
-            Arc::new(DashMap::new());
+        let data: Arc<
+            DashMap<
+                GuildId,
+                (
+                    Option<String>,
+                    Option<String>,
+                    Option<String>,
+                    Option<ChannelId>,
+                ),
+            >,
+        > = Arc::new(DashMap::new());
         let channels: Arc<
             DashMap<GuildId, (UnboundedSender<()>, Arc<Mutex<UnboundedReceiver<()>>>)>,
         > = Arc::new(DashMap::new());
@@ -722,8 +731,12 @@ impl LavalinkClient {
                         loop {
                             match tokio::time::timeout(timeout, inner_rx.recv()).await {
                                 Err(x) => {
-                                    if let Some((Some(token), Some(endpoint), Some(session_id), Some(channel_id))) =
-                                        data.get(&guild_id).map(|x| x.value().clone())
+                                    if let Some((
+                                        Some(token),
+                                        Some(endpoint),
+                                        Some(session_id),
+                                        Some(channel_id),
+                                    )) = data.get(&guild_id).map(|x| x.value().clone())
                                     {
                                         trace!(
                                                 "Connection information requested in {:?} but no changes since the previous request were received.",
@@ -752,8 +765,12 @@ impl LavalinkClient {
 
                                     trace!("Event received in guild {:?}", guild_id);
 
-                                    if let Some((Some(token), Some(endpoint), Some(session_id), Some(channel_id))) =
-                                        data.get(&guild_id).map(|x| x.value().clone())
+                                    if let Some((
+                                        Some(token),
+                                        Some(endpoint),
+                                        Some(session_id),
+                                        Some(channel_id),
+                                    )) = data.get(&guild_id).map(|x| x.value().clone())
                                     {
                                         trace!(
                                             "Both events have been received in guild {:?}",

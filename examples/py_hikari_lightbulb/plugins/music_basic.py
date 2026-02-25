@@ -122,14 +122,12 @@ async def play(ctx: Context) -> None:
         return None
 
     voice = ctx.bot.voice.connections.get(ctx.guild_id)
-    has_joined = False
 
     if not voice:
         if not await _join(ctx):
             await ctx.respond("Please, join a voice channel first.")
             return None
         voice = ctx.bot.voice.connections.get(ctx.guild_id)
-        has_joined = True
 
     assert isinstance(voice, LavalinkVoice)
 
@@ -226,9 +224,6 @@ async def play(ctx: Context) -> None:
     # Error or no search results
     else:
         await ctx.respond("No songs found")
-        return None
-
-    if has_joined:
         return None
 
     player_data = await player_ctx.get_player()

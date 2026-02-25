@@ -19,7 +19,7 @@ fn raw_event(
     _: crate::client::LavalinkClient,
     session_id: String,
     event: &serde_json::Value,
-) -> BoxFuture<()> {
+) -> BoxFuture<'_, ()> {
     Box::pin(async move {
         debug!("{:?} -> {:?}", session_id, event);
     })
@@ -77,7 +77,7 @@ impl crate::client::LavalinkClient {
     }
 
     #[pyo3(name = "create_player_context")]
-    #[pyo3(signature = (guild_id, endpoint, token, session_id, user_data=None))]
+    #[pyo3(signature = (guild_id, endpoint, token, session_id, channel_id, user_data=None))]
     fn create_player_context_py<'a>(
         &self,
         py: Python<'a>,
@@ -85,6 +85,7 @@ impl crate::client::LavalinkClient {
         endpoint: String,
         token: String,
         session_id: String,
+        channel_id: super::model::PyChannelId,
         user_data: Option<PyObject>,
     ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
@@ -101,6 +102,7 @@ impl crate::client::LavalinkClient {
                                 endpoint,
                                 token,
                                 session_id,
+                                channel_id: Some(channel_id.into()),
                             },
                             std::sync::Arc::new(RwLock::new(data)),
                         )
@@ -113,6 +115,7 @@ impl crate::client::LavalinkClient {
                                 endpoint,
                                 token,
                                 session_id,
+                                channel_id: Some(channel_id.into()),
                             },
                             std::sync::Arc::new(RwLock::new(Python::with_gil(|py| py.None()))),
                         )
@@ -130,6 +133,7 @@ impl crate::client::LavalinkClient {
         endpoint: String,
         token: String,
         session_id: String,
+        channel_id: super::model::PyChannelId,
     ) -> PyResult<Bound<'a, PyAny>> {
         let client = self.clone();
 
@@ -141,6 +145,7 @@ impl crate::client::LavalinkClient {
                         endpoint,
                         token,
                         session_id,
+                        channel_id: Some(channel_id.into()),
                     },
                 )
                 .await?;

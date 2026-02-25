@@ -34,7 +34,7 @@ impl PlayerContextInner {
                     QueueMessage(queue_message) => {
                         // Why is this needed...?
                         //self.queue_init().await;
-    
+
                         use super::QueueMessage::*;
 
                         match queue_message {

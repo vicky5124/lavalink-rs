@@ -135,7 +135,7 @@ class LavalinkVoice(VoiceConnection):
         lavalink_client = kwargs["lavalink_client"]
 
         player = await lavalink_client.create_player_context(
-            guild_id, endpoint, token, session_id
+            guild_id, endpoint, token, session_id, channel_id
         )
 
         player_data = kwargs["player_data"]

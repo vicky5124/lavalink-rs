@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.0
+
+- Add DAVE support (Lavalink V4.2.0)
+
 ## 0.14.3
 
 - Update twilight to 0.17

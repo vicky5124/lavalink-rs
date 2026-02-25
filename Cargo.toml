@@ -1,6 +1,6 @@
 [package]
 name = "lavalink-rs"
-version = "0.14.3"
+version = "0.15.0"
 edition = "2021"
 authors = ["vicky5124 <vickyf5124@gmail.com>"]
 license = "MPL-2.0"
@@ -59,11 +59,14 @@ dashmap = "6"
 http = "1"
 tracing = "0.1"
 futures = "0.3"
-oneshot = "0.1"
-serde_qs = "0.15"
+serde_qs = "1"
 http-body-util = "0.1"
 bytes = "1"
 urlencoding = "2"
+
+[dependencies.oneshot]
+version = "0.2"
+features = ["async"]
 
 [dependencies.tokio-tungstenite]
 optional = true
