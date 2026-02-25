@@ -70,6 +70,24 @@ impl FromStr for ChannelId {
     }
 }
 
+impl std::fmt::Display for UserId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::fmt::Display for GuildId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::fmt::Display for ChannelId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl From<u64> for UserId {
     fn from(i: u64) -> Self {
         Self(i)
@@ -116,6 +134,47 @@ where
     match StringOrInt::<T>::deserialize(deserializer)? {
         StringOrInt::String(s) => s.parse::<T>().map_err(serde::de::Error::custom),
         StringOrInt::Number(i) => Ok(i),
+    }
+}
+
+pub fn deserialize_option_number_from_string<'de, T, D>(
+    deserializer: D,
+) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: FromStr + Deserialize<'de>,
+    <T as FromStr>::Err: Display,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum NumericOrNull<T> {
+        String(String),
+        Number(T),
+        Null,
+    }
+
+    match NumericOrNull::<T>::deserialize(deserializer)? {
+        NumericOrNull::String(s) => match s.as_str() {
+            "" => Ok(None),
+            _ => s.parse::<T>().map(Some).map_err(serde::de::Error::custom),
+        },
+        NumericOrNull::Number(i) => Ok(Some(i)),
+        NumericOrNull::Null => Ok(None),
+    }
+}
+
+pub(crate) fn serialize_string_from_option_trait<'de, T, S>(
+    value: &Option<T>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+    T: ToString,
+    //<S as serde::Serializer>::Ok: String,
+{
+    match *value {
+        Some(ref x) => serializer.serialize_some(&x.to_string()),
+        None => serializer.serialize_none(),
     }
 }
 

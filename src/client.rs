@@ -690,7 +690,7 @@ impl LavalinkClient {
     }
 
     async fn handle_connection_info(self, mut rx: UnboundedReceiver<client::ClientMessage>) {
-        let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>)>> =
+        let data: Arc<DashMap<GuildId, (Option<String>, Option<String>, Option<String>, Option<ChannelId>)>> =
             Arc::new(DashMap::new());
         let channels: Arc<
             DashMap<GuildId, (UnboundedSender<()>, Arc<Mutex<UnboundedReceiver<()>>>)>,
@@ -722,7 +722,7 @@ impl LavalinkClient {
                         loop {
                             match tokio::time::timeout(timeout, inner_rx.recv()).await {
                                 Err(x) => {
-                                    if let Some((Some(token), Some(endpoint), Some(session_id))) =
+                                    if let Some((Some(token), Some(endpoint), Some(session_id), Some(channel_id))) =
                                         data.get(&guild_id).map(|x| x.value().clone())
                                     {
                                         trace!(
@@ -734,6 +734,7 @@ impl LavalinkClient {
                                             token: token.to_string(),
                                             endpoint: endpoint.to_string(),
                                             session_id: session_id.to_string(),
+                                            channel_id: channel_id.into(),
                                         }));
                                         return;
                                     }
@@ -751,7 +752,7 @@ impl LavalinkClient {
 
                                     trace!("Event received in guild {:?}", guild_id);
 
-                                    if let Some((Some(token), Some(endpoint), Some(session_id))) =
+                                    if let Some((Some(token), Some(endpoint), Some(session_id), Some(channel_id))) =
                                         data.get(&guild_id).map(|x| x.value().clone())
                                     {
                                         trace!(
@@ -763,6 +764,7 @@ impl LavalinkClient {
                                             token: token.to_string(),
                                             endpoint: endpoint.to_string(),
                                             session_id: session_id.to_string(),
+                                            channel_id: channel_id.into(),
                                         }));
                                         return;
                                     }
@@ -784,9 +786,10 @@ impl LavalinkClient {
                         });
                     }
 
-                    let mut entry = data.entry(guild_id).or_insert((None, None, None));
+                    let mut entry = data.entry(guild_id).or_insert((None, None, None, None));
                     let session_id = entry.value().2.clone();
-                    *entry.value_mut() = (Some(token), endpoint, session_id);
+                    let channel_id = entry.value().3.clone();
+                    *entry.value_mut() = (Some(token), endpoint, session_id, channel_id);
 
                     {
                         let inner_tx = &channels.get(&guild_id).unwrap().0;
@@ -822,10 +825,10 @@ impl LavalinkClient {
                         continue;
                     }
 
-                    let mut entry = data.entry(guild_id).or_insert((None, None, None));
+                    let mut entry = data.entry(guild_id).or_insert((None, None, None, None));
                     let token = entry.value().0.clone();
                     let endpoint = entry.value().1.clone();
-                    *entry.value_mut() = (token, endpoint, Some(session_id));
+                    *entry.value_mut() = (token, endpoint, Some(session_id), channel_id);
 
                     {
                         let inner_tx = &channels.get(&guild_id).unwrap().0;

@@ -18,6 +18,7 @@ pub struct Player {
     /// The filters currently in use by the player
     pub filters: Option<Filters>,
     /// The voice connection information of the player.
+    /// Channel ID will always be None.
     pub voice: ConnectionInfo,
 }
 
@@ -57,6 +58,14 @@ pub struct ConnectionInfo {
     ///
     /// Provided by `Voice State Update`.
     pub session_id: String,
+    /// The Discord voice channel ID the bot is connecting to.
+    ///
+    /// Must be Some on player updates. Will be none on get players.
+    ///
+    /// Provided by `Voice Server Update`.
+    #[serde(serialize_with = "serialize_string_from_option_trait")]
+    #[serde(deserialize_with = "deserialize_option_number_from_string")]
+    pub channel_id: Option<ChannelId>,
 }
 
 impl ConnectionInfo {
@@ -75,6 +84,7 @@ impl From<SongbirdConnectionInfo> for ConnectionInfo {
             endpoint: connection_info.endpoint,
             token: connection_info.token,
             session_id: connection_info.session_id,
+            channel_id: connection_info.channel_id.map(|x| x.into()),
         }
     }
 }

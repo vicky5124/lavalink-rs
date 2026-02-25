@@ -161,10 +161,6 @@ pub async fn play(
     let queue = player.get_queue();
     queue.append(tracks.into())?;
 
-    if has_joined {
-        return Ok(());
-    }
-
     if let Ok(player_data) = player.get_player().await {
         if player_data.track.is_none() && queue.get_track(0).await.is_ok_and(|x| x.is_some()) {
             player.skip()?;
