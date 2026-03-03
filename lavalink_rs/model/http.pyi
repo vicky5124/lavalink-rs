@@ -6,6 +6,12 @@ JSON: t.TypeAlias = t.Union[
     t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None
 ]
 
+
+class UpdatePlayerTrack:
+    encoded: t.Optional[str]
+    identifier: t.Optional[str]
+
+
 class UpdatePlayer:
     end_time: t.Optional[int]
     volume: t.Optional[int]
@@ -16,13 +22,31 @@ class UpdatePlayer:
     track: t.Optional[UpdatePlayerTrack]
     user_data: t.Optional[JSON]
 
-class UpdatePlayerTrack:
-    encoded: t.Optional[str]
-    identifier: t.Optional[str]
 
 class ResumingState:
     timeout: t.Optional[int]
     resuming: t.Optional[bool]
+
+
+class Git:
+    commit: str
+    commit_time: int
+    branch: str
+
+
+class Plugin:
+    version: str
+    name: str
+
+
+class Version:
+    pre_release: t.Optional[str]
+    major: int
+    patch: int
+    semver: str
+    minor: int
+    build: t.Optional[str]
+
 
 class Info:
     build_time: int
@@ -33,20 +57,3 @@ class Info:
     source_managers: t.List[str]
     jvm: str
     lavaplayer: str
-
-class Git:
-    commit: str
-    commit_time: int
-    branch: str
-
-class Plugin:
-    version: str
-    name: str
-
-class Version:
-    pre_release: t.Optional[str]
-    major: int
-    patch: int
-    semver: str
-    minor: int
-    build: t.Optional[str]

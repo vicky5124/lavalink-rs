@@ -17,6 +17,7 @@ from lavalink_rs.model.events import (
 __CD = t.TypeVar("__CD")
 __PD = t.TypeVar("__PD")
 
+
 class LavalinkClient:
     data: t.Optional[__CD]
 
@@ -33,7 +34,12 @@ class LavalinkClient:
     def get_node_by_index(self, idx: int) -> t.Optional[Node]: ...
     async def get_node_for_guild(self, guild_id: t.Union[GuildId, int]) -> Node: ...
     async def create_player(
-        self, guild_id: t.Union[GuildId, int], connection_info: ConnectionInfo
+        self,
+        guild_id: t.Union[GuildId, int],
+        endpoint: str,
+        token: str,
+        session_id: str,
+        channel_id: ChannelId,
     ) -> Player: ...
     async def create_player_context(
         self,
@@ -41,6 +47,7 @@ class LavalinkClient:
         endpoint: str,
         token: str,
         session_id: str,
+        channel_id: ChannelId,
         data: t.Optional[__PD] = None,
     ) -> PlayerContext: ...
     async def delete_player(self, guild_id: t.Union[GuildId, int]) -> None: ...
@@ -81,6 +88,7 @@ class LavalinkClient:
         self, guild_id: t.Union[GuildId, int], timeout: int
     ) -> ConnectionInfo: ...
 
+
 class PlayerContext:
     data: t.Optional[__PD]
 
@@ -102,6 +110,7 @@ class PlayerContext:
     def queue(self, track: t.Union[TrackInQueue, TrackData]) -> None: ...
     def get_queue(self) -> QueueRef: ...
 
+
 class NodeBuilder:
     hostname: str
     is_ssl: bool
@@ -118,6 +127,7 @@ class NodeBuilder:
         session_id: t.Optional[str] = None,
         events: t.Optional[EventHandler] = None,
     ) -> None: ...
+
 
 class EventHandler:
     async def stats(
@@ -145,6 +155,7 @@ class EventHandler:
         self, client: LavalinkClient, session_id: str, event: Ready
     ) -> None: ...
 
+
 class NodeDistributionStrategy:
     @staticmethod
     def new() -> NodeDistributionStrategy: ...
@@ -163,8 +174,10 @@ class NodeDistributionStrategy:
         func: t.Callable[[LavalinkClient, t.Union[GuildId, int]], t.Awaitable[Node]],
     ) -> NodeDistributionStrategy: ...
 
+
 class Node:
     http: Http
+
 
 class Http:
     authority: str
@@ -201,6 +214,7 @@ class Http:
     ) -> Player: ...
     async def get_players(self, session_id: str) -> t.List[Player]: ...
 
+
 class QueueRef:
     async def get_queue(self) -> t.List[TrackInQueue]: ...
     async def get_track(self, index: int) -> t.Optional[TrackInQueue]: ...
@@ -214,6 +228,7 @@ class QueueRef:
     def append(self, tracks: t.Sequence[t.Union[TrackInQueue, TrackData]]) -> None: ...
     def swap(self, index: int, track: t.Union[TrackInQueue, TrackData]) -> None: ...
 
+
 class TrackInQueue:
     track: TrackData
     volume: t.Optional[int]
@@ -221,15 +236,18 @@ class TrackInQueue:
     start_time_ms: t.Optional[int]
     filters: t.Optional[Filters]
 
+
 class GuildId:
     inner: int
 
     def __init__(self, id: int) -> None: ...
 
+
 class ChannelId:
     inner: int
 
     def __init__(self, id: int) -> None: ...
+
 
 class UserId:
     inner: int

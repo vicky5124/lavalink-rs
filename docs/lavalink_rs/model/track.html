@@ -57,10 +57,10 @@
                     <a class="class" href="#Track">Track</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Track.data">data</a>
+                                <a class="variable" href="#Track.load_type">load_type</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Track.load_type">load_type</a>
+                                <a class="variable" href="#Track.data">data</a>
                         </li>
                 </ul>
 
@@ -69,16 +69,16 @@
                     <a class="class" href="#TrackData">TrackData</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackData.plugin_info">plugin_info</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackData.encoded">encoded</a>
+                                <a class="variable" href="#TrackData.user_data">user_data</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackData.info">info</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackData.user_data">user_data</a>
+                                <a class="variable" href="#TrackData.encoded">encoded</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackData.plugin_info">plugin_info</a>
                         </li>
                 </ul>
 
@@ -87,37 +87,37 @@
                     <a class="class" href="#TrackInfo">TrackInfo</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackInfo.uri">uri</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.is_stream">is_stream</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#TrackInfo.isrc">isrc</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.identifier">identifier</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackInfo.length">length</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInfo.author">author</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInfo.source_name">source_name</a>
+                                <a class="variable" href="#TrackInfo.length">length</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInfo.title">title</a>
+                                <a class="variable" href="#TrackInfo.identifier">identifier</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInfo.uri">uri</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInfo.artwork_url">artwork_url</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInfo.is_seekable">is_seekable</a>
+                                <a class="variable" href="#TrackInfo.source_name">source_name</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInfo.position">position</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInfo.title">title</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInfo.is_stream">is_stream</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackInfo.is_seekable">is_seekable</a>
                         </li>
                 </ul>
 
@@ -126,10 +126,10 @@
                     <a class="class" href="#PlaylistData">PlaylistData</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#PlaylistData.info">info</a>
+                                <a class="variable" href="#PlaylistData.plugin_info">plugin_info</a>
                         </li>
                         <li>
-                                <a class="variable" href="#PlaylistData.plugin_info">plugin_info</a>
+                                <a class="variable" href="#PlaylistData.info">info</a>
                         </li>
                         <li>
                                 <a class="variable" href="#PlaylistData.tracks">tracks</a>
@@ -153,13 +153,13 @@
                     <a class="class" href="#TrackError">TrackError</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackError.cause">cause</a>
+                                <a class="variable" href="#TrackError.severity">severity</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackError.message">message</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackError.severity">severity</a>
+                                <a class="variable" href="#TrackError.cause">cause</a>
                         </li>
                 </ul>
 
@@ -272,17 +272,6 @@
     
     
 
-                            <div id="Track.data" class="classattr">
-                                <div class="attr variable">
-            <span class="name">data</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Track.data"></a>
-    
-    
-
-                            </div>
                             <div id="Track.load_type" class="classattr">
                                 <div class="attr variable">
             <span class="name">load_type</span>
@@ -290,6 +279,17 @@
         
     </div>
     <a class="headerlink" href="#Track.load_type"></a>
+    
+    
+
+                            </div>
+                            <div id="Track.data" class="classattr">
+                                <div class="attr variable">
+            <span class="name">data</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Track.data"></a>
     
     
 
@@ -309,24 +309,13 @@
 </div>
 
 
-                            <div id="TrackData.plugin_info" class="classattr">
+                            <div id="TrackData.user_data" class="classattr">
                                 <div class="attr variable">
-            <span class="name">plugin_info</span>
+            <span class="name">user_data</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackData.plugin_info"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackData.encoded" class="classattr">
-                                <div class="attr variable">
-            <span class="name">encoded</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackData.encoded"></a>
+    <a class="headerlink" href="#TrackData.user_data"></a>
     
     
 
@@ -342,13 +331,24 @@
     
 
                             </div>
-                            <div id="TrackData.user_data" class="classattr">
+                            <div id="TrackData.encoded" class="classattr">
                                 <div class="attr variable">
-            <span class="name">user_data</span>
+            <span class="name">encoded</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackData.user_data"></a>
+    <a class="headerlink" href="#TrackData.encoded"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackData.plugin_info" class="classattr">
+                                <div class="attr variable">
+            <span class="name">plugin_info</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackData.plugin_info"></a>
     
     
 
@@ -368,32 +368,6 @@
 </div>
 
 
-                            <div id="TrackInfo.uri" class="classattr">
-                                <div class="attr variable">
-            <span class="name">uri</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.uri"></a>
-    
-            <div class="docstring"><p>The track uri.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.is_stream" class="classattr">
-                                <div class="attr variable">
-            <span class="name">is_stream</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.is_stream"></a>
-    
-            <div class="docstring"><p>Whether the track is a stream.</p>
-</div>
-
-
-                            </div>
                             <div id="TrackInfo.isrc" class="classattr">
                                 <div class="attr variable">
             <span class="name">isrc</span>
@@ -403,32 +377,6 @@
     <a class="headerlink" href="#TrackInfo.isrc"></a>
     
             <div class="docstring"><p>The track "International Standard Recording Code".</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.identifier" class="classattr">
-                                <div class="attr variable">
-            <span class="name">identifier</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.identifier"></a>
-    
-            <div class="docstring"><p>The track identifier.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackInfo.length" class="classattr">
-                                <div class="attr variable">
-            <span class="name">length</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackInfo.length"></a>
-    
-            <div class="docstring"><p>The track length in milliseconds.</p>
 </div>
 
 
@@ -446,28 +394,41 @@
 
 
                             </div>
-                            <div id="TrackInfo.source_name" class="classattr">
+                            <div id="TrackInfo.length" class="classattr">
                                 <div class="attr variable">
-            <span class="name">source_name</span>
+            <span class="name">length</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInfo.source_name"></a>
+    <a class="headerlink" href="#TrackInfo.length"></a>
     
-            <div class="docstring"><p>The track source name.</p>
+            <div class="docstring"><p>The track length in milliseconds.</p>
 </div>
 
 
                             </div>
-                            <div id="TrackInfo.title" class="classattr">
+                            <div id="TrackInfo.identifier" class="classattr">
                                 <div class="attr variable">
-            <span class="name">title</span>
+            <span class="name">identifier</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInfo.title"></a>
+    <a class="headerlink" href="#TrackInfo.identifier"></a>
     
-            <div class="docstring"><p>The track title,</p>
+            <div class="docstring"><p>The track identifier.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.uri" class="classattr">
+                                <div class="attr variable">
+            <span class="name">uri</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.uri"></a>
+    
+            <div class="docstring"><p>The track uri.</p>
 </div>
 
 
@@ -485,15 +446,15 @@
 
 
                             </div>
-                            <div id="TrackInfo.is_seekable" class="classattr">
+                            <div id="TrackInfo.source_name" class="classattr">
                                 <div class="attr variable">
-            <span class="name">is_seekable</span>
+            <span class="name">source_name</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInfo.is_seekable"></a>
+    <a class="headerlink" href="#TrackInfo.source_name"></a>
     
-            <div class="docstring"><p>Whether the track is seekable.</p>
+            <div class="docstring"><p>The track source name.</p>
 </div>
 
 
@@ -511,6 +472,45 @@
 
 
                             </div>
+                            <div id="TrackInfo.title" class="classattr">
+                                <div class="attr variable">
+            <span class="name">title</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.title"></a>
+    
+            <div class="docstring"><p>The track title,</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.is_stream" class="classattr">
+                                <div class="attr variable">
+            <span class="name">is_stream</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.is_stream"></a>
+    
+            <div class="docstring"><p>Whether the track is a stream.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackInfo.is_seekable" class="classattr">
+                                <div class="attr variable">
+            <span class="name">is_seekable</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackInfo.is_seekable"></a>
+    
+            <div class="docstring"><p>Whether the track is seekable.</p>
+</div>
+
+
+                            </div>
                 </section>
                 <section id="PlaylistData">
                     <div class="attr class">
@@ -524,17 +524,6 @@
     
     
 
-                            <div id="PlaylistData.info" class="classattr">
-                                <div class="attr variable">
-            <span class="name">info</span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlaylistData.info"></a>
-    
-    
-
-                            </div>
                             <div id="PlaylistData.plugin_info" class="classattr">
                                 <div class="attr variable">
             <span class="name">plugin_info</span>
@@ -542,6 +531,17 @@
         
     </div>
     <a class="headerlink" href="#PlaylistData.plugin_info"></a>
+    
+    
+
+                            </div>
+                            <div id="PlaylistData.info" class="classattr">
+                                <div class="attr variable">
+            <span class="name">info</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PlaylistData.info"></a>
     
     
 
@@ -611,15 +611,15 @@
     
     
 
-                            <div id="TrackError.cause" class="classattr">
+                            <div id="TrackError.severity" class="classattr">
                                 <div class="attr variable">
-            <span class="name">cause</span>
+            <span class="name">severity</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackError.cause"></a>
+    <a class="headerlink" href="#TrackError.severity"></a>
     
-            <div class="docstring"><p>The cause of the exception.</p>
+            <div class="docstring"><p>The severity of the exception.</p>
 </div>
 
 
@@ -637,15 +637,15 @@
 
 
                             </div>
-                            <div id="TrackError.severity" class="classattr">
+                            <div id="TrackError.cause" class="classattr">
                                 <div class="attr variable">
-            <span class="name">severity</span>
+            <span class="name">cause</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackError.severity"></a>
+    <a class="headerlink" href="#TrackError.cause"></a>
     
-            <div class="docstring"><p>The severity of the exception.</p>
+            <div class="docstring"><p>The cause of the exception.</p>
 </div>
 
 

@@ -227,13 +227,13 @@
                                 <a class="function" href="#Http.get_players">get_players</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Http.authority">authority</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Http.rest_address">rest_address</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Http.rest_address_versionless">rest_address_versionless</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Http.authority">authority</a>
                         </li>
                 </ul>
 
@@ -257,13 +257,13 @@
                                 <a class="variable" href="#NodeBuilder.password">password</a>
                         </li>
                         <li>
+                                <a class="variable" href="#NodeBuilder.session_id">session_id</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#NodeBuilder.user_id">user_id</a>
                         </li>
                         <li>
                                 <a class="variable" href="#NodeBuilder.is_ssl">is_ssl</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#NodeBuilder.session_id">session_id</a>
                         </li>
                 </ul>
 
@@ -296,19 +296,19 @@
                     <a class="class" href="#TrackInQueue">TrackInQueue</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackInQueue.start_time_ms">start_time_ms</a>
+                                <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInQueue.filters">filters</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.volume">volume</a>
+                                <a class="variable" href="#TrackInQueue.start_time_ms">start_time_ms</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackInQueue.track">track</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackInQueue.end_time_ms">end_time_ms</a>
+                                <a class="variable" href="#TrackInQueue.volume">volume</a>
                         </li>
                 </ul>
 
@@ -433,7 +433,7 @@ lavalink_rs    </h1>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">create_player_context</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="o">/</span>, </span><span class="param"><span class="n">guild_id</span>, </span><span class="param"><span class="n">endpoint</span>, </span><span class="param"><span class="n">token</span>, </span><span class="param"><span class="n">session_id</span>, </span><span class="param"><span class="n">user_data</span><span class="o">=</span><span class="kc">None</span></span><span class="return-annotation">):</span></span>
+        <span class="name">create_player_context</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="o">/</span>,</span><span class="param">	<span class="n">guild_id</span>,</span><span class="param">	<span class="n">endpoint</span>,</span><span class="param">	<span class="n">token</span>,</span><span class="param">	<span class="n">session_id</span>,</span><span class="param">	<span class="n">channel_id</span>,</span><span class="param">	<span class="n">user_data</span><span class="o">=</span><span class="kc">None</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
@@ -448,7 +448,7 @@ lavalink_rs    </h1>
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">create_player</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="o">/</span>, </span><span class="param"><span class="n">guild_id</span>, </span><span class="param"><span class="n">endpoint</span>, </span><span class="param"><span class="n">token</span>, </span><span class="param"><span class="n">session_id</span></span><span class="return-annotation">):</span></span>
+        <span class="name">create_player</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="o">/</span>, </span><span class="param"><span class="n">guild_id</span>, </span><span class="param"><span class="n">endpoint</span>, </span><span class="param"><span class="n">token</span>, </span><span class="param"><span class="n">session_id</span>, </span><span class="param"><span class="n">channel_id</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
@@ -1342,6 +1342,17 @@ lavalink_rs    </h1>
 
 
                             </div>
+                            <div id="Http.authority" class="classattr">
+                                <div class="attr variable">
+            <span class="name">authority</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Http.authority"></a>
+    
+    
+
+                            </div>
                             <div id="Http.rest_address" class="classattr">
                                 <div class="attr variable">
             <span class="name">rest_address</span>
@@ -1360,17 +1371,6 @@ lavalink_rs    </h1>
         
     </div>
     <a class="headerlink" href="#Http.rest_address_versionless"></a>
-    
-    
-
-                            </div>
-                            <div id="Http.authority" class="classattr">
-                                <div class="attr variable">
-            <span class="name">authority</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Http.authority"></a>
     
     
 
@@ -1447,6 +1447,17 @@ let node_builder = NodeBuilder {
     
 
                             </div>
+                            <div id="NodeBuilder.session_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">session_id</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NodeBuilder.session_id"></a>
+    
+    
+
+                            </div>
                             <div id="NodeBuilder.user_id" class="classattr">
                                 <div class="attr variable">
             <span class="name">user_id</span>
@@ -1465,17 +1476,6 @@ let node_builder = NodeBuilder {
         
     </div>
     <a class="headerlink" href="#NodeBuilder.is_ssl"></a>
-    
-    
-
-                            </div>
-                            <div id="NodeBuilder.session_id" class="classattr">
-                                <div class="attr variable">
-            <span class="name">session_id</span>
-
-        
-    </div>
-    <a class="headerlink" href="#NodeBuilder.session_id"></a>
     
     
 
@@ -1598,13 +1598,13 @@ let node_builder = NodeBuilder {
 </div>
 
 
-                            <div id="TrackInQueue.start_time_ms" class="classattr">
+                            <div id="TrackInQueue.end_time_ms" class="classattr">
                                 <div class="attr variable">
-            <span class="name">start_time_ms</span>
+            <span class="name">end_time_ms</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInQueue.start_time_ms"></a>
+    <a class="headerlink" href="#TrackInQueue.end_time_ms"></a>
     
     
 
@@ -1620,13 +1620,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="TrackInQueue.volume" class="classattr">
+                            <div id="TrackInQueue.start_time_ms" class="classattr">
                                 <div class="attr variable">
-            <span class="name">volume</span>
+            <span class="name">start_time_ms</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInQueue.volume"></a>
+    <a class="headerlink" href="#TrackInQueue.start_time_ms"></a>
     
     
 
@@ -1642,13 +1642,13 @@ let node_builder = NodeBuilder {
     
 
                             </div>
-                            <div id="TrackInQueue.end_time_ms" class="classattr">
+                            <div id="TrackInQueue.volume" class="classattr">
                                 <div class="attr variable">
-            <span class="name">end_time_ms</span>
+            <span class="name">volume</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackInQueue.end_time_ms"></a>
+    <a class="headerlink" href="#TrackInQueue.volume"></a>
     
     
 

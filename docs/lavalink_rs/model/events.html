@@ -36,10 +36,10 @@
                     <a class="class" href="#Ready">Ready</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Ready.session_id">session_id</a>
+                                <a class="variable" href="#Ready.op">op</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Ready.op">op</a>
+                                <a class="variable" href="#Ready.session_id">session_id</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Ready.resumed">resumed</a>
@@ -51,13 +51,13 @@
                     <a class="class" href="#PlayerUpdate">PlayerUpdate</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="variable" href="#PlayerUpdate.guild_id">guild_id</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#PlayerUpdate.state">state</a>
                         </li>
                         <li>
                                 <a class="variable" href="#PlayerUpdate.op">op</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#PlayerUpdate.guild_id">guild_id</a>
                         </li>
                 </ul>
 
@@ -66,10 +66,10 @@
                     <a class="class" href="#Stats">Stats</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Stats.playing_players">playing_players</a>
+                                <a class="variable" href="#Stats.op">op</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Stats.memory">memory</a>
+                                <a class="variable" href="#Stats.playing_players">playing_players</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Stats.players">players</a>
@@ -78,13 +78,13 @@
                                 <a class="variable" href="#Stats.uptime">uptime</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Stats.op">op</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Stats.frame_stats">frame_stats</a>
+                                <a class="variable" href="#Stats.memory">memory</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Stats.cpu">cpu</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Stats.frame_stats">frame_stats</a>
                         </li>
                 </ul>
 
@@ -93,13 +93,13 @@
                     <a class="class" href="#Cpu">Cpu</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="variable" href="#Cpu.system_load">system_load</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Cpu.cores">cores</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Cpu.lavalink_load">lavalink_load</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Cpu.system_load">system_load</a>
                         </li>
                 </ul>
 
@@ -108,16 +108,16 @@
                     <a class="class" href="#Memory">Memory</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#Memory.used">used</a>
+                                <a class="variable" href="#Memory.reservable">reservable</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Memory.free">free</a>
+                                <a class="variable" href="#Memory.used">used</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Memory.allocated">allocated</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Memory.reservable">reservable</a>
+                                <a class="variable" href="#Memory.free">free</a>
                         </li>
                 </ul>
 
@@ -141,9 +141,6 @@
                     <a class="class" href="#TrackStart">TrackStart</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackStart.event_type">event_type</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#TrackStart.op">op</a>
                         </li>
                         <li>
@@ -152,6 +149,9 @@
                         <li>
                                 <a class="variable" href="#TrackStart.guild_id">guild_id</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#TrackStart.event_type">event_type</a>
+                        </li>
                 </ul>
 
             </li>
@@ -159,19 +159,19 @@
                     <a class="class" href="#TrackEnd">TrackEnd</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackEnd.guild_id">guild_id</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackEnd.track">track</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackEnd.event_type">event_type</a>
+                                <a class="variable" href="#TrackEnd.op">op</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackEnd.reason">reason</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackEnd.op">op</a>
+                                <a class="variable" href="#TrackEnd.event_type">event_type</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackEnd.track">track</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackEnd.guild_id">guild_id</a>
                         </li>
                 </ul>
 
@@ -201,19 +201,19 @@
                     <a class="class" href="#TrackException">TrackException</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackException.track">track</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#TrackException.guild_id">guild_id</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackException.event_type">event_type</a>
+                                <a class="variable" href="#TrackException.track">track</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackException.exception">exception</a>
                         </li>
                         <li>
                                 <a class="variable" href="#TrackException.op">op</a>
                         </li>
                         <li>
-                                <a class="variable" href="#TrackException.exception">exception</a>
+                                <a class="variable" href="#TrackException.event_type">event_type</a>
                         </li>
                 </ul>
 
@@ -222,12 +222,6 @@
                     <a class="class" href="#TrackStuck">TrackStuck</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#TrackStuck.guild_id">guild_id</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#TrackStuck.event_type">event_type</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#TrackStuck.op">op</a>
                         </li>
                         <li>
@@ -235,6 +229,12 @@
                         </li>
                         <li>
                                 <a class="variable" href="#TrackStuck.threshold_ms">threshold_ms</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackStuck.event_type">event_type</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#TrackStuck.guild_id">guild_id</a>
                         </li>
                 </ul>
 
@@ -246,19 +246,19 @@
                                 <a class="variable" href="#WebSocketClosed.op">op</a>
                         </li>
                         <li>
-                                <a class="variable" href="#WebSocketClosed.event_type">event_type</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#WebSocketClosed.code">code</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#WebSocketClosed.guild_id">guild_id</a>
                         </li>
                         <li>
                                 <a class="variable" href="#WebSocketClosed.reason">reason</a>
                         </li>
                         <li>
                                 <a class="variable" href="#WebSocketClosed.by_remote">by_remote</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#WebSocketClosed.event_type">event_type</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#WebSocketClosed.guild_id">guild_id</a>
                         </li>
                 </ul>
 
@@ -298,9 +298,20 @@
 </div>
 
 
+                            <div id="Ready.op" class="classattr">
+                                <div class="attr variable">
+            <span class="name">op</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Ready.op"></a>
+    
+    
+
+                            </div>
                             <div id="Ready.session_id" class="classattr">
                                 <div class="attr variable">
-            <span class="name">session_id</span>
+            <span class="name">session_id</span><span class="annotation">: str</span>
 
         
     </div>
@@ -311,20 +322,9 @@
 
 
                             </div>
-                            <div id="Ready.op" class="classattr">
-                                <div class="attr variable">
-            <span class="name">op</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Ready.op"></a>
-    
-    
-
-                            </div>
                             <div id="Ready.resumed" class="classattr">
                                 <div class="attr variable">
-            <span class="name">resumed</span>
+            <span class="name">resumed</span><span class="annotation">: bool</span>
 
         
     </div>
@@ -350,9 +350,20 @@
 </div>
 
 
+                            <div id="PlayerUpdate.guild_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">guild_id</span><span class="annotation">: GuildId</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PlayerUpdate.guild_id"></a>
+    
+    
+
+                            </div>
                             <div id="PlayerUpdate.state" class="classattr">
                                 <div class="attr variable">
-            <span class="name">state</span>
+            <span class="name">state</span><span class="annotation">: State</span>
 
         
     </div>
@@ -365,22 +376,11 @@
                             </div>
                             <div id="PlayerUpdate.op" class="classattr">
                                 <div class="attr variable">
-            <span class="name">op</span>
+            <span class="name">op</span><span class="annotation">: str</span>
 
         
     </div>
     <a class="headerlink" href="#PlayerUpdate.op"></a>
-    
-    
-
-                            </div>
-                            <div id="PlayerUpdate.guild_id" class="classattr">
-                                <div class="attr variable">
-            <span class="name">guild_id</span>
-
-        
-    </div>
-    <a class="headerlink" href="#PlayerUpdate.guild_id"></a>
     
     
 
@@ -400,9 +400,20 @@
 </div>
 
 
+                            <div id="Stats.op" class="classattr">
+                                <div class="attr variable">
+            <span class="name">op</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Stats.op"></a>
+    
+    
+
+                            </div>
                             <div id="Stats.playing_players" class="classattr">
                                 <div class="attr variable">
-            <span class="name">playing_players</span>
+            <span class="name">playing_players</span><span class="annotation">: int</span>
 
         
     </div>
@@ -413,22 +424,9 @@
 
 
                             </div>
-                            <div id="Stats.memory" class="classattr">
-                                <div class="attr variable">
-            <span class="name">memory</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Stats.memory"></a>
-    
-            <div class="docstring"><p>Memory statistics of the node.</p>
-</div>
-
-
-                            </div>
                             <div id="Stats.players" class="classattr">
                                 <div class="attr variable">
-            <span class="name">players</span>
+            <span class="name">players</span><span class="annotation">: int</span>
 
         
     </div>
@@ -441,7 +439,7 @@
                             </div>
                             <div id="Stats.uptime" class="classattr">
                                 <div class="attr variable">
-            <span class="name">uptime</span>
+            <span class="name">uptime</span><span class="annotation">: int</span>
 
         
     </div>
@@ -452,20 +450,35 @@
 
 
                             </div>
-                            <div id="Stats.op" class="classattr">
+                            <div id="Stats.memory" class="classattr">
                                 <div class="attr variable">
-            <span class="name">op</span>
+            <span class="name">memory</span><span class="annotation">: <a href="#Memory">Memory</a></span>
 
         
     </div>
-    <a class="headerlink" href="#Stats.op"></a>
+    <a class="headerlink" href="#Stats.memory"></a>
     
+            <div class="docstring"><p>Memory statistics of the node.</p>
+</div>
+
+
+                            </div>
+                            <div id="Stats.cpu" class="classattr">
+                                <div class="attr variable">
+            <span class="name">cpu</span><span class="annotation">: <a href="#Cpu">Cpu</a></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Stats.cpu"></a>
     
+            <div class="docstring"><p>CPU statistics of the node.</p>
+</div>
+
 
                             </div>
                             <div id="Stats.frame_stats" class="classattr">
                                 <div class="attr variable">
-            <span class="name">frame_stats</span>
+            <span class="name">frame_stats</span><span class="annotation">: Optional[<a href="#FrameStats">FrameStats</a>]</span>
 
         
     </div>
@@ -474,19 +487,6 @@
             <div class="docstring"><p>The frame stats of the node.</p>
 
 <p>This field is None if there's no players, or it was requested via the REST API.</p>
-</div>
-
-
-                            </div>
-                            <div id="Stats.cpu" class="classattr">
-                                <div class="attr variable">
-            <span class="name">cpu</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Stats.cpu"></a>
-    
-            <div class="docstring"><p>CPU statistics of the node.</p>
 </div>
 
 
@@ -504,9 +504,20 @@
     
     
 
+                            <div id="Cpu.system_load" class="classattr">
+                                <div class="attr variable">
+            <span class="name">system_load</span><span class="annotation">: float</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Cpu.system_load"></a>
+    
+    
+
+                            </div>
                             <div id="Cpu.cores" class="classattr">
                                 <div class="attr variable">
-            <span class="name">cores</span>
+            <span class="name">cores</span><span class="annotation">: int</span>
 
         
     </div>
@@ -517,22 +528,11 @@
                             </div>
                             <div id="Cpu.lavalink_load" class="classattr">
                                 <div class="attr variable">
-            <span class="name">lavalink_load</span>
+            <span class="name">lavalink_load</span><span class="annotation">: float</span>
 
         
     </div>
     <a class="headerlink" href="#Cpu.lavalink_load"></a>
-    
-    
-
-                            </div>
-                            <div id="Cpu.system_load" class="classattr">
-                                <div class="attr variable">
-            <span class="name">system_load</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Cpu.system_load"></a>
     
     
 
@@ -550,9 +550,20 @@
     
     
 
+                            <div id="Memory.reservable" class="classattr">
+                                <div class="attr variable">
+            <span class="name">reservable</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Memory.reservable"></a>
+    
+    
+
+                            </div>
                             <div id="Memory.used" class="classattr">
                                 <div class="attr variable">
-            <span class="name">used</span>
+            <span class="name">used</span><span class="annotation">: int</span>
 
         
     </div>
@@ -561,20 +572,9 @@
     
 
                             </div>
-                            <div id="Memory.free" class="classattr">
-                                <div class="attr variable">
-            <span class="name">free</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Memory.free"></a>
-    
-    
-
-                            </div>
                             <div id="Memory.allocated" class="classattr">
                                 <div class="attr variable">
-            <span class="name">allocated</span>
+            <span class="name">allocated</span><span class="annotation">: int</span>
 
         
     </div>
@@ -583,13 +583,13 @@
     
 
                             </div>
-                            <div id="Memory.reservable" class="classattr">
+                            <div id="Memory.free" class="classattr">
                                 <div class="attr variable">
-            <span class="name">reservable</span>
+            <span class="name">free</span><span class="annotation">: int</span>
 
         
     </div>
-    <a class="headerlink" href="#Memory.reservable"></a>
+    <a class="headerlink" href="#Memory.free"></a>
     
     
 
@@ -609,7 +609,7 @@
 
                             <div id="FrameStats.sent" class="classattr">
                                 <div class="attr variable">
-            <span class="name">sent</span>
+            <span class="name">sent</span><span class="annotation">: int</span>
 
         
     </div>
@@ -622,7 +622,7 @@
                             </div>
                             <div id="FrameStats.nulled" class="classattr">
                                 <div class="attr variable">
-            <span class="name">nulled</span>
+            <span class="name">nulled</span><span class="annotation">: int</span>
 
         
     </div>
@@ -635,7 +635,7 @@
                             </div>
                             <div id="FrameStats.deficit" class="classattr">
                                 <div class="attr variable">
-            <span class="name">deficit</span>
+            <span class="name">deficit</span><span class="annotation">: int</span>
 
         
     </div>
@@ -664,20 +664,9 @@ If the deficit is negative, too many frames were sent, and if it's positive, not
 </div>
 
 
-                            <div id="TrackStart.event_type" class="classattr">
-                                <div class="attr variable">
-            <span class="name">event_type</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackStart.event_type"></a>
-    
-    
-
-                            </div>
                             <div id="TrackStart.op" class="classattr">
                                 <div class="attr variable">
-            <span class="name">op</span>
+            <span class="name">op</span><span class="annotation">: str</span>
 
         
     </div>
@@ -688,7 +677,7 @@ If the deficit is negative, too many frames were sent, and if it's positive, not
                             </div>
                             <div id="TrackStart.track" class="classattr">
                                 <div class="attr variable">
-            <span class="name">track</span>
+            <span class="name">track</span><span class="annotation">: TrackData</span>
 
         
     </div>
@@ -701,11 +690,22 @@ If the deficit is negative, too many frames were sent, and if it's positive, not
                             </div>
                             <div id="TrackStart.guild_id" class="classattr">
                                 <div class="attr variable">
-            <span class="name">guild_id</span>
+            <span class="name">guild_id</span><span class="annotation">: GuildId</span>
 
         
     </div>
     <a class="headerlink" href="#TrackStart.guild_id"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackStart.event_type" class="classattr">
+                                <div class="attr variable">
+            <span class="name">event_type</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackStart.event_type"></a>
     
     
 
@@ -726,44 +726,20 @@ track_exception and track_stuck will also trigger this event.</p>
 </div>
 
 
-                            <div id="TrackEnd.guild_id" class="classattr">
+                            <div id="TrackEnd.op" class="classattr">
                                 <div class="attr variable">
-            <span class="name">guild_id</span>
+            <span class="name">op</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackEnd.guild_id"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackEnd.track" class="classattr">
-                                <div class="attr variable">
-            <span class="name">track</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackEnd.track"></a>
-    
-            <div class="docstring"><p>The track that finished playing.</p>
-</div>
-
-
-                            </div>
-                            <div id="TrackEnd.event_type" class="classattr">
-                                <div class="attr variable">
-            <span class="name">event_type</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackEnd.event_type"></a>
+    <a class="headerlink" href="#TrackEnd.op"></a>
     
     
 
                             </div>
                             <div id="TrackEnd.reason" class="classattr">
                                 <div class="attr variable">
-            <span class="name">reason</span>
+            <span class="name">reason</span><span class="annotation">: <a href="#TrackEndReason">TrackEndReason</a></span>
 
         
     </div>
@@ -774,13 +750,37 @@ track_exception and track_stuck will also trigger this event.</p>
 
 
                             </div>
-                            <div id="TrackEnd.op" class="classattr">
+                            <div id="TrackEnd.event_type" class="classattr">
                                 <div class="attr variable">
-            <span class="name">op</span>
+            <span class="name">event_type</span><span class="annotation">: str</span>
 
         
     </div>
-    <a class="headerlink" href="#TrackEnd.op"></a>
+    <a class="headerlink" href="#TrackEnd.event_type"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackEnd.track" class="classattr">
+                                <div class="attr variable">
+            <span class="name">track</span><span class="annotation">: TrackData</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackEnd.track"></a>
+    
+            <div class="docstring"><p>The track that finished playing.</p>
+</div>
+
+
+                            </div>
+                            <div id="TrackEnd.guild_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">guild_id</span><span class="annotation">: GuildId</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackEnd.guild_id"></a>
     
     
 
@@ -875,9 +875,20 @@ track_exception and track_stuck will also trigger this event.</p>
 </div>
 
 
+                            <div id="TrackException.guild_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">guild_id</span><span class="annotation">: GuildId</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackException.guild_id"></a>
+    
+    
+
+                            </div>
                             <div id="TrackException.track" class="classattr">
                                 <div class="attr variable">
-            <span class="name">track</span>
+            <span class="name">track</span><span class="annotation">: TrackData</span>
 
         
     </div>
@@ -888,42 +899,9 @@ track_exception and track_stuck will also trigger this event.</p>
 
 
                             </div>
-                            <div id="TrackException.guild_id" class="classattr">
-                                <div class="attr variable">
-            <span class="name">guild_id</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackException.guild_id"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackException.event_type" class="classattr">
-                                <div class="attr variable">
-            <span class="name">event_type</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackException.event_type"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackException.op" class="classattr">
-                                <div class="attr variable">
-            <span class="name">op</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackException.op"></a>
-    
-    
-
-                            </div>
                             <div id="TrackException.exception" class="classattr">
                                 <div class="attr variable">
-            <span class="name">exception</span>
+            <span class="name">exception</span><span class="annotation">: TrackError</span>
 
         
     </div>
@@ -932,6 +910,28 @@ track_exception and track_stuck will also trigger this event.</p>
             <div class="docstring"><p>The exception itself.</p>
 </div>
 
+
+                            </div>
+                            <div id="TrackException.op" class="classattr">
+                                <div class="attr variable">
+            <span class="name">op</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackException.op"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackException.event_type" class="classattr">
+                                <div class="attr variable">
+            <span class="name">event_type</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackException.event_type"></a>
+    
+    
 
                             </div>
                 </section>
@@ -949,31 +949,9 @@ track_exception and track_stuck will also trigger this event.</p>
 </div>
 
 
-                            <div id="TrackStuck.guild_id" class="classattr">
-                                <div class="attr variable">
-            <span class="name">guild_id</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackStuck.guild_id"></a>
-    
-    
-
-                            </div>
-                            <div id="TrackStuck.event_type" class="classattr">
-                                <div class="attr variable">
-            <span class="name">event_type</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TrackStuck.event_type"></a>
-    
-    
-
-                            </div>
                             <div id="TrackStuck.op" class="classattr">
                                 <div class="attr variable">
-            <span class="name">op</span>
+            <span class="name">op</span><span class="annotation">: str</span>
 
         
     </div>
@@ -984,7 +962,7 @@ track_exception and track_stuck will also trigger this event.</p>
                             </div>
                             <div id="TrackStuck.track" class="classattr">
                                 <div class="attr variable">
-            <span class="name">track</span>
+            <span class="name">track</span><span class="annotation">: TrackData</span>
 
         
     </div>
@@ -997,7 +975,7 @@ track_exception and track_stuck will also trigger this event.</p>
                             </div>
                             <div id="TrackStuck.threshold_ms" class="classattr">
                                 <div class="attr variable">
-            <span class="name">threshold_ms</span>
+            <span class="name">threshold_ms</span><span class="annotation">: int</span>
 
         
     </div>
@@ -1006,6 +984,28 @@ track_exception and track_stuck will also trigger this event.</p>
             <div class="docstring"><p>The threshold in milliseconds that was exceeded.</p>
 </div>
 
+
+                            </div>
+                            <div id="TrackStuck.event_type" class="classattr">
+                                <div class="attr variable">
+            <span class="name">event_type</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackStuck.event_type"></a>
+    
+    
+
+                            </div>
+                            <div id="TrackStuck.guild_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">guild_id</span><span class="annotation">: GuildId</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TrackStuck.guild_id"></a>
+    
+    
 
                             </div>
                 </section>
@@ -1025,7 +1025,7 @@ track_exception and track_stuck will also trigger this event.</p>
 
                             <div id="WebSocketClosed.op" class="classattr">
                                 <div class="attr variable">
-            <span class="name">op</span>
+            <span class="name">op</span><span class="annotation">: str</span>
 
         
     </div>
@@ -1034,20 +1034,9 @@ track_exception and track_stuck will also trigger this event.</p>
     
 
                             </div>
-                            <div id="WebSocketClosed.event_type" class="classattr">
-                                <div class="attr variable">
-            <span class="name">event_type</span>
-
-        
-    </div>
-    <a class="headerlink" href="#WebSocketClosed.event_type"></a>
-    
-    
-
-                            </div>
                             <div id="WebSocketClosed.code" class="classattr">
                                 <div class="attr variable">
-            <span class="name">code</span>
+            <span class="name">code</span><span class="annotation">: int</span>
 
         
     </div>
@@ -1061,20 +1050,9 @@ for a list of them.</p>
 
 
                             </div>
-                            <div id="WebSocketClosed.guild_id" class="classattr">
-                                <div class="attr variable">
-            <span class="name">guild_id</span>
-
-        
-    </div>
-    <a class="headerlink" href="#WebSocketClosed.guild_id"></a>
-    
-    
-
-                            </div>
                             <div id="WebSocketClosed.reason" class="classattr">
                                 <div class="attr variable">
-            <span class="name">reason</span>
+            <span class="name">reason</span><span class="annotation">: str</span>
 
         
     </div>
@@ -1087,7 +1065,7 @@ for a list of them.</p>
                             </div>
                             <div id="WebSocketClosed.by_remote" class="classattr">
                                 <div class="attr variable">
-            <span class="name">by_remote</span>
+            <span class="name">by_remote</span><span class="annotation">: bool</span>
 
         
     </div>
@@ -1096,6 +1074,28 @@ for a list of them.</p>
             <div class="docstring"><p>Whether the connection was closed by Discord or not.</p>
 </div>
 
+
+                            </div>
+                            <div id="WebSocketClosed.event_type" class="classattr">
+                                <div class="attr variable">
+            <span class="name">event_type</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebSocketClosed.event_type"></a>
+    
+    
+
+                            </div>
+                            <div id="WebSocketClosed.guild_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">guild_id</span><span class="annotation">: GuildId</span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebSocketClosed.guild_id"></a>
+    
+    
 
                             </div>
                 </section>

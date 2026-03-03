@@ -1,31 +1,3 @@
-class SearchEngines:
-    @staticmethod
-    def youtube(query: str) -> str: ...
-    @staticmethod
-    def youtube_music(query: str) -> str: ...
-    @staticmethod
-    def soundcloud(query: str) -> str: ...
-    @staticmethod
-    def spotify(query: str) -> str: ...
-    @staticmethod
-    def spotify_recommended(
-        query: str,
-        parameters: SpotifyRecommendedParameters,
-    ) -> str: ...
-    @staticmethod
-    def apple_music(query: str) -> str: ...
-    @staticmethod
-    def deezer(query: str) -> str: ...
-    @staticmethod
-    def deezer_isrc(query: str) -> str: ...
-    @staticmethod
-    def yandex_music(query: str) -> str: ...
-    @staticmethod
-    def flowery_tts(
-        query: str,
-        parameters: FloweryTTSParameters,
-    ) -> str: ...
-
 class SpotifyRecommendedParameters:
     seed_artists: str
     seed_genres: str
@@ -75,9 +47,39 @@ class SpotifyRecommendedParameters:
     max_valence: float
     target_valence: float
 
+
 class FloweryTTSParameters:
     voice: str
     translate: bool
     silence: int
     audio_format: str
     speed: float
+
+
+class SearchEngines:
+    @staticmethod
+    def youtube(query: str) -> str: ...
+    @staticmethod
+    def youtube_music(query: str) -> str: ...
+    @staticmethod
+    def soundcloud(query: str) -> str: ...
+    @staticmethod
+    def spotify(query: str) -> str: ...
+    @staticmethod
+    def spotify_recommended(
+        query: str,
+        parameters: SpotifyRecommendedParameters,
+    ) -> str: ...
+    @staticmethod
+    def apple_music(query: str) -> str: ...
+    @staticmethod
+    def deezer(query: str) -> str: ...
+    @staticmethod
+    def deezer_isrc(query: str) -> str: ...
+    @staticmethod
+    def yandex_music(query: str) -> str: ...
+    @staticmethod
+    def flowery_tts(
+        query: str,
+        parameters: FloweryTTSParameters,
+    ) -> str: ...

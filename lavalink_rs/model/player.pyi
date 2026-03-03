@@ -1,20 +1,12 @@
 import typing as t
 
-from lavalink_rs import GuildId
+from lavalink_rs import GuildId, ChannelId
 from lavalink_rs.model.track import TrackData
 
 JSON: t.TypeAlias = t.Union[
     t.Dict[str, "JSON"], t.List["JSON"], str, int, float, bool, None
 ]
 
-class Player:
-    track: t.Optional[TrackData]
-    volume: int
-    voice: ConnectionInfo
-    guild_id: GuildId
-    paused: bool
-    state: State
-    filters: t.Optional[Filters]
 
 class State:
     connected: bool
@@ -22,13 +14,69 @@ class State:
     position: int
     ping: t.Optional[int]
 
-class ConnectionInfo:
-    session_id: str
-    token: str
-    endpoint: str
 
-    def __new__(cls, endpoint: str, token: str, session_id: str) -> ConnectionInfo: ...
-    def fix(self) -> None: ...
+class ChannelMix:
+    right_to_left: t.Optional[float]
+    right_to_right: t.Optional[float]
+    left_to_right: t.Optional[float]
+    left_to_left: t.Optional[float]
+
+
+class Distortion:
+    sin_offset: t.Optional[float]
+    scale: t.Optional[float]
+    offset: t.Optional[float]
+    sin_scale: t.Optional[float]
+    cos_offset: t.Optional[float]
+    tan_offset: t.Optional[float]
+    cos_scale: t.Optional[float]
+    tan_scale: t.Optional[float]
+
+    def __new__(cls) -> Distortion: ...
+
+
+class Equalizer:
+    gain: float
+    band: int
+
+    def __new__(cls) -> Equalizer: ...
+
+
+class Karaoke:
+    filter_band: t.Optional[float]
+    level: t.Optional[float]
+    filter_width: t.Optional[float]
+    mono_level: t.Optional[float]
+
+    def __new__(cls) -> Karaoke: ...
+
+
+class LowPass:
+    smoothing: t.Optional[float]
+
+    def __new__(cls) -> LowPass: ...
+
+
+class Rotation:
+    rotation_hz: t.Optional[float]
+
+    def __new__(cls) -> Rotation: ...
+
+
+class Timescale:
+    speed: t.Optional[float]
+    pitch: t.Optional[float]
+    rate: t.Optional[float]
+
+    def __new__(cls) -> Timescale: ...
+
+
+class TremoloVibrato:
+    frequency: t.Optional[float]
+    depth: t.Optional[float]
+
+    def __new__(cls) -> TremoloVibrato: ...
+
 
 class Filters:
     tremolo: t.Optional[TremoloVibrato]
@@ -45,57 +93,22 @@ class Filters:
 
     def __new__(cls) -> Filters: ...
 
-class ChannelMix:
-    right_to_left: t.Optional[float]
-    right_to_right: t.Optional[float]
-    left_to_right: t.Optional[float]
-    left_to_left: t.Optional[float]
 
-class Distortion:
-    sin_offset: t.Optional[float]
-    scale: t.Optional[float]
-    offset: t.Optional[float]
-    sin_scale: t.Optional[float]
-    cos_offset: t.Optional[float]
-    tan_offset: t.Optional[float]
-    cos_scale: t.Optional[float]
-    tan_scale: t.Optional[float]
+class ConnectionInfo:
+    session_id: str
+    token: str
+    endpoint: str
+    channel_id: t.Optional[ChannelId]
 
-    def __new__(cls) -> Distortion: ...
+    def __new__(cls, endpoint: str, token: str, session_id: str) -> ConnectionInfo: ...
+    def fix(self) -> None: ...
 
-class Equalizer:
-    gain: float
-    band: int
 
-    def __new__(cls) -> Equalizer: ...
-
-class Karaoke:
-    filter_band: t.Optional[float]
-    level: t.Optional[float]
-    filter_width: t.Optional[float]
-    mono_level: t.Optional[float]
-
-    def __new__(cls) -> Karaoke: ...
-
-class LowPass:
-    smoothing: t.Optional[float]
-
-    def __new__(cls) -> LowPass: ...
-
-class Rotation:
-    rotation_hz: t.Optional[float]
-
-    def __new__(cls) -> Rotation: ...
-
-class Timescale:
-    speed: t.Optional[float]
-    pitch: t.Optional[float]
-    rate: t.Optional[float]
-
-    def __new__(cls) -> Timescale: ...
-
-class TremoloVibrato:
-    frequency: t.Optional[float]
-    depth: t.Optional[float]
-
-    def __new__(cls) -> TremoloVibrato: ...
+class Player:
+    track: t.Optional[TrackData]
+    volume: int
+    voice: ConnectionInfo
+    guild_id: GuildId
+    paused: bool
+    state: State
+    filters: t.Optional[Filters]
